@@ -1,8 +1,11 @@
-use std::{ops::{Add, AddAssign, Index, Sub}, ptr::NonNull};
+use std::ptr::NonNull;
 
-use crate::repeated_field::Vec;
+use crate::repeated_field::{Bytes, RepeatedField};
+use crate::wire::{zigzag_decode, ReadCursor};
+
 
 pub mod repeated_field;
+pub mod wire;
 
 pub struct LocalCapture<'a, T> {
     value: std::mem::ManuallyDrop<T>,
@@ -36,133 +39,12 @@ impl<'a, T> Drop for LocalCapture<'a, T> {
     }
 }
 
-fn zigzag_decode(n: u64) -> i64 {
-    ((n >> 1) as i64) ^ (-((n & 1) as i64))
-}
-
-#[derive(Clone, Copy)]
-struct Cursor(NonNull<u8>);
-
-impl Cursor {
-    fn as_ptr(&self) -> *mut u8 {
-        self.0.as_ptr()
-    }
-
-    fn read_varint(&mut self) -> Option<u64> {
-        let mut result = 0;
-        let mut extra = 0;
-        for i in 0..10 {
-            let b = self[i];
-            if i == 9 && b != 1 {
-                return None;
-            }
-            result ^= (b as u64) << (7 * i);
-            if b < 0x80 {
-                *self += i + 1;
-                return Some(result ^ extra);
-            }
-            extra ^= 0x80 << (7 * i);
-        }
-        None
-    }
-
-    fn read_tag(&mut self) -> Option<u32> {
-        let mut result = 0;
-        let mut extra = 0;
-        for i in 0..5 {
-            let b = self[i];
-            if i == 4 && (b == 0 || b > 15) {
-                return None;
-            }
-            result ^= (b as u32) << (7 * i);
-            if b < 0x80 {
-                *self += i + 1;
-                return Some(result ^ extra);
-            }
-            extra ^= 0x80 << (7 * i);
-        }
-        None
-    }
-
-    // Reads a isize varint limited to i32::MAX (used for lengths)
-    fn read_size(&mut self) -> Option<isize> {
-        let mut result = 0;
-        let mut extra = 0;
-        for i in 0..5 {
-            let b = self[i];
-            if i == 4 && (b == 0 || b > 7) {
-                return None;
-            }
-            result ^= (b as isize) << (7 * i);
-            if b < 0x80 {
-                *self += i + 1;
-                return Some(result ^ extra);
-            }
-            extra ^= 0x80 << (7 * i);
-        }
-        None
-    }
-
-    fn read_unaligned<T>(&mut self) -> T {
-        let p = self.0.as_ptr();
-        let value = unsafe { std::ptr::read_unaligned(p as *const T) };
-        *self += std::mem::size_of::<T>() as isize;
-        value
-    }
-
-    fn read_slice(&mut self, len: isize) -> &[u8] {
-        let p = self.0.as_ptr();
-        let slice = unsafe { std::slice::from_raw_parts(p, len as usize) };
-        *self += len;
-        slice
-    }
-}
-
-impl PartialEq<NonNull<u8>> for Cursor {
-    fn eq(&self, other: &NonNull<u8>) -> bool {
-        self.as_ptr() == other.as_ptr()
-    }
-}
-
-impl PartialOrd<NonNull<u8>> for Cursor {
-    fn partial_cmp(&self, other: &NonNull<u8>) -> Option<std::cmp::Ordering> {
-        Some(self.0.cmp(other))
-    }
-}
-
-impl Add<isize> for Cursor {
-    type Output = Cursor;
-    fn add(self, rhs: isize) -> Self::Output {
-        Cursor(unsafe { self.0.offset(rhs) })
-    }
-}
-
-impl AddAssign<isize> for Cursor {
-    fn add_assign(&mut self, rhs: isize) {
-        *self = *self + rhs;
-    }
-}
-
-impl Sub<NonNull<u8>> for Cursor {
-    type Output = isize;
-    fn sub(self, rhs: NonNull<u8>) -> Self::Output {
-        self.0.as_ptr() as isize - rhs.as_ptr() as isize
-    }
-}
-
-impl Index<isize> for Cursor {
-    type Output = u8;
-    fn index(&self, index: isize) -> &Self::Output {
-        unsafe { &*self.0.as_ptr().offset(index) }
-    }
-}
-
 
 const SLOP_SIZE: usize = 16;
 
 struct TableEntry {
-    tag: u8,
-    kind: u8,
+    has_bit: u8,
+    kind: FieldKind,
     data_offset: u16,
 }
 
@@ -216,26 +98,59 @@ struct ParseContext {
 pub struct Object;
 
 impl Object {
+    fn set_has(&mut self, has_bit_idx: u32) {
+        let has_bit_offset = has_bit_idx / 32;
+        *self.ref_mut::<u32>(has_bit_offset) |= 1 << (has_bit_idx as usize % 32);
+    }
+
     fn ref_mut<T>(&mut self, offset: u32) -> &mut T {
         unsafe { &mut *((self as *mut Object as *mut u8).add(offset as usize) as *mut T) }
     }
 
-    fn get_or_create_child_object<'a>(&mut self, aux_entry: &AuxTableEntry) -> (&'a mut Object, &'a Table) {
+    fn add<T>(&mut self, offset: u32, val: T) {
+        let field = self.ref_mut::<RepeatedField<T>>(offset);
+        field.push(val);
+    }
+
+    fn get_or_create_child_object<'a>(&mut self, aux_entry: &AuxTableEntry, has_bit_idx: u32) -> (&'a mut Object, &'a Table) {
         let field = self.ref_mut::<*mut Object>(aux_entry.offset);
         let child_table = unsafe { &*aux_entry.child_table };
         let child = if (*field).is_null() {
             let child = (child_table.create_fn)();
             *field = child;
+            self.set_has(has_bit_idx);
             child
         } else {
             unsafe { &mut **field }
         };
         (child, child_table)
     }
+
+    fn add_child_object<'a>(&mut self, aux_entry: &AuxTableEntry) -> (&'a mut Object, &'a Table) {
+        let field = self.ref_mut::<RepeatedField<*mut Object>>(aux_entry.offset);
+        let child_table = unsafe { &*aux_entry.child_table };
+        let child = (child_table.create_fn)();
+        field.push(child);
+        (child, child_table)
+    }
+
+    fn set_bytes(&mut self, offset: u32, has_bit_idx: u32, bytes: &[u8]) -> &mut Bytes {
+        self.set_has(has_bit_idx);
+        let field = self.ref_mut::<Bytes>(offset);
+        field.assign(bytes);
+        field
+    }
+
+    fn add_bytes(&mut self, offset: u32, bytes: &[u8]) -> &mut Bytes {
+        let field = self.ref_mut::<RepeatedField<Bytes>>(offset);
+        let b = Bytes::from_slice(bytes);
+        field.push(b);
+        field.last_mut().unwrap()
+    }
 }
 
 impl ParseContext {
-    fn push_limit(&mut self, ptr: Cursor, len: isize, end: NonNull<u8>, obj: &mut Object, table: &Table) -> Option<NonNull<u8>> {
+    fn push_limit(&mut self, ptr: ReadCursor, len: isize, end: NonNull<u8>, obj: &mut Object, table: &Table) -> Option<NonNull<u8>> {
         let new_limit = ptr - end + len;
         let delta_limit = self.limit - new_limit;
         if delta_limit < 0 {
@@ -296,7 +211,38 @@ impl ParseContext {
     }
 }
 
-fn parse_loop_chunk(mut ptr: Cursor, end: NonNull<u8>, obj: &mut Object, table: &Table, expected_end: u32) -> Option<Cursor> {
+
+#[repr(u8)]
+pub enum FieldKind {
+    Varint64,
+    Varint32,
+    Varint64Zigzag,
+    Varint32Zigzag,
+    Fixed64,
+    Fixed32,
+    Bytes,
+    Message,
+    Group,
+    RepeatedVarint64,
+    RepeatedVarint32,
+    RepeatedVarint64Zigzag,
+    RepeatedVarint32Zigzag,
+    RepeatedFixed64,
+    RepeatedFixed32,
+    RepeatedBytes,
+    RepeatedMessage,
+    RepeatedGroup,
+}
+
+fn validate_wire_type(tag: u32, expected_wire_type: u8) -> Option<()> {
+    if (tag & 7) == expected_wire_type as u32 {
+        Some(())
+    } else {
+        None
+    }
+}
+
+fn parse_loop_chunk(mut ptr: ReadCursor, end: NonNull<u8>, obj: &mut Object, table: &Table, expected_end: u32) -> Option<ReadCursor> {
     while ptr < end {
         let tag = ptr.read_tag()?;
         if tag == 0 {
@@ -311,60 +257,126 @@ fn parse_loop_chunk(mut ptr: Cursor, end: NonNull<u8>, obj: &mut Object, table: 
         }
         let field_number = tag >> 3;
         let entry = table.entry(field_number)?;
-        if entry.tag != tag as u8 {
-            return None;
-        }
         let offset = entry.data_offset as u32;
+        let has_bit_idx = entry.has_bit as u32;
         match entry.kind {
-            0 => { // varint64
+            FieldKind::Varint64 => { // varint64
+                validate_wire_type(tag, 0)?;
                 let value = ptr.read_varint()?;
                 *obj.ref_mut(offset) = value;
+                obj.set_has(has_bit_idx);
             }
-            1 => { // varint32
+            FieldKind::Varint32 => { // varint32
+                validate_wire_type(tag, 0)?;
                 let value = ptr.read_varint()?;
                 *obj.ref_mut(offset) = value as u32;
+                obj.set_has(has_bit_idx);
             }
-            2 => { // varint64 zigzag
+            FieldKind::Varint64Zigzag => { // varint64 zigzag
+                validate_wire_type(tag, 0)?;
                 let value = ptr.read_varint()?;
                 *obj.ref_mut(offset) = zigzag_decode(value);
+                obj.set_has(has_bit_idx);
             }
-            3 => { // varint32 zigzag
+            FieldKind::Varint32Zigzag => { // varint32 zigzag
+                validate_wire_type(tag, 0)?;
                 let value = ptr.read_varint()?;
                 *obj.ref_mut(offset) = zigzag_decode(value) as u32;
+                obj.set_has(has_bit_idx);
             }
-            4 => { // fixed64
+            FieldKind::Fixed64 => { // fixed64
+                validate_wire_type(tag, 1)?;
                 let value = ptr.read_unaligned::<u64>();
                 *obj.ref_mut(offset) = value;
+                obj.set_has(has_bit_idx);
             }
-            5 => { // fixed32
+            FieldKind::Fixed32 => { // fixed32
+                validate_wire_type(tag, 5)?;
                 let value = ptr.read_unaligned::<u32>();
                 *obj.ref_mut(offset) = value;
+                obj.set_has(has_bit_idx);
             }
-            6 => { // bytes
+            FieldKind::Bytes => { // bytes
+                validate_wire_type(tag, 2)?;
                 let len = ptr.read_size()?;
                 if ptr - end + len > 0 {
                     return None;
                 }
-                obj.ref_mut::<Vec<u8>>(offset).assign(ptr.read_slice(len));
+                obj.set_bytes(offset, has_bit_idx, ptr.read_slice(len));
             }
-            7 => { // message
+            FieldKind::Message => { // message
+                validate_wire_type(tag, 0)?;
                 let len = ptr.read_size()?;
                 if ptr - end + len > 0 {
                     return None;
                 }
                 let aux_entry = table.aux_entry(offset);
-                let (child, child_table) = obj.get_or_create_child_object(aux_entry);
-                let new_end = (ptr + len).0;
+                let (child, child_table) = obj.get_or_create_child_object(aux_entry, has_bit_idx);
+                let new_end = ptr.limit(len);
                 ptr = parse_loop_chunk(ptr, new_end, child, child_table, 0)?;
             }
-            8 => { // start group
+            FieldKind::Group => { // start group
+                validate_wire_type(tag, 3)?;
                 let group_tag = tag + 1;
                 let aux_entry = table.aux_entry(offset);
-                let (child, child_table) = obj.get_or_create_child_object(aux_entry);
+                let (child, child_table) = obj.get_or_create_child_object(aux_entry, has_bit_idx);
                 ptr = parse_loop_chunk(ptr, end, child, child_table, group_tag + 1)?;
             }
-            _ => {
-                unreachable!()
+            FieldKind::RepeatedVarint64 => { // varint64
+                validate_wire_type(tag, 0)?;
+                let value = ptr.read_varint()?;
+                obj.add(offset, value);
+            }
+            FieldKind::RepeatedVarint32 => { // varint32
+                validate_wire_type(tag, 0)?;
+                let value = ptr.read_varint()?;
+                obj.add(offset, value as u32);
+            }
+            FieldKind::RepeatedVarint64Zigzag => { // varint64 zigzag
+                validate_wire_type(tag, 0)?;
+                let value = ptr.read_varint()?;
+                obj.add(offset, zigzag_decode(value));
+            }
+            FieldKind::RepeatedVarint32Zigzag => { // varint32 zigzag
+                validate_wire_type(tag, 0)?;
+                let value = ptr.read_varint()?;
+                obj.add(offset, zigzag_decode(value) as u32);
+            }
+            FieldKind::RepeatedFixed64 => { // fixed64
+                validate_wire_type(tag, 1)?;
+                let value = ptr.read_unaligned::<u64>();
+                obj.add(offset, value);
+            }
+            FieldKind::RepeatedFixed32 => { // fixed32
+                validate_wire_type(tag, 5)?;
+                let value = ptr.read_unaligned::<u32>();
+                obj.add(offset, value);
+            }
+            FieldKind::RepeatedBytes => { // bytes
+                validate_wire_type(tag, 2)?;
+                let len = ptr.read_size()?;
+                if ptr - end + len > 0 {
+                    return None;
+                }
+                obj.add_bytes(offset, ptr.read_slice(len));
+            }
+            FieldKind::RepeatedMessage => { // message
+                validate_wire_type(tag, 0)?;
+                let len = ptr.read_size()?;
+                if ptr - end + len > 0 {
+                    return None;
+                }
+                let aux_entry = table.aux_entry(offset);
+                let (child, child_table) = obj.add_child_object(aux_entry);
+                let new_end = ptr.limit(len);
+                ptr = parse_loop_chunk(ptr, new_end, child, child_table, 0)?;
+            }
+            FieldKind::RepeatedGroup => { // start group
+                validate_wire_type(tag, 3)?;
+                let group_tag = tag + 1;
+                let aux_entry = table.aux_entry(offset);
+                let (child, child_table) = obj.add_child_object(aux_entry);
+                ptr = parse_loop_chunk(ptr, end, child, child_table, group_tag + 1)?;
             }
         }
     }
@@ -374,7 +386,7 @@ fn parse_loop_chunk(mut ptr: Cursor, end: NonNull<u8>, obj: &mut Object, table: 
     Some(ptr)
 }
 
-fn parse_loop(mut ptr: Cursor, end: NonNull<u8>, ctx: &mut ParseContext) -> Option<Cursor> {
+fn parse_loop(mut ptr: ReadCursor, end: NonNull<u8>, ctx: &mut ParseContext) -> Option<ReadCursor> {
     let mut obj = unsafe { &mut *ctx.obj };
     let mut table = unsafe { &*ctx.table };
     loop {
@@ -390,66 +402,135 @@ fn parse_loop(mut ptr: Cursor, end: NonNull<u8>, ctx: &mut ParseContext) -> Opti
                 continue;
             }
             let entry = table.entry(field_number)?;
-            if entry.tag != tag as u8 {
-                return None;
-            }
             let offset = entry.data_offset as u32;
+            let has_bit_idx = entry.has_bit as u32;
             match entry.kind {
-                0 => { // varint64
+                FieldKind::Varint64 => { // varint64
+                    validate_wire_type(tag, 0);
                     let value = ptr.read_varint()?;
                     *obj.ref_mut(offset) = value;
+                    obj.set_has(has_bit_idx);
                 }
-                1 => { // varint32
+                FieldKind::Varint32 => { // varint32
+                    validate_wire_type(tag, 0);
                     let value = ptr.read_varint()?;
                     *obj.ref_mut(offset) = value as u32;
+                    obj.set_has(has_bit_idx);
                 }
-                2 => { // varint64 zigzag
+                FieldKind::Varint64Zigzag => { // varint64 zigzag
+                    validate_wire_type(tag, 0);
                     let value = ptr.read_varint()?;
                     *obj.ref_mut(offset) = zigzag_decode(value);
+                    obj.set_has(has_bit_idx);
                 }
-                3 => { // varint32 zigzag
+                FieldKind::Varint32Zigzag => { // varint32 zigzag
+                    validate_wire_type(tag, 0);
                     let value = ptr.read_varint()?;
                     *obj.ref_mut(offset) = zigzag_decode(value) as u32;
+                    obj.set_has(has_bit_idx);
                 }
-                4 => { // fixed64
+                FieldKind::Fixed64 => { // fixed64
+                    validate_wire_type(tag, 1);
                     let value = ptr.read_unaligned::<u64>();
                     *obj.ref_mut(offset) = value;
+                    obj.set_has(has_bit_idx);
                 }
-                5 => { // fixed32
+                FieldKind::Fixed32 => { // fixed32
+                    validate_wire_type(tag, 5);
                     let value = ptr.read_unaligned::<u32>();
                     *obj.ref_mut(offset) = value;
+                    obj.set_has(has_bit_idx);
                 }
-                6 => { // bytes
+                FieldKind::Bytes => { // bytes
+                    validate_wire_type(tag, 2);
                     let len = ptr.read_size()?;
                     if ptr - limited_end + len <= SLOP_SIZE as isize {
-                        obj.ref_mut::<Vec<u8>>(offset).assign(ptr.read_slice(len));
+                        obj.set_bytes(offset, has_bit_idx, ptr.read_slice(len));
                     } else {
                         ctx.push_limit(ptr, len, end, obj, table)?;
-                        let s = obj.ref_mut::<Vec<u8>>(offset);
-                        s.assign(ptr.read_slice(len - (ptr - end) + SLOP_SIZE as isize));
-                        ctx.obj = s as *mut _ as *mut Object;
+                        ctx.obj = obj.set_bytes(offset, has_bit_idx, ptr.read_slice(SLOP_SIZE as isize - (ptr - end))) as *mut _ as *mut Object;
                         ctx.table = 1 as *const Table;
                         return Some(ptr);
                     }
                 }
-                7 => { // message
+                FieldKind::Message => { // message
+                    validate_wire_type(tag, 2);
                     let len = ptr.read_size()?;
                     let aux_entry = table.aux_entry(offset);
-                    let (child, child_table) = obj.get_or_create_child_object(aux_entry);
+                    let (child, child_table) = obj.get_or_create_child_object(aux_entry, has_bit_idx);
                     if ptr - limited_end + len <= 0 {
-                        let new_end = (ptr + len).0;
+                        let new_end = ptr.limit(len);
                         ptr = parse_loop_chunk(ptr, new_end, child, child_table, 0)?;
                     } else {
                         limited_end = ctx.push_limit(ptr, len, end, obj, table)?;
                         (obj, table) = (child, child_table);
                     }
                 }
-                8 => { // start group
+                FieldKind::Group => { // start group
+                    validate_wire_type(tag, 3);
                     ctx.push_group(field_number, obj, table)?;
-                    (obj, table) = obj.get_or_create_child_object(table.aux_entry(offset));
+                    (obj, table) = obj.get_or_create_child_object(table.aux_entry(offset, ), has_bit_idx);
                 }
-                _ => {
-                    unreachable!()
+                FieldKind::RepeatedVarint64 => { // varint64
+                    validate_wire_type(tag, 0);
+                    let value = ptr.read_varint()?;
+                    obj.add(offset, value);
+                }
+                FieldKind::RepeatedVarint32 => { // varint32
+                    validate_wire_type(tag, 0);
+                    let value = ptr.read_varint()?;
+                    obj.add(offset, value as u32);
+                }
+                FieldKind::RepeatedVarint64Zigzag => { // varint64 zigzag
+                    validate_wire_type(tag, 0);
+                    let value = ptr.read_varint()?;
+                    obj.add(offset, zigzag_decode(value));
+                }
+                FieldKind::RepeatedVarint32Zigzag => { // varint32 zigzag
+                    validate_wire_type(tag, 0);
+                    let value = ptr.read_varint()?;
+                    obj.add(offset, zigzag_decode(value) as u32);
+                }
+                FieldKind::RepeatedFixed64 => { // fixed64
+                    validate_wire_type(tag, 1);
+                    let value = ptr.read_unaligned::<u64>();
+                    obj.add(offset, value);
+                }
+                FieldKind::RepeatedFixed32 => { // fixed32
+                    validate_wire_type(tag, 5);
+                    let value = ptr.read_unaligned::<u32>();
+                    obj.add(offset, value);
+                    obj.set_has(has_bit_idx);
+                }
+                FieldKind::RepeatedBytes => { // bytes
+                    validate_wire_type(tag, 2);
+                    let len = ptr.read_size()?;
+                    if ptr - limited_end + len <= SLOP_SIZE as isize {
+                        obj.add_bytes(offset, ptr.read_slice(len));
+                    } else {
+                        ctx.push_limit(ptr, len, end, obj, table)?;
+                        ctx.obj = obj.add_bytes(offset, ptr.read_slice(SLOP_SIZE as isize - (ptr - end))) as *mut _ as *mut Object;
+                        ctx.table = 1 as *const Table;
+                        return Some(ptr);
+                    }
+                }
+                FieldKind::RepeatedMessage => { // message
+                    validate_wire_type(tag, 2);
+                    let len = ptr.read_size()?;
+                    let aux_entry = table.aux_entry(offset);
+                    let (child, child_table) = obj.add_child_object(aux_entry);
+                    if ptr - limited_end + len <= 0 {
+                        let new_end = ptr.limit(len);
+                        ptr = parse_loop_chunk(ptr, new_end, child, child_table, 0)?;
+                    } else {
+                        limited_end = ctx.push_limit(ptr, len, end, obj, table)?;
+                        (obj, table) = (child, child_table);
+                    }
+                }
+                FieldKind::RepeatedGroup => { // start group
+                    validate_wire_type(tag, 3);
+                    ctx.push_group(field_number, obj, table)?;
+                    (obj, table) = obj.add_child_object(table.aux_entry(offset));
                 }
             }
         }
@@ -468,8 +549,7 @@ pub fn parse(obj: &mut Object, table: &Table, buf: &[u8]) -> Option<()> {
     let mut patch_buffer = [0u8; SLOP_SIZE * 2];
     if buf.len() <= SLOP_SIZE {
         patch_buffer[..buf.len()].copy_from_slice(buf);
-        let start = Cursor(NonNull::from_ref(&patch_buffer[0]));
-        let end = (start + buf.len() as isize).0;
+        let (start, end) = ReadCursor::new(&patch_buffer[..buf.len()]);
         parse_loop_chunk(start, end, obj, table, 0)?;
         Some(())
     } else {
@@ -480,13 +560,11 @@ pub fn parse(obj: &mut Object, table: &Table, buf: &[u8]) -> Option<()> {
             depth: 100,
             stack: [Default::default(); 100],
         };
-        let start = Cursor(NonNull::from_ref(&buf[0]));
-        let end = (start + buf.len() as isize).0;
+        let (start, end) = ReadCursor::new(&buf[..buf.len() - SLOP_SIZE]);
         let overrun = parse_loop(start, end, &mut ctx)? - end;
         assert!(overrun >= 0 && overrun <= SLOP_SIZE as isize);
         patch_buffer[..SLOP_SIZE].copy_from_slice(buf[buf.len() - SLOP_SIZE..].as_ref());
-        let start = Cursor(NonNull::from_ref(&patch_buffer[0]));
-        let end = (start + SLOP_SIZE as isize).0;
+        let (start, end) = ReadCursor::new(&patch_buffer[..SLOP_SIZE]);
         if parse_loop(start + overrun, end, &mut ctx)? == end {
             Some(())
         } else {
@@ -535,7 +613,7 @@ impl ResumeableParse {
 
     pub fn finish(&mut self) -> Option<()> {
         let overrun = Self::go_parse(self.overrun, &self.patch_buffer[..SLOP_SIZE], &mut self.ctx)?;
-        if overrun == 0 {
+        if overrun == 0 && self.ctx.depth == STACK_DEPTH {
             Some(())
         } else {
             None
@@ -544,8 +622,7 @@ impl ResumeableParse {
 
     fn go_parse(overrun: isize, buf: &[u8], ctx: &mut ParseContext) -> Option<isize> {
         if overrun < buf.len() as isize {
-            let start = Cursor(NonNull::from_ref(&buf[0]));
-            let end = (start + buf.len() as isize).0;
+            let (start, end) = ReadCursor::new(&buf[..buf.len()]);
             let overrun = parse_loop(start + overrun, end, ctx)? - end;
             assert!(overrun >= 0 && overrun <= SLOP_SIZE as isize);
             Some(overrun)

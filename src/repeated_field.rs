@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::{self, NonNull};
 
 #[derive(Copy, Clone)]
-struct RawVec {
+pub(super) struct RawVec {
     ptr: NonNull<u8>,
     cap: usize,
 }
@@ -120,13 +120,13 @@ impl RawVec {
     }
 }
 
-pub struct Vec<T> {
+pub struct RepeatedField<T> {
     buf: RawVec,
     len: usize,
     phantom: std::marker::PhantomData<T>,
 }
 
-impl<T> Vec<T> {
+impl<T> RepeatedField<T> {
     fn ptr(&self) -> *mut T {
         self.buf.ptr.as_ptr() as *mut T
     }
@@ -136,12 +136,24 @@ impl<T> Vec<T> {
     }
 
     pub fn new() -> Self {
-        Vec {
+        RepeatedField {
             buf: if std::mem::size_of::<T>() == 0 { RawVec::new_zst() } else { RawVec::new() },
             len: 0,
             phantom: std::marker::PhantomData,
         }
     }
+
+    pub fn from_slice(slice: &[T]) -> Self 
+    where
+        T: Copy,
+    {
+        let mut rf = Self::new();
+        rf.reserve(slice.len());
+        unsafe { rf.ptr().copy_from_nonoverlapping(slice.as_ptr(), slice.len()) };
+        rf.len = slice.len();
+        rf
+    }
+
     pub fn push(&mut self, elem: T) {
         unsafe { 
             (self.buf.push_uninitialized(&mut self.len, Layout::new::<T>()) as *mut T).write(elem) 
@@ -225,7 +237,7 @@ impl<T> Vec<T> {
     }
 }
 
-impl<T> Drop for Vec<T> {
+impl<T> Drop for RepeatedField<T> {
     fn drop(&mut self) {
         unsafe {
             std::ptr::drop_in_place(self.deref_mut());
@@ -234,20 +246,20 @@ impl<T> Drop for Vec<T> {
     }
 }
 
-impl<T> Deref for Vec<T> {
+impl<T> Deref for RepeatedField<T> {
     type Target = [T];
     fn deref(&self) -> &[T] {
         unsafe { std::slice::from_raw_parts(self.ptr(), self.len) }
     }
 }
 
-impl<T> DerefMut for Vec<T> {
+impl<T> DerefMut for RepeatedField<T> {
     fn deref_mut(&mut self) -> &mut [T] {
         unsafe { std::slice::from_raw_parts_mut(self.ptr(), self.len) }
     }
 }
 
-impl<T> IntoIterator for Vec<T> {
+impl<T> IntoIterator for RepeatedField<T> {
     type Item = T;
     type IntoIter = IntoIter<T>;
     fn into_iter(self) -> IntoIter<T> {
@@ -358,7 +370,7 @@ impl<T> Drop for IntoIter<T> {
 }
 
 pub struct Drain<'a, T: 'a> {
-    vec: PhantomData<&'a mut Vec<T>>,
+    vec: PhantomData<&'a mut RepeatedField<T>>,
     iter: RawValIter<T>,
 }
 
@@ -385,3 +397,4 @@ impl<'a, T> Drop for Drain<'a, T> {
     }
 }
 
+pub type Bytes = RepeatedField<u8>;
