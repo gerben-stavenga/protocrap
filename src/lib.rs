@@ -147,6 +147,7 @@ impl Object {
         field.push(b);
         field.last_mut().unwrap()
     }
+    
 }
 
 impl ParseContext {
