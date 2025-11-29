@@ -1,4 +1,5 @@
 use std::alloc::{self, Layout};
+use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::mem;
 use std::ops::{Deref, DerefMut};
@@ -6,7 +7,7 @@ use std::ptr::{self, NonNull};
 
 #[derive(Copy, Clone)]
 pub(super) struct RawVec {
-    ptr: NonNull<u8>,
+    ptr: *mut u8,
     cap: usize,
 }
 
@@ -14,7 +15,7 @@ impl RawVec {
     fn new() -> Self {
         // `NonNull::dangling()` doubles as "unallocated" and "zero-sized allocation"
         RawVec {
-            ptr: NonNull::dangling(),
+            ptr: std::ptr::null_mut(),
             cap: 0,
         }
     }
@@ -22,7 +23,7 @@ impl RawVec {
     fn new_zst() -> Self {
         // `NonNull::dangling()` doubles as "unallocated" and "zero-sized allocation"
         RawVec {
-            ptr: NonNull::dangling(),
+            ptr: NonNull::dangling().as_ptr(),
             cap: usize::MAX,
         }
     }
@@ -63,15 +64,15 @@ impl RawVec {
             unsafe { alloc::alloc(new_layout) }
         } else {
             let old_layout = Layout::from_size_align(layout.size() * self.cap, layout.align()).unwrap();
-            let old_ptr = self.ptr.as_ptr() as *mut u8;
+            let old_ptr = self.ptr;
             unsafe { alloc::realloc(old_ptr, old_layout, new_layout.size()) }
         };
 
         // If allocation fails, `new_ptr` will be null, in which case we abort.
-        self.ptr = match NonNull::new(new_ptr) {
-            Some(p) => p,
-            None => alloc::handle_alloc_error(new_layout),
-        };
+        if new_ptr.is_null() {
+            alloc::handle_alloc_error(new_layout);
+        }
+        self.ptr = new_ptr;
         self.cap = new_cap;
         self
     }
@@ -85,7 +86,7 @@ impl RawVec {
         // Can't overflow, we'll OOM first.
         *len = l + 1;
 
-        unsafe { self.ptr.as_ptr().add(l * layout.size()) }
+        unsafe { self.ptr.add(l * layout.size()) }
     }
 
     pub unsafe fn pop(&mut self, len: &mut usize, layout: Layout) -> Option<*mut u8> {
@@ -94,7 +95,7 @@ impl RawVec {
             None
         } else {
             let l = l - 1;
-            let ptr = unsafe { self.ptr.as_ptr().add(l * layout.size()) };
+            let ptr = unsafe { self.ptr.add(l * layout.size()) };
             *len = l;
             Some(ptr)
         }
@@ -112,7 +113,7 @@ impl RawVec {
             unsafe {
                 let layout = Layout::from_size_align_unchecked(layout.size() * self.cap, layout.align());
                 alloc::dealloc(
-                    self.ptr.as_ptr() as *mut u8,
+                    self.ptr,
                     layout,
                 );
             }
@@ -126,9 +127,28 @@ pub struct RepeatedField<T> {
     phantom: std::marker::PhantomData<T>,
 }
 
+impl<T> Default for RepeatedField<T> {
+    fn default() -> Self {
+        RepeatedField {
+            buf: if std::mem::size_of::<T>() == 0 { RawVec::new_zst() } else { RawVec::new() },
+            len: 0,
+            phantom: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<T> Debug for RepeatedField<T> 
+where
+    T: Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.as_ref().fmt(f)
+    }
+}
+
 impl<T> RepeatedField<T> {
     fn ptr(&self) -> *mut T {
-        self.buf.ptr.as_ptr() as *mut T
+        self.buf.ptr as *mut T
     }
 
     fn cap(&self) -> usize {
@@ -136,11 +156,7 @@ impl<T> RepeatedField<T> {
     }
 
     pub fn new() -> Self {
-        RepeatedField {
-            buf: if std::mem::size_of::<T>() == 0 { RawVec::new_zst() } else { RawVec::new() },
-            len: 0,
-            phantom: std::marker::PhantomData,
-        }
+        Self::default()
     }
 
     pub fn from_slice(slice: &[T]) -> Self 
@@ -148,10 +164,24 @@ impl<T> RepeatedField<T> {
         T: Copy,
     {
         let mut rf = Self::new();
-        rf.reserve(slice.len());
-        unsafe { rf.ptr().copy_from_nonoverlapping(slice.as_ptr(), slice.len()) };
-        rf.len = slice.len();
+        rf.append(slice);
         rf
+    }
+
+    fn slice(&self) -> &[T] {
+        if self.len == 0 {
+            &[]
+        } else {
+            unsafe { std::slice::from_raw_parts(self.ptr(), self.len) }
+        }
+    }
+
+    fn slice_mut(&mut self) -> &mut [T] {
+        if self.len == 0 {
+            &mut []
+        } else {
+            unsafe { std::slice::from_raw_parts_mut(self.ptr(), self.len) }
+        }
     }
 
     pub fn push(&mut self, elem: T) {
@@ -231,9 +261,19 @@ impl<T> RepeatedField<T> {
         T: Copy,
     {
         self.clear();
-        self.reserve(slice.len());
-        unsafe { self.ptr().copy_from_nonoverlapping(slice.as_ptr(), slice.len()) };
-        self.len = slice.len();
+        self.append(slice);
+    }
+
+    pub fn append(&mut self, slice: &[T]) 
+    where
+        T: Copy,
+    {
+        let old_len = self.len;
+        self.reserve(old_len + slice.len());
+        unsafe {
+            self.ptr().add(old_len).copy_from_nonoverlapping(slice.as_ptr(), slice.len());
+        }
+        self.len = old_len + slice.len();
     }
 }
 
@@ -249,13 +289,13 @@ impl<T> Drop for RepeatedField<T> {
 impl<T> Deref for RepeatedField<T> {
     type Target = [T];
     fn deref(&self) -> &[T] {
-        unsafe { std::slice::from_raw_parts(self.ptr(), self.len) }
+        self.slice()
     }
 }
 
 impl<T> DerefMut for RepeatedField<T> {
     fn deref_mut(&mut self) -> &mut [T] {
-        unsafe { std::slice::from_raw_parts_mut(self.ptr(), self.len) }
+        self.slice_mut()
     }
 }
 

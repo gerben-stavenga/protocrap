@@ -1,0 +1,8 @@
+cc_binary(
+    name = "compiler",
+    srcs = ["codegen.cpp"],
+    deps = [
+        "@protobuf//:protobuf",
+        "//proto:example_cc"
+    ],
+)
