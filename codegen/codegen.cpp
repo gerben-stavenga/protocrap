@@ -450,7 +450,7 @@ static ENCODING_TABLE_$name$: protobuf::encoding::TableWithEntries<$num_entries$
                 {{"offset", std::to_string(i)},
                  {"field_name", field->name()},
                     {"child_type_name", rust_full_name(field->message_type())}},
-                "protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!($name$, $field_name$) as usize, child_table: &ENCODING_TABLE_$child_type_name$.0},\n");
+                "protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!($name$, $field_name$), child_table: &ENCODING_TABLE_$child_type_name$.0},\n");
         }
     }
     printer->Emit(R"rs(]);)rs");
