@@ -84,14 +84,14 @@ impl ReadCursor {
         let res = self[0] as u64;
         if std::hint::likely(res < 0x80) {
             *self += 1;
-            return Some(res);
+            Some(res)
         } else {
             let (new_ptr, value) = read_varint(self.0.as_ptr());
             if new_ptr.is_null() {
                 return None;
             }
             self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
-            return Some(value);
+            Some(value)
         }
     }
 
@@ -99,14 +99,14 @@ impl ReadCursor {
         let res = self[0] as u32;
         if std::hint::likely(res < 0x80) {
             *self += 1;
-            return Some(res);
+            Some(res)
         } else {
             let (new_ptr, value) = read_tag(self.0.as_ptr());
             if new_ptr.is_null() {
                 return None;
             }
             self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
-            return Some(value);
+            Some(value)
         }
     }
 
@@ -115,14 +115,14 @@ impl ReadCursor {
         let res = self[0] as isize;
         if std::hint::likely(res < 0x80) {
             *self += 1;
-            return Some(res);
+            Some(res)
         } else {
             let (new_ptr, value) = read_size(self.0.as_ptr());
             if new_ptr.is_null() {
                 return None;
             }
             self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
-            return Some(value);
+            Some(value)
         }
     }
 

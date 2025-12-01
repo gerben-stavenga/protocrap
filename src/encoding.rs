@@ -52,7 +52,7 @@ struct StackEntry {
 }
 
 impl StackEntry {
-    fn to_context<'a>(self) -> (EncodeContext<'a>, u32, isize) {
+    fn into_context<'a>(self) -> (EncodeContext<'a>, u32, isize) {
         (
             EncodeContext {
                 obj: unsafe { &*self.obj },
@@ -90,7 +90,7 @@ impl EncodeContext<'_> {
     }
 
     fn pop(&mut self, stack: &mut Stack<StackEntry>) -> Option<(u32, isize)> {
-        let (ctx, tag, byte_count) = stack.pop()?.to_context();
+        let (ctx, tag, byte_count) = stack.pop()?.into_context();
         *self = ctx;
         Some((tag, byte_count))
     }
@@ -111,7 +111,7 @@ fn encode_bytes<'a>(
         return Some((cursor, EncodeObject::String(&bytes[..len - buffer_size])));
     }
     cursor.write_slice(bytes);
-    let (ctx, tag, old_byte_count) = stack.pop()?.to_context();
+    let (ctx, tag, old_byte_count) = stack.pop()?.into_context();
     let field_byte_count = count(cursor, begin, byte_count) - old_byte_count;
     cursor.write_varint(field_byte_count as u64);
     cursor.write_tag(tag);

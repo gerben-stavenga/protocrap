@@ -46,7 +46,7 @@ impl TableEntryBits {
     }
 
     fn offset(&self) -> u32 {
-        (self.0 >> 16) as u32
+        self.0 >> 16
     }
 }
 
@@ -85,8 +85,8 @@ struct StackEntry {
 }
 
 impl StackEntry {
-    fn to_context<'a>(
-        &self,
+    fn into_context<'a>(
+        self,
         mut limit: isize,
         field_number: Option<u32>,
     ) -> Option<ParseContext<'a>> {
@@ -146,7 +146,7 @@ impl<'a> ParseContext<'a> {
         end: NonNull<u8>,
         stack: &mut Stack<StackEntry>,
     ) -> Option<NonNull<u8>> {
-        *self = stack.pop()?.to_context(self.limit, None)?;
+        *self = stack.pop()?.into_context(self.limit, None)?;
         Some(self.limited_end(end))
     }
 
@@ -160,7 +160,7 @@ impl<'a> ParseContext<'a> {
     }
 
     fn pop_group(&mut self, field_number: u32, stack: &mut Stack<StackEntry>) -> Option<()> {
-        *self = stack.pop()?.to_context(self.limit, Some(field_number))?;
+        *self = stack.pop()?.into_context(self.limit, Some(field_number))?;
         Some(())
     }
 
@@ -221,7 +221,7 @@ fn parse_string<'a>(
         return Some((cursor, limit, ParseObject::Bytes(bytes)));
     }
     bytes.append(cursor.read_slice(limit - (cursor - end)));
-    let ctx = stack.pop()?.to_context(limit, None)?;
+    let ctx = stack.pop()?.into_context(limit, None)?;
     parse_loop(ctx, cursor, end, stack)
 }
 

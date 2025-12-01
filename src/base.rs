@@ -32,7 +32,7 @@ impl Object {
     }
 
     pub(crate) fn get_slice<T>(&self, offset: usize) -> &[T] {
-        self.ref_at::<RepeatedField<T>>(offset as usize).as_ref()
+        self.ref_at::<RepeatedField<T>>(offset).as_ref()
     }
 
     pub(crate) fn set<T>(&mut self, offset: u32, has_bit_idx: u32, val: T) -> &mut T {
@@ -48,7 +48,7 @@ impl Object {
     }
 
     pub(crate) fn bytes(&self, offset: usize) -> &[u8] {
-        self.ref_at::<Bytes>(offset as usize).as_ref()
+        self.ref_at::<Bytes>(offset).as_ref()
     }
 
     pub(crate) fn set_bytes(&mut self, offset: u32, has_bit_idx: u32, bytes: &[u8]) -> &mut Bytes {
