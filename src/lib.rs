@@ -43,7 +43,7 @@ pub fn parse_from_bufread<const STACK_DEPTH: usize>(
         if len == 0 {
             break;
         }
-        if !parser.resume(&buffer) {
+        if !parser.resume(buffer) {
             return Err(anyhow::anyhow!("parse error"));
         }
     }

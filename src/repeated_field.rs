@@ -243,7 +243,7 @@ impl<T> RepeatedField<T> {
     }
 
     pub fn drain(&mut self) -> Drain<'_, T> {
-        let iter = unsafe { RawValIter::new(&self) };
+        let iter = unsafe { RawValIter::new(self) };
 
         // this is a mem::forget safety thing. If Drain is forgotten, we just
         // leak the whole Vec's contents. Also we need to do this *eventually*
@@ -333,7 +333,7 @@ impl<T> RawValIter<T> {
             start: slice.as_ptr(),
             end: if mem::size_of::<T>() == 0 {
                 ((slice.as_ptr() as usize) + slice.len()) as *const _
-            } else if slice.len() == 0 {
+            } else if slice.is_empty() {
                 slice.as_ptr()
             } else {
                 unsafe { slice.as_ptr().add(slice.len()) }

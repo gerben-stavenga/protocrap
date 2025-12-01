@@ -440,8 +440,8 @@ impl<'a> ResumeableState<'a> {
             ParseObject::Message(obj, table) => {
                 let ctx = ParseContext {
                     limit: self.limit,
-                    obj: obj,
-                    table: table,
+                    obj,
+                    table,
                 };
                 parse_loop(ctx, cursor, end, stack)?
             }

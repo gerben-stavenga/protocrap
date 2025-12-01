@@ -4,7 +4,7 @@ pub struct Object;
 
 impl Object {
     pub fn create(size: u32) -> &'static mut Object {
-        let buffer = vec![0u64; (size as usize + 7) / 8].leak();
+        let buffer = vec![0u64; (size as usize).div_ceil(8)].leak();
         unsafe { &mut *(buffer as *mut [u64] as *mut Object) }
     }
 
@@ -44,7 +44,7 @@ impl Object {
     }
 
     pub(crate) fn get<T: Copy>(&self, offset: usize) -> T {
-        *self.ref_at::<T>(offset as usize)
+        *self.ref_at::<T>(offset)
     }
 
     pub(crate) fn get_slice<T>(&self, offset: u32) -> &[T] {

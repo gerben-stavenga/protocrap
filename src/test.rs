@@ -87,14 +87,14 @@ impl Test {
 }
 impl protobuf::Protobuf for Test {
     fn encoding_table() -> &'static [crate::encoding::TableEntry] {
-        &ENCODING_TABLE_Test.0
+        &ENCODING_TABLE_TEST.0
     }
     fn decoding_table() -> &'static crate::decoding::Table {
-        &DECODING_TABLE_Test.0
+        &DECODING_TABLE_TEST.0
     }
 }
 
-static DECODING_TABLE_Test: protobuf::decoding::TableWithEntries<7, 3> = protobuf::decoding::TableWithEntries(
+static DECODING_TABLE_TEST: protobuf::decoding::TableWithEntries<7, 3> = protobuf::decoding::TableWithEntries(
     crate::decoding::Table {
         num_entries: 7,
         size: std::mem::size_of::<Test>() as u32,
@@ -105,28 +105,28 @@ protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind:
 protobuf::decoding::TableEntry {has_bit: 1, kind: protobuf::decoding::FieldKind::Fixed64, offset: std::mem::offset_of!(Test, y) as u16},
 protobuf::decoding::TableEntry {has_bit: 2, kind: protobuf::decoding::FieldKind::Bytes, offset: std::mem::offset_of!(Test, z) as u16},
 protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<7, 3>, 2) + 0 * std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
-protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Group, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<7, 3>, 2) + 1 * std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
+protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Group, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<7, 3>, 2) + std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
 protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<7, 3>, 2) + 2 * std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
   ],
         [
-protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child1) as u32, child_table: &DECODING_TABLE_Test.0},
-protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child2) as u32, child_table: &DECODING_TABLE_Test_Child2.0},
-protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, nested_message) as u32, child_table: &DECODING_TABLE_Test_NestedMessage.0},
+protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child1) as u32, child_table: &DECODING_TABLE_TEST.0},
+protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child2) as u32, child_table: &DECODING_TABLE_TEST_CHILD2.0},
+protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test, nested_message) as u32, child_table: &DECODING_TABLE_TEST_NESTED_MESSAGE.0},
 ]
 );
 
-static ENCODING_TABLE_Test: protobuf::encoding::TableWithEntries<6, 3> = protobuf::encoding::TableWithEntries(
+static ENCODING_TABLE_TEST: protobuf::encoding::TableWithEntries<6, 3> = protobuf::encoding::TableWithEntries(
 [
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<6, 3>, 1) + 0 * std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 50},
-protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Group, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<6, 3>, 1) + 1 * std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 43},
+protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Group, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<6, 3>, 1) + std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 43},
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<6, 3>, 1) + 2 * std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 34},
 protobuf::encoding::TableEntry {has_bit: 2, kind: protobuf::decoding::FieldKind::Bytes, offset: std::mem::offset_of!(Test, z) as u16, encoded_tag: 26},
 protobuf::encoding::TableEntry {has_bit: 1, kind: protobuf::decoding::FieldKind::Fixed64, offset: std::mem::offset_of!(Test, y) as u16, encoded_tag: 17},
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Varint32, offset: std::mem::offset_of!(Test, x) as u16, encoded_tag: 8},
 ], [
-protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, nested_message), child_table: &ENCODING_TABLE_Test_NestedMessage.0},
-protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child2), child_table: &ENCODING_TABLE_Test_Child2.0},
-protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child1), child_table: &ENCODING_TABLE_Test.0},
+protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, nested_message), child_table: &ENCODING_TABLE_TEST_NESTED_MESSAGE.0},
+protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child2), child_table: &ENCODING_TABLE_TEST_CHILD2.0},
+protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test, child1), child_table: &ENCODING_TABLE_TEST.0},
 ]);
 #[repr(C)]
 #[derive(Debug, Default)]
@@ -162,14 +162,14 @@ impl Test_Child2 {
 }
 impl protobuf::Protobuf for Test_Child2 {
     fn encoding_table() -> &'static [crate::encoding::TableEntry] {
-        &ENCODING_TABLE_Test_Child2.0
+        &ENCODING_TABLE_TEST_CHILD2.0
     }
     fn decoding_table() -> &'static crate::decoding::Table {
-        &DECODING_TABLE_Test_Child2.0
+        &DECODING_TABLE_TEST_CHILD2.0
     }
 }
 
-static DECODING_TABLE_Test_Child2: protobuf::decoding::TableWithEntries<3, 1> = protobuf::decoding::TableWithEntries(
+static DECODING_TABLE_TEST_CHILD2: protobuf::decoding::TableWithEntries<3, 1> = protobuf::decoding::TableWithEntries(
     crate::decoding::Table {
         num_entries: 3,
         size: std::mem::size_of::<Test_Child2>() as u32,
@@ -180,16 +180,16 @@ protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind:
 protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<3, 1>, 2) + 0 * std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
   ],
         [
-protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test_Child2, recursive) as u32, child_table: &DECODING_TABLE_Test.0},
+protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test_Child2, recursive) as u32, child_table: &DECODING_TABLE_TEST.0},
 ]
 );
 
-static ENCODING_TABLE_Test_Child2: protobuf::encoding::TableWithEntries<2, 1> = protobuf::encoding::TableWithEntries(
+static ENCODING_TABLE_TEST_CHILD2: protobuf::encoding::TableWithEntries<2, 1> = protobuf::encoding::TableWithEntries(
 [
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<2, 1>, 1) + 0 * std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 18},
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Varint64Zigzag, offset: std::mem::offset_of!(Test_Child2, x) as u16, encoded_tag: 8},
 ], [
-protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test_Child2, recursive), child_table: &ENCODING_TABLE_Test.0},
+protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test_Child2, recursive), child_table: &ENCODING_TABLE_TEST.0},
 ]);
 #[repr(C)]
 #[derive(Debug, Default)]
@@ -225,14 +225,14 @@ impl Test_NestedMessage {
 }
 impl protobuf::Protobuf for Test_NestedMessage {
     fn encoding_table() -> &'static [crate::encoding::TableEntry] {
-        &ENCODING_TABLE_Test_NestedMessage.0
+        &ENCODING_TABLE_TEST_NESTED_MESSAGE.0
     }
     fn decoding_table() -> &'static crate::decoding::Table {
-        &DECODING_TABLE_Test_NestedMessage.0
+        &DECODING_TABLE_TEST_NESTED_MESSAGE.0
     }
 }
 
-static DECODING_TABLE_Test_NestedMessage: protobuf::decoding::TableWithEntries<3, 1> = protobuf::decoding::TableWithEntries(
+static DECODING_TABLE_TEST_NESTED_MESSAGE: protobuf::decoding::TableWithEntries<3, 1> = protobuf::decoding::TableWithEntries(
     crate::decoding::Table {
         num_entries: 3,
         size: std::mem::size_of::<Test_NestedMessage>() as u32,
@@ -243,14 +243,14 @@ protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind:
 protobuf::decoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::decoding::TableWithEntries<3, 1>, 2) + 0 * std::mem::size_of::<protobuf::decoding::AuxTableEntry>()) as u16},
   ],
         [
-protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test_NestedMessage, recursive) as u32, child_table: &DECODING_TABLE_Test.0},
+protobuf::decoding::AuxTableEntry {offset: std::mem::offset_of!(Test_NestedMessage, recursive) as u32, child_table: &DECODING_TABLE_TEST.0},
 ]
 );
 
-static ENCODING_TABLE_Test_NestedMessage: protobuf::encoding::TableWithEntries<2, 1> = protobuf::encoding::TableWithEntries(
+static ENCODING_TABLE_TEST_NESTED_MESSAGE: protobuf::encoding::TableWithEntries<2, 1> = protobuf::encoding::TableWithEntries(
 [
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Message, offset: (std::mem::offset_of!(protobuf::encoding::TableWithEntries<2, 1>, 1) + 0 * std::mem::size_of::<protobuf::encoding::AuxTableEntry>()) as u16, encoded_tag: 18},
 protobuf::encoding::TableEntry {has_bit: 0, kind: protobuf::decoding::FieldKind::Varint64Zigzag, offset: std::mem::offset_of!(Test_NestedMessage, x) as u16, encoded_tag: 8},
 ], [
-protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test_NestedMessage, recursive), child_table: &ENCODING_TABLE_Test.0},
+protobuf::encoding::AuxTableEntry {offset: std::mem::offset_of!(Test_NestedMessage, recursive), child_table: &ENCODING_TABLE_TEST.0},
 ]);
