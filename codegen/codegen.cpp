@@ -468,9 +468,23 @@ int main() {
     gp::io::FileOutputStream file_output(1);
     gp::io::Printer printer(&file_output, '$');
 
-    printer.Emit("// Automatically generated Rust code from protobuf definitions.\n\n");
-    printer.Emit("use crate as protobuf;\n\n");
-    printer.Emit("use protobuf::Protobuf;\n");
+    printer.Emit(R"rs(
+// Automatically generated Rust code from protobuf definitions.\n\n");
+
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(non_snake_case)]
+#![allow(non_camel_case_types)]
+#![allow(non_upper_case_globals)]
+#![allow(clippy::erasing_op)]
+#![allow(clippy::identity_op)]
+
+use crate as protobuf;
+use protobuf::Protobuf;
+
+)rs");
+
     generate_code(msg.descriptor(), &printer);
 
     return 0;

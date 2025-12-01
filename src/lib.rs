@@ -6,7 +6,7 @@ pub mod encoding;
 pub mod repeated_field;
 pub mod wire;
 
-pub(crate) mod utils;
+pub mod utils;
 
 mod test;
 
