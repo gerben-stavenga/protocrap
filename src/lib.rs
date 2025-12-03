@@ -1,4 +1,4 @@
-#![feature(likely_unlikely)]
+#![feature(likely_unlikely, allocator_api)]
 
 pub mod arena;
 pub mod base;

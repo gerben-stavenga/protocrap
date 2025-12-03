@@ -6,7 +6,7 @@
 // arena is batching small allocations into sporadic large allocations, we can
 // allocate large blocks using the dyn Allocator trait object without too much
 // overhead.
-pub struct Arena {
+pub struct Arena<'a> {
     current: *mut MemBlock,
     allocator: &'a dyn std::alloc::Allocator,
 }
