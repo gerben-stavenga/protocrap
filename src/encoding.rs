@@ -402,19 +402,19 @@ impl<'a> ResumableState<'a> {
     }
 }
 
-struct ResumeableEncode<'a, const STACK_DEPTH: usize> {
+pub(crate) struct ResumeableEncode<'a, const STACK_DEPTH: usize> {
     state: MaybeUninit<ResumableState<'a>>,
     patch_buffer: [u8; 2 * SLOP_SIZE],
     stack: StackWithStorage<StackEntry, STACK_DEPTH>,
 }
 
-enum ResumeResult<'a> {
+pub(crate) enum ResumeResult<'a> {
     Done(&'a [u8]),
     NeedsMoreBuffer,
 }
 
 impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
-    pub fn new<T: Protobuf>(obj: &'a T) -> Self {
+    pub(crate) fn new<T: Protobuf>(obj: &'a T) -> Self {
         Self {
             state: MaybeUninit::new(ResumableState {
                 overrun: 0,
@@ -426,7 +426,7 @@ impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
         }
     }
 
-    pub fn resume_encode<'b>(&mut self, buffer: &'b mut [u8]) -> Option<ResumeResult<'b>> {
+    pub(crate) fn resume_encode<'b>(&mut self, buffer: &'b mut [u8]) -> Option<ResumeResult<'b>> {
         let len = buffer.len() as isize;
         let mut state = unsafe { self.state.assume_init_read() };
         if len > SLOP_SIZE as isize {
@@ -459,18 +459,4 @@ impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
         self.state.write(state);
         Some(ResumeResult::NeedsMoreBuffer)
     }
-}
-
-pub fn encode_flat<'a, const STACK_DEPTH: usize>(
-    obj: &impl Protobuf,
-    buffer: &'a mut [u8],
-) -> anyhow::Result<&'a [u8]> {
-    let mut resumeable_encode = ResumeableEncode::<STACK_DEPTH>::new(obj);
-    let ResumeResult::Done(buf) = resumeable_encode
-        .resume_encode(buffer)
-        .ok_or(anyhow::anyhow!("Message tree too deep"))?
-    else {
-        return Err(anyhow::anyhow!("Buffer too small for message"));
-    };
-    Ok(buf)
 }

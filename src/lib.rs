@@ -1,18 +1,19 @@
 #![feature(likely_unlikely)]
 
+pub mod arena;
 pub mod base;
-pub mod decoding;
-pub mod encoding;
 pub mod repeated_field;
 pub mod wire;
 
 pub mod utils;
 
+mod decoding;
+mod encoding;
 mod test;
 
 pub trait Protobuf {
-    fn encoding_table() -> &'static [encoding::TableEntry];
-    fn decoding_table() -> &'static decoding::Table;
+    fn encoding_table() -> &'static [encoding::TableEntry] where Self: Sized;
+    fn decoding_table() -> &'static decoding::Table where Self: Sized;
 
     fn as_object(&self) -> &base::Object {
         unsafe { &*(self as *const Self as *const base::Object) }
@@ -23,45 +24,111 @@ pub trait Protobuf {
     }
 }
 
-#[must_use]
-pub fn parse_flat<const STACK_DEPTH: usize>(obj: &mut impl Protobuf, buf: &[u8]) -> bool {
-    let mut parser = decoding::ResumeableParse::<STACK_DEPTH>::new(obj, isize::MAX);
-    if !parser.resume(buf) {
-        return false;
-    }
-    parser.finish()
-}
-
-pub fn parse_from_bufread<const STACK_DEPTH: usize>(
-    obj: &mut impl Protobuf,
-    reader: &mut impl std::io::BufRead,
-) -> anyhow::Result<()> {
-    let mut parser = decoding::ResumeableParse::<STACK_DEPTH>::new(obj, isize::MAX);
-    let mut len = 0;
-    loop {
-        reader.consume(len);
-        let buffer = reader.fill_buf()?;
-        len = buffer.len();
-        if len == 0 {
-            break;
+pub trait ProtobufExt: Protobuf {
+    #[must_use]
+    fn parse_flat<const STACK_DEPTH: usize>(&mut self, buf: &[u8]) -> bool {
+        let mut parser = decoding::ResumeableParse::<STACK_DEPTH>::new(self, isize::MAX);
+        if !parser.resume(buf) {
+            return false;
         }
-        if !parser.resume(buffer) {
+        parser.finish()
+    }
+
+    fn parse<'a, E: std::error::Error + Send + Sync + 'static>(&mut self, provider: &'a mut impl FnMut() -> Result<Option<&'a [u8]>, E>) -> anyhow::Result<()> {
+        let mut parser = decoding::ResumeableParse::<32>::new(self, isize::MAX);
+        loop {
+            let Some(buffer) = provider()? else {
+                break;
+            };
+            if !parser.resume(buffer) {
+                return Err(anyhow::anyhow!("parse error"));
+            }
+        }
+        if !parser.finish() {
             return Err(anyhow::anyhow!("parse error"));
         }
+        Ok(())
     }
-    if !parser.finish() {
-        return Err(anyhow::anyhow!("parse error"));
-    }
-    Ok(())
-}
 
-pub fn parse_from_read<const STACK_DEPTH: usize>(
-    obj: &mut impl Protobuf,
-    reader: &mut impl std::io::Read,
-) -> anyhow::Result<()> {
-    let mut buf_reader = std::io::BufReader::new(reader);
-    parse_from_bufread::<STACK_DEPTH>(obj, &mut buf_reader)
-}
+    fn parse_from_bufread<const STACK_DEPTH: usize>(
+        &mut self,
+        reader: &mut impl std::io::BufRead,
+    ) -> anyhow::Result<()> {
+        let mut parser = decoding::ResumeableParse::<STACK_DEPTH>::new(self, isize::MAX);
+        loop {
+            let buffer = reader.fill_buf()?;
+            let len = buffer.len();
+            if len == 0 {
+                break;
+            }
+            if !parser.resume(buffer) {
+                return Err(anyhow::anyhow!("parse error"));
+            }
+            reader.consume(len);
+        }
+        if !parser.finish() {
+            return Err(anyhow::anyhow!("parse error"));
+        }
+        Ok(())
+    }
+
+    fn parse_from_read<const STACK_DEPTH: usize>(
+        &mut self,
+        reader: &mut impl std::io::Read,
+    ) -> anyhow::Result<()> {
+        let mut buf_reader = std::io::BufReader::new(reader);
+        self.parse_from_bufread::<STACK_DEPTH>(&mut buf_reader)
+    }
+
+    async fn parse_from_async_bufread<const STACK_DEPTH: usize>(
+        &mut self,
+        reader: &mut (impl futures::io::AsyncBufRead + Unpin),
+    ) -> anyhow::Result<()> {
+        use futures::io::AsyncBufReadExt;
+
+        let mut parser = decoding::ResumeableParse::<STACK_DEPTH>::new(self, isize::MAX);
+        loop {
+            let buffer = reader.fill_buf().await?;
+            let len = buffer.len();
+            if len == 0 {
+                break;
+            }
+            if !parser.resume(buffer) {
+                return Err(anyhow::anyhow!("parse error"));
+            }
+            reader.consume_unpin(len);
+        }
+        if !parser.finish() {
+            return Err(anyhow::anyhow!("parse error"));
+        }
+        Ok(())
+    }
+
+    async fn parse_from_async_read<const STACK_DEPTH: usize>(
+        &mut self,
+        reader: &mut (impl futures::io::AsyncRead + Unpin),
+    ) -> anyhow::Result<()> {
+        let mut buf_reader = futures::io::BufReader::new(reader);
+        self.parse_from_async_bufread::<STACK_DEPTH>(&mut buf_reader).await
+    }
+
+    fn encode_flat<'a, const STACK_DEPTH: usize>(
+        &mut self,
+        buffer: &'a mut [u8],
+    ) -> anyhow::Result<&'a [u8]> {
+        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
+        let encoding::ResumeResult::Done(buf) = resumeable_encode
+            .resume_encode(buffer)
+            .ok_or(anyhow::anyhow!("Message tree too deep"))?
+        else {
+            return Err(anyhow::anyhow!("Buffer too small for message"));
+        };
+        Ok(buf)
+    }
+}    
+
+impl<T: Protobuf> ProtobufExt for T {}
+
 
 #[cfg(test)]
 mod tests {
@@ -82,7 +149,7 @@ mod tests {
     fn test_resumeable_parse() {
         let mut test = test::Test::default();
 
-        assert!(parse_flat::<100>(&mut test, &BUFFER));
+        assert!(test.parse_flat::<100>(&BUFFER));
 
         println!("{:?} {:?}", &test, test.child1());
         std::mem::forget(test);
@@ -101,7 +168,7 @@ mod tests {
 
         let mut buffer = [0u8; 64];
 
-        let written = encoding::encode_flat::<100>(&test, &mut buffer).unwrap();
+        let written = test.encode_flat::<100>(&mut buffer).unwrap();
         assert_eq!(written, &BUFFER);
     }
 }
