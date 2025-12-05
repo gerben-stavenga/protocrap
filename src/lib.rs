@@ -9,7 +9,7 @@ pub mod utils;
 
 mod decoding;
 mod encoding;
-mod test;
+pub mod test;
 
 pub trait Protobuf {
     fn encoding_table() -> &'static [encoding::TableEntry];
