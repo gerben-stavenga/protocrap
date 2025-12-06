@@ -167,6 +167,10 @@ mod tests {
 
     use super::*;
 
+    pub mod prost_gen {
+        include!(concat!(env!("OUT_DIR"), "/_.rs"));
+    }
+
     const BUFFER: [u8; 40] = [
         // x varint 0
         0o10, 1, // y fixed 64, 2
@@ -204,5 +208,52 @@ mod tests {
 
         let written = test.encode_flat::<100>(&mut buffer).unwrap();
         assert_eq!(written, &BUFFER);
+    }
+
+    fn make_medium_prost() -> prost_gen::Test {
+        prost_gen::Test {
+            x: Some(42),
+            y: Some(0xDEADBEEF),
+            z: Some(b"Hello World! This is a test string with some content.".to_vec()),
+            child1: Some(Box::new(prost_gen::Test {
+                x: Some(123),
+                y: Some(456),
+                z: None,
+                child1: None,
+                child2: None,
+                nested_message: vec![],
+            })),
+            child2: None,
+            nested_message: vec![],
+        }
+    }
+
+    fn encode_prost(msg: &prost_gen::Test) -> Vec<u8> {
+        use prost::Message;
+        let mut buf = Vec::with_capacity(msg.encoded_len());
+        msg.encode(&mut buf).unwrap();
+        buf
+    }
+
+    // Medium message: scalars + bytes + one child
+    #[test]
+    fn make_medium_protocrap() {
+        let mut msg = test::Test::default();
+        msg.set_x(42);
+        msg.set_y(0xDEADBEEF);
+        msg.set_z(b"Hello World! This is a test string with some content.");
+        println!("{:?}", msg.z());
+        let child = msg.child1_mut();
+        child.set_x(123);
+        child.set_y(456);
+        println!("{:?}", msg.z());
+        // std::mem::forget(msg);
+
+        let medium_data = encode_prost(&make_medium_prost());
+        {
+            let mut msg = test::Test::default();
+            msg.parse_flat::<32>(medium_data.as_slice());
+            msg.parse_flat::<32>(medium_data.as_slice());
+        }
     }
 }

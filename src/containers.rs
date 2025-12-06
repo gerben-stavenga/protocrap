@@ -38,7 +38,9 @@ impl RawVec {
             if new_cap == 0 {
                 (1, layout)
             } else {
-                (new_cap, layout)
+                let new_layout =
+                    Layout::from_size_align(layout.size() * new_cap, layout.align()).unwrap();
+                (new_cap, new_layout)
             }
         } else {
             // This can't overflow because we ensure self.cap <= isize::MAX.
@@ -173,7 +175,7 @@ impl<T> RepeatedField<T> {
     }
 
     pub fn slice(&self) -> &[T] {
-        if self.len == 0 {
+        if self.cap() == 0 {
             &[]
         } else {
             unsafe { std::slice::from_raw_parts(self.ptr(), self.len) }
@@ -181,7 +183,7 @@ impl<T> RepeatedField<T> {
     }
 
     pub fn slice_mut(&mut self) -> &mut [T] {
-        if self.len == 0 {
+        if self.cap() == 0 {
             &mut []
         } else {
             unsafe { std::slice::from_raw_parts_mut(self.ptr(), self.len) }
@@ -257,7 +259,7 @@ impl<T> RepeatedField<T> {
     }
 
     pub fn clear(&mut self) {
-        unsafe { std::ptr::drop_in_place(&mut *self) }
+        unsafe { std::ptr::drop_in_place(self.as_mut()) }
         self.len = 0
     }
 
