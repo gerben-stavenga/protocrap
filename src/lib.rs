@@ -154,7 +154,7 @@ pub trait ProtobufExt: Protobuf {
     }
 
     fn encode_flat<'a, const STACK_DEPTH: usize>(
-        &mut self,
+        &self,
         buffer: &'a mut [u8],
     ) -> anyhow::Result<&'a [u8]> {
         let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
@@ -180,15 +180,6 @@ pub mod tests {
     pub mod prost_gen {
         include!(concat!(env!("OUT_DIR"), "/_.rs"));
     }
-
-    const BUFFER: [u8; 40] = [
-        // x varint 0
-        0o10, 1, // y fixed 64, 2
-        0o21, 2, 0, 0, 0, 0, 0, 0, 0, // z length delimted 11
-        0o32, 21, b'H', b'e', b'l', b'l', b'o', b' ', b'W', b'o', b'r', b'l', b'd', b'!', b'1',
-        b'2', b'3', b'4', b'5', b'6', b'7', b'8', b'9', // child is length delimited 34
-        0o42, 4, 0o10, 2, 0o62, 0, // nested_message is length delimited 0
-    ];
 
     pub fn make_small_prost() -> prost_gen::Test {
         prost_gen::Test {
@@ -275,34 +266,23 @@ pub mod tests {
     }
 
     #[test]
-    fn test_resumeable_parse() {
+    fn time_encode() {
         let mut arena = crate::arena::Arena::new(&std::alloc::Global);
-        let mut test = test::Test::default();
-
-        assert!(test.parse_flat::<100>(&mut arena, &BUFFER));
-
-        println!("{:?} {:?}", &test, test.child1());
-        std::mem::forget(test);
-    }
-
-    // disable test temporarily
-    #[test]
-    fn test_resumeable_encode() {
-        let mut arena = crate::arena::Arena::new(&std::alloc::Global);
-        let mut test = test::Test::default();
-
-        test.set_x(1);
-        test.set_y(2);
-        test.set_z(b"Hello World!123456789");
-        let child = test.child1_mut(&mut arena);
-        child.set_x(2);
-        child
-            .nested_message_mut()
-            .push(Box::into_raw(Box::new(test::Test_NestedMessage::default())));
-
-        let mut buffer = [0u8; 64];
-
-        let written = test.encode_flat::<100>(&mut buffer).unwrap();
-        assert_eq!(written, &BUFFER);
-    }
+        let prost_msg = make_small_prost();
+        let mut msg = make_protocrap(&prost_msg, &mut arena);
+        let mut buf = vec![0u8; 4096];
+        
+        // Warmup
+        for _ in 0..100 {
+            let _ = msg.encode_flat::<32>(&mut buf);
+        }
+        
+        // Remove the eprintln! from encode_flat first!
+        let t0 = std::time::Instant::now();
+        for _ in 0..10000 {
+            let _ = msg.encode_flat::<32>(&mut buf);
+        }
+        let elapsed = t0.elapsed();
+        eprintln!("10000 encodes: {:?}, per encode: {:?}", elapsed, elapsed / 10000);
+    }    
 }

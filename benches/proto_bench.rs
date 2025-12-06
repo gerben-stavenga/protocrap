@@ -23,6 +23,7 @@ fn bench_decoding(
         let mut arena = crate::arena::Arena::new(&std::alloc::Global);
         let mut msg = Test::default();
         b.iter(|| {
+            msg.nested_message_mut().clear();
             msg.parse_flat::<32>(&mut arena, black_box(data));
             black_box(&msg as *const _);
         })
@@ -60,7 +61,7 @@ fn bench_encoding(
     prost_msg: &prost_gen::Test,
 ) {
     let mut arena = crate::arena::Arena::new(&std::alloc::Global);
-    let mut protocrap_msg = make_protocrap(prost_msg, &mut arena);
+    let protocrap_msg = make_protocrap(prost_msg, &mut arena);
 
     c.bench_function(&format!("{}/protocrap", bench_function_name), |b| {
         let mut buf = vec![0u8; 4096];
