@@ -179,7 +179,7 @@ impl<T> RepeatedField<T> {
         rf
     }
 
-    pub const fn from_static_slice(slice: &'static [T]) -> Self {
+    pub const fn from_static(slice: &'static [T]) -> Self {
         RepeatedField {
             buf: RawVec {
                 ptr: slice.as_ptr() as *mut u8,
@@ -461,8 +461,8 @@ impl String {
         String(RepeatedField::new())
     }
 
-    pub const fn from_static_slice(s: &'static str) -> Self {
-        String(RepeatedField::from_static_slice(s.as_bytes()))
+    pub const fn from_static(s: &'static str) -> Self {
+        String(RepeatedField::from_static(s.as_bytes()))
     }
 
     pub fn as_str(&self) -> &str {

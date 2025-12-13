@@ -56,7 +56,8 @@ impl Table {
         unsafe {
             let kind_array_ptr = (self as *const Table).add(1) as *const FieldKind;
             // TODO alignment for small tables
-            let entries_ptr = kind_array_ptr.add(1 + (self.mask as usize >> 3)) as *const TableEntry;
+            let entries_ptr =
+                kind_array_ptr.add(1 + (self.mask as usize >> 3)) as *const TableEntry;
             *entries_ptr.add(field_number as usize)
         }
     }
@@ -74,7 +75,11 @@ impl Table {
 }
 
 #[repr(C)]
-pub struct TableWithEntries<const NUM_MASKED: usize, const NUM_ENTRIES: usize, const NUM_AUX_ENTRIES: usize>(
+pub struct TableWithEntries<
+    const NUM_MASKED: usize,
+    const NUM_ENTRIES: usize,
+    const NUM_AUX_ENTRIES: usize,
+>(
     pub Table,
     pub [FieldKind; NUM_MASKED],
     pub [TableEntry; NUM_ENTRIES],
@@ -118,7 +123,6 @@ enum DecodeObject<'a> {
     SkipLengthDelimited,
     SkipGroup,
 }
-
 
 #[repr(C)]
 struct DecodeObjectState<'a> {
@@ -195,7 +199,12 @@ impl<'a> DecodeObjectState<'a> {
     #[inline(always)]
     fn set_bytes(&mut self, field_number: u32, slice: &[u8]) -> &'a mut Bytes {
         let entry = self.table.entry(field_number);
-        unsafe { std::mem::transmute(self.obj.set_bytes(entry.offset(), entry.has_bit_idx(), slice)) }
+        unsafe {
+            std::mem::transmute(
+                self.obj
+                    .set_bytes(entry.offset(), entry.has_bit_idx(), slice),
+            )
+        }
     }
 
     #[inline(always)]
@@ -292,7 +301,11 @@ fn skip_group<'a>(
                     } else {
                         let new_limit = cursor - end + len;
                         let delta_limit = limit - new_limit;
-                        stack.push(StackEntry { obj: std::ptr::null_mut(), table: std::ptr::null(), delta_limit_or_group_tag: delta_limit });
+                        stack.push(StackEntry {
+                            obj: std::ptr::null_mut(),
+                            table: std::ptr::null(),
+                            delta_limit_or_group_tag: delta_limit,
+                        });
                         return Some((cursor, new_limit, DecodeObject::SkipLengthDelimited));
                     }
                 }
@@ -306,7 +319,12 @@ fn skip_group<'a>(
                 }
                 4 => {
                     // end group
-                    let Some(StackEntry { obj, table, delta_limit_or_group_tag }) = stack.pop() else {
+                    let Some(StackEntry {
+                        obj,
+                        table,
+                        delta_limit_or_group_tag,
+                    }) = stack.pop()
+                    else {
                         return None;
                     };
                     if -delta_limit_or_group_tag != field_number as isize {
@@ -318,7 +336,7 @@ fn skip_group<'a>(
                             obj: unsafe { &mut *obj },
                             table: unsafe { &*table },
                         };
-                        return decode_loop(ctx, cursor, end, stack, arena); 
+                        return decode_loop(ctx, cursor, end, stack, arena);
                     }
                 }
                 5 => {
@@ -384,43 +402,43 @@ fn decode_loop<'a>(
                 match ctx.table.kind(tag) {
                     FieldKind::Varint64 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, cursor.read_varint()?);
                     }
                     FieldKind::Varint32 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, cursor.read_varint()? as u32);
                     }
                     FieldKind::Varint64Zigzag => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, zigzag_decode(cursor.read_varint()?));
                     }
                     FieldKind::Varint32Zigzag => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, zigzag_decode(cursor.read_varint()?) as i32);
                     }
                     FieldKind::Fixed64 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 1) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, cursor.read_unaligned::<u64>());
                     }
                     FieldKind::Fixed32 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 5) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.set(field_number, cursor.read_unaligned::<u32>());
                     }
                     FieldKind::Bytes => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 2) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         let len = cursor.read_size()?;
                         if cursor - limited_end + len <= SLOP_SIZE as isize {
@@ -429,13 +447,14 @@ fn decode_loop<'a>(
                             ctx.push_limit(len, cursor, end, stack)?;
                             let bytes = ctx.set_bytes(
                                 field_number,
-                                cursor.read_slice(SLOP_SIZE as isize - (cursor - end)));
+                                cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
+                            );
                             return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes)));
                         }
                     }
                     FieldKind::Message => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 2) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         let len = cursor.read_size()?;
                         limited_end = ctx.push_limit(len, cursor, end, stack)?;
@@ -443,50 +462,50 @@ fn decode_loop<'a>(
                     }
                     FieldKind::Group => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 3) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.push_group(field_number, stack)?;
                         (ctx.obj, ctx.table) = ctx.get_or_create_child_object(field_number, arena);
                     }
                     FieldKind::RepeatedVarint64 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, cursor.read_varint()?);
                     }
                     FieldKind::RepeatedVarint32 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, cursor.read_varint()? as u32);
                     }
                     FieldKind::RepeatedVarint64Zigzag => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, zigzag_decode(cursor.read_varint()?));
                     }
                     FieldKind::RepeatedVarint32Zigzag => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 0) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, zigzag_decode(cursor.read_varint()?) as i32);
                     }
                     FieldKind::RepeatedFixed64 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 1) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, cursor.read_unaligned::<u64>());
                     }
                     FieldKind::RepeatedFixed32 => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 5) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.add(field_number, cursor.read_unaligned::<u32>());
                     }
                     FieldKind::RepeatedBytes => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 2) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         let len = cursor.read_size()?;
                         if cursor - limited_end + len <= SLOP_SIZE as isize {
@@ -502,7 +521,7 @@ fn decode_loop<'a>(
                     }
                     FieldKind::RepeatedMessage => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 2) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         let len = cursor.read_size()?;
                         limited_end = ctx.push_limit(len, cursor, end, stack)?;
@@ -510,7 +529,7 @@ fn decode_loop<'a>(
                     }
                     FieldKind::RepeatedGroup => {
                         let Some(field_number) = cursor.parse_one_byte_tag(tag, 3) else {
-                          break 'unknown;
+                            break 'unknown;
                         };
                         ctx.push_group(field_number, stack)?;
                         (ctx.obj, ctx.table) = ctx.add_child_object(field_number, arena);
@@ -525,7 +544,7 @@ fn decode_loop<'a>(
             if tag & 0xFF == 0 {
                 // 0 byte can used to terminate parsing, but only if stack is empty
                 if stack.is_empty() {
-                    cursor += 1;  // consume the 0 byte
+                    cursor += 1; // consume the 0 byte
                     return Some((cursor, ctx.limit, DecodeObject::None));
                 }
                 return None;
@@ -627,9 +646,7 @@ impl<'a> ResumeableState<'a> {
             DecodeObject::SkipLengthDelimited => {
                 skip_length_delimited(self.limit, cursor, end, stack, arena)?
             }
-            DecodeObject::SkipGroup => {
-                skip_group(self.limit, cursor, end, stack, arena)?
-            }
+            DecodeObject::SkipGroup => skip_group(self.limit, cursor, end, stack, arena)?,
             DecodeObject::None => unreachable!(),
         };
         self.limit = new_limit;
@@ -676,7 +693,9 @@ impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
         let Some(state) = state.go_decode(&patch_buffer[..SLOP_SIZE], &mut stack, arena) else {
             return false;
         };
-        state.overrun == 0 && matches!(state.object, DecodeObject::Message(_, _)) && stack.is_empty()
+        state.overrun == 0
+            && matches!(state.object, DecodeObject::Message(_, _))
+            && stack.is_empty()
     }
 
     fn resume_impl(&mut self, buf: &[u8], arena: &mut crate::arena::Arena) -> Option<()> {

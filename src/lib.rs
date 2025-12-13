@@ -8,8 +8,8 @@ pub mod wire;
 pub mod utils;
 
 pub mod decoding;
-pub mod encoding;
 pub mod descriptor;
+pub mod encoding;
 
 // #[cfg(feature = "serde_support")]
 // pub mod serde;

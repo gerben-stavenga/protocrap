@@ -299,6 +299,45 @@ pub struct $name$ {
 impl $name$ {)rs");
     {
         auto _indent = printer->WithIndent();
+        printer->Emit(
+            {{"N", (number_of_has_bits + 31) / 32}},
+            R"rs(pub const fn from_static(has_bits: [u32; $N$],)rs");
+        for (int i = 0; i < descriptor->field_count(); ++i) {
+            const gp::FieldDescriptor* field = descriptor->field(i);
+            if (field->label() == gp::FieldDescriptor::LABEL_REPEATED) {
+                printer->Emit(
+                    {{"type", rust_field_member_type(field)},
+                    {"name", rust_field_name(field)}},
+                    "\n$name$: &'static [$type$],");
+            } else {
+                printer->Emit(
+                    {{"type", rust_field_member_type(field)},
+                    {"name", rust_field_name(field)}},
+                    "\n$name$: $type$,");
+            }
+        }
+        printer->Emit(R"rs() -> Self {
+)rs");
+        {
+            auto _indent2 = printer->WithIndent();
+            printer->Emit(R"rs(
+  Self {
+    has_bits,
+)rs");
+            {
+                auto _indent3 = printer->WithIndent();
+                for (int i = 0; i < descriptor->field_count(); ++i) {
+                    const gp::FieldDescriptor* field = descriptor->field(i);
+                    printer->Emit(
+                        {{"name", rust_field_name(field)}},
+                        "\n$name$,");
+                }
+            }
+            printer->Emit(R"rs(
+  }
+})rs");
+        }
+                
         for (int i = 0; i < descriptor->field_count(); ++i) {
             const gp::FieldDescriptor* field = descriptor->field(i);
             if (field->label() == gp::FieldDescriptor::LABEL_REPEATED) {
@@ -568,101 +607,144 @@ std::string descriptor_name(const gp::Message& msg) {
     return "test";
 }
 
+std::string escape_rust_string(const std::string& s) {
+    std::string result;
+    for (char c : s) {
+        switch (c) {
+            case '"': result += "\\\""; break;
+            case '\\': result += "\\\\"; break;
+            case '\n': result += "\\n"; break;
+            case '\r': result += "\\r"; break;
+            case '\t': result += "\\t"; break;
+            case '\0': result += "\\0"; break;
+            default:
+                if (c < 32 || c > 126) {
+                    char buf[8];
+                    snprintf(buf, sizeof(buf), "\\x%02x", (unsigned char)c);
+                    result += buf;
+                } else {
+                    result += c;
+                }
+        }
+    }
+    return result;
+}
+
+std::string float_literal(float f) {
+    if (std::isnan(f)) return "f32::NAN";
+    if (std::isinf(f)) return f > 0 ? "f32::INFINITY" : "f32::NEG_INFINITY";
+    std::ostringstream oss;
+    oss << std::setprecision(9) << f << "f32";
+    return oss.str();
+}
+
+std::string double_literal(double d) {
+    if (std::isnan(d)) return "f64::NAN";
+    if (std::isinf(d)) return d > 0 ? "f64::INFINITY" : "f64::NEG_INFINITY";
+    std::ostringstream oss;
+    oss << std::setprecision(17) << d << "f64";
+    return oss.str();
+}
+
 std::string value(const gp::Message& msg, const gp::FieldDescriptor* field, int index) {
     auto refl = msg.GetReflection();
     auto has_field = field->is_repeated() || refl->HasField(msg, field);
+    
     switch (field->type()) {
         case gp::FieldDescriptor::TYPE_INT32:
         case gp::FieldDescriptor::TYPE_SINT32:
-        case gp::FieldDescriptor::TYPE_SFIXED32:
+        case gp::FieldDescriptor::TYPE_SFIXED32: {
             if (field->is_repeated()) {
                 return std::to_string(refl->GetRepeatedInt32(msg, field, index));
             }
-            if (!has_field) {
-                return "0";
-            }
-            return std::to_string(refl->GetInt32(msg, field));
+            return has_field ? std::to_string(refl->GetInt32(msg, field)) : "0";
+        }
+        
         case gp::FieldDescriptor::TYPE_INT64:
         case gp::FieldDescriptor::TYPE_SINT64:
-        case gp::FieldDescriptor::TYPE_SFIXED64:
+        case gp::FieldDescriptor::TYPE_SFIXED64: {
             if (field->is_repeated()) {
-                return std::to_string(refl->GetRepeatedInt64(msg, field, index));
+                return std::to_string(refl->GetRepeatedInt64(msg, field, index)) + "i64";
             }
-            if (!has_field) {
-                return "0";
-            }
-            return std::to_string(refl->GetInt64(msg, field));
+            return has_field ? std::to_string(refl->GetInt64(msg, field)) + "i64" : "0i64";
+        }
+        
         case gp::FieldDescriptor::TYPE_UINT32:
-        case gp::FieldDescriptor::TYPE_FIXED32:
+        case gp::FieldDescriptor::TYPE_FIXED32: {
             if (field->is_repeated()) {
-                return std::to_string(refl->GetRepeatedUInt32(msg, field, index));
+                return std::to_string(refl->GetRepeatedUInt32(msg, field, index)) + "u32";
             }
-            if (!has_field) {
-                return "0";
-            }
-            return std::to_string(refl->GetUInt32(msg, field));
+            return has_field ? std::to_string(refl->GetUInt32(msg, field)) + "u32" : "0u32";
+        }
+        
         case gp::FieldDescriptor::TYPE_UINT64:
-        case gp::FieldDescriptor::TYPE_FIXED64:
+        case gp::FieldDescriptor::TYPE_FIXED64: {
             if (field->is_repeated()) {
-                return std::to_string(refl->GetRepeatedUInt64(msg, field, index));
+                return std::to_string(refl->GetRepeatedUInt64(msg, field, index)) + "u64";
             }
-            if (!has_field) {
-                return "0";
-            }
-            return std::to_string(refl->GetUInt64(msg, field));
-        case gp::FieldDescriptor::TYPE_BOOL:
+            return has_field ? std::to_string(refl->GetUInt64(msg, field)) + "u64" : "0u64";
+        }
+        
+        case gp::FieldDescriptor::TYPE_BOOL: {
             if (field->is_repeated()) {
                 return refl->GetRepeatedBool(msg, field, index) ? "true" : "false";
             }
-            if (!has_field) {
-                return "false";
-            }
-            return refl->GetBool(msg, field) ? "true" : "false";
-        case gp::FieldDescriptor::TYPE_FLOAT:
+            return has_field ? (refl->GetBool(msg, field) ? "true" : "false") : "false";
+        }
+        
+        case gp::FieldDescriptor::TYPE_FLOAT: {
             if (field->is_repeated()) {
-                return std::to_string(refl->GetRepeatedFloat(msg, field, index));
+                return float_literal(refl->GetRepeatedFloat(msg, field, index));
             }
-            if (!has_field) {
-                return "0.0";
-            }
-            return std::to_string(refl->GetFloat(msg, field));
-        case gp::FieldDescriptor::TYPE_DOUBLE:
+            return has_field ? float_literal(refl->GetFloat(msg, field)) : "0.0f32";
+        }
+        
+        case gp::FieldDescriptor::TYPE_DOUBLE: {
             if (field->is_repeated()) {
-                return std::to_string(refl->GetRepeatedDouble(msg, field, index));
+                return double_literal(refl->GetRepeatedDouble(msg, field, index));
             }
-            if (!has_field) {
-                return "0.0";
-            }
-            return std::to_string(refl->GetDouble(msg, field));
-        case gp::FieldDescriptor::TYPE_STRING:
+            return has_field ? double_literal(refl->GetDouble(msg, field)) : "0.0f64";
+        }
+        
+        case gp::FieldDescriptor::TYPE_STRING: {
             if (field->is_repeated()) {
-                return "protocrap::containers::String::from_static_slice(\"" + refl->GetRepeatedString(msg, field, index) + "\")";
+                return "protocrap::containers::String::from_static(\"" + 
+                    escape_rust_string(refl->GetRepeatedString(msg, field, index)) + "\")";
             }
             if (!has_field) {
                 return "protocrap::containers::String::new()";
             }
-            return "protocrap::containers::String::from_static_slice(\"" + refl->GetString(msg, field) + "\")";
-        case gp::FieldDescriptor::TYPE_BYTES:
+            return "protocrap::containers::String::from_static(\"" + 
+                escape_rust_string(refl->GetString(msg, field)) + "\")";
+        }
+        
+        case gp::FieldDescriptor::TYPE_BYTES: {
             if (field->is_repeated()) {
-                return "protocrap::containers::Bytes::from_static_slice(\"" + refl->GetRepeatedString(msg, field, index) + "\")";
+                return "protocrap::containers::Bytes::from_static(b\"" + 
+                    escape_rust_string(refl->GetRepeatedString(msg, field, index)) + "\")";
             }
             if (!has_field) {
                 return "protocrap::containers::Bytes::new()";
             }
-            return "protocrap::containers::Bytes::from_static_slice(\"" + refl->GetString(msg, field) + "\")";
+            return "protocrap::containers::Bytes::from_static(b\"" + 
+                escape_rust_string(refl->GetString(msg, field)) + "\")";
+        }
+        
         case gp::FieldDescriptor::TYPE_ENUM: {
             if (field->is_repeated()) {
-                auto enum_value = refl->GetRepeatedEnum(msg, field, index);
-                return std::to_string(enum_value->number());
+                return std::to_string(refl->GetRepeatedEnum(msg, field, index)->number());
             }
-            return std::to_string(refl->GetEnum(msg, field)->number());
+            return has_field ? std::to_string(refl->GetEnum(msg, field)->number()) : "0";
+        }
+        
         case gp::FieldDescriptor::TYPE_MESSAGE:
         case gp::FieldDescriptor::TYPE_GROUP:
-            std::cerr << "Error: Unsupported field type" << std::endl;
+            std::cerr << "Error: Message fields should be handled separately\n";
             std::terminate();
-        }
     }
-}   
+    __builtin_unreachable();
+}
+
 
 void generate_descriptor_data(
     const gp::Message& msg,
@@ -709,7 +791,7 @@ void generate_descriptor_data(
                 {
                     {"field_name", rust_field_name(field)},
                 },
-                "  $field_name$: protocrap::containers::RepeatedField::from_static_slice(&[\n");
+                "  $field_name$: protocrap::containers::RepeatedField::from_static(&[\n");
             if (field->message_type()) {
                 int num_repeated = refl->FieldSize(msg, field);
                 for (int j = 0; j < num_repeated; ++j) {
@@ -791,6 +873,11 @@ use protocrap::Protobuf;
 
         for (int i = 0; i < file->message_type_count(); ++i) {
             generate_code(file->message_type(i), &printer);
+        }
+
+        if (file->name() != "descriptor.proto") {
+            printer.Emit(
+                "use protocrap::descriptor::*;\n");
         }
 
         gp::FileDescriptorProto file_proto;

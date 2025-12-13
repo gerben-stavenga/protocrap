@@ -1,4 +1,5 @@
 #![feature(allocator_api)]
+#![cfg(feature = "bench")]
 
 use criterion::{
     BenchmarkGroup, Criterion, Throughput, black_box, criterion_group, criterion_main,
@@ -8,8 +9,8 @@ use prost::Message;
 
 // Your crate
 use protocrap::{
-    ProtobufExt, arena, tests::encode_prost, tests::make_large_prost, tests::make_medium_prost,
-    tests::make_protocrap, tests::make_small_prost, tests::prost_gen, tests::test::Test,
+    ProtobufExt, arena,
+    tests::{make_large_prost, make_medium_prost, make_small_prost, make_protocrap, prost_gen, encode_prost}
 };
 
 fn bench_decoding(
