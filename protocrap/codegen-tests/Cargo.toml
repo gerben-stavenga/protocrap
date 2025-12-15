@@ -1,0 +1,18 @@
+cargo-features = ["edition2024"]
+
+[package]
+name = "codegen-tests"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+protocrap = { path = ".." }
+prost = { version = "0.14.1" }
+serde = { version = "1.0.228" }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[build-dependencies]
+prost-build = "0.14.1"
+protocrap-codegen = { path = "../../protocrap-codegen" }

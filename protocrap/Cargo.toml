@@ -1,0 +1,21 @@
+cargo-features = ["edition2024"]
+
+[package]
+name = "protocrap"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+futures = "0.3.31"
+serde = { version = "1.0.228" }
+
+[build-dependencies]
+protocrap-codegen = { path = "../protocrap-codegen" }
+
+[profile.dev]
+panic = 'abort'
+
+[profile.release]
+panic = 'abort'
+

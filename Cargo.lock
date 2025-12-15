@@ -118,6 +118,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1d728cc89cf3aee9ff92b05e62b19ee65a02b5702cff7d5a377e32c6ae29d8d"
 
 [[package]]
+name = "codegen-tests"
+version = "0.1.0"
+dependencies = [
+ "criterion",
+ "prost",
+ "prost-build",
+ "protocrap",
+ "protocrap-codegen",
+ "serde",
+]
+
+[[package]]
 name = "criterion"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -214,9 +226,9 @@ checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
 name = "fixedbitset"
-version = "0.4.2"
+version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
+checksum = "1d674e81391d1e1ab681a28d99df07927c6d4aa5b027d7da16ba32d1d21ecd99"
 
 [[package]]
 name = "futures"
@@ -456,9 +468,9 @@ checksum = "d6790f58c7ff633d8771f42965289203411a5e5c68388703c06e14f24770b41e"
 
 [[package]]
 name = "petgraph"
-version = "0.6.5"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4c5cc86750666a3ed20bdaf5ca2a0344f9c67674cae0515bec2da16fbaa47db"
+checksum = "3672b37090dbd86368a4145bc067582552b29c27377cad4e0a306c97f9bd7772"
 dependencies = [
  "fixedbitset",
  "indexmap",
@@ -590,11 +602,19 @@ name = "protocrap"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "criterion",
  "futures",
- "prost",
- "prost-build",
  "protocrap-codegen",
+ "serde",
+]
+
+[[package]]
+name = "protocrap-benchmarks"
+version = "0.1.0"
+dependencies = [
+ "codegen-tests",
+ "criterion",
+ "prost",
+ "protocrap",
  "serde",
 ]
 
@@ -602,6 +622,7 @@ dependencies = [
 name = "protocrap-codegen"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "prettyplease",
  "proc-macro2",
  "prost",

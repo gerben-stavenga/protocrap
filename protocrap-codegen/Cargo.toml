@@ -1,0 +1,20 @@
+[package]
+name = "protocrap-codegen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.100"
+prost = "0.14.1"
+prost-types = "0.14.1"
+quote = "1.0"
+syn = { version = "2.0", features = ["full", "parsing"] }
+proc-macro2 = "1.0"
+prettyplease = "0.2"
+prost-reflect = "0.16.3"
+
+[lib]
+name = "protocrap_codegen"
+
+[[bin]]
+name = "protocrap-codegen"

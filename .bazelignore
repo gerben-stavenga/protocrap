@@ -1,5 +1,0 @@
-bazel-bin
-bazel-out
-bazel-protocrap
-bazel-rust_protobuf
-bazel-testlogs
