@@ -325,6 +325,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedVarint64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -338,6 +341,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedVarint32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -351,6 +357,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedVarint64Zigzag => {
                 let slice = obj_state.get_slice::<i64>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -364,6 +373,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedVarint32Zigzag => {
                 let slice = obj_state.get_slice::<i32>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -377,6 +389,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedFixed64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -390,6 +405,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedFixed32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 write_repeated(
                     &mut obj_state,
                     &mut cursor,
@@ -403,6 +421,9 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedBytes => {
                 let slice = obj_state.get_slice::<Bytes>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -428,6 +449,7 @@ fn encode_loop<'a>(
             FieldKind::RepeatedMessage => {
                 let (offset, child_table) = aux_entry(offset, obj_state.table);
                 let slice = obj_state.get_slice::<*const Object>(offset);
+                println!("rep msg len {}", slice.len());
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -443,6 +465,7 @@ fn encode_loop<'a>(
             FieldKind::RepeatedGroup => {
                 let (offset, child_table) = aux_entry(offset, obj_state.table);
                 let slice = obj_state.get_slice::<*const Object>(offset);
+                println!("rep group len {}", slice.len());
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
