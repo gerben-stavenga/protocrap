@@ -173,6 +173,7 @@ pub fn generate_decoding_table(
                 protocrap::decoding::Table {
                     mask: #mask,
                     size: core::mem::size_of::<ProtoType>() as u16,
+                    descriptor: &ProtoType::descriptor_proto(),
                 },
                 [#(#masked_entries,)*],
                 [#(#table_entries,)*],

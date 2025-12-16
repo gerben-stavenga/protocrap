@@ -18,15 +18,11 @@ include!(concat!(env!("OUT_DIR"), "/descriptor.pc.rs"));
 #[cfg(feature = "serde_support")]
 pub mod serde;
 
-pub trait Protobuf {
+pub trait Protobuf: Default {
     fn encoding_table() -> &'static [encoding::TableEntry];
     fn decoding_table() -> &'static decoding::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
-        unsafe {
-            *(Self::encoding_table().as_ptr()
-                as *const &'static google::protobuf::DescriptorProto::ProtoType)
-                .sub(1)
-        }
+        Self::decoding_table().descriptor
     }
 
     fn as_object(&self) -> &base::Object {

@@ -12,15 +12,15 @@ use crate::wire::{FieldKind, ReadCursor, SLOP_SIZE, zigzag_decode};
 pub struct TableEntry(pub u16);
 
 impl TableEntry {
-    fn has_bit_idx(&self) -> u32 {
+    pub(crate) fn has_bit_idx(&self) -> u32 {
         (self.0 >> 10) as u32
     }
 
-    fn offset(&self) -> u32 {
+    pub(crate) fn offset(&self) -> u32 {
         (self.0 as u32) & 0x3FF
     }
 
-    fn aux_offset(&self) -> u32 {
+    pub(crate) fn aux_offset(&self) -> u32 {
         self.0 as u32
     }
 }
@@ -39,6 +39,7 @@ unsafe impl Sync for AuxTableEntry {}
 pub struct Table {
     pub mask: u16,
     pub size: u16,
+    pub descriptor: &'static crate::google::protobuf::DescriptorProto::ProtoType,
 }
 
 impl Table {
@@ -52,7 +53,7 @@ impl Table {
     }
 
     #[inline(always)]
-    fn entry(&self, field_number: u32) -> TableEntry {
+    pub(crate) fn entry(&self, field_number: u32) -> TableEntry {
         unsafe {
             let kind_array_ptr = (self as *const Table).add(1) as *const FieldKind;
             // TODO alignment for small tables
@@ -63,7 +64,7 @@ impl Table {
     }
 
     #[inline(always)]
-    fn aux_entry(&self, field_number: u32) -> &AuxTableEntry {
+    pub(crate) fn aux_entry(&self, field_number: u32) -> &AuxTableEntry {
         let entry = self.entry(field_number);
         let offset = entry.aux_offset();
         unsafe {

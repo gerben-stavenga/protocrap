@@ -113,7 +113,19 @@ fn test_serde_serialization() {
     let mut protocrap_msg = Test::ProtoType::default();
     assert!(protocrap_msg.decode_flat::<32>(&mut arena, &data));
 
+    let mut buffer = vec![0u8; data.len()];
+    assert_eq!(protocrap_msg.encode_flat::<100>(&mut buffer).expect("msg should encode").len(), data.len());
     let serialized = serde_json::to_string(&protocrap::serde::SerdeProtobuf::new(&protocrap_msg))
         .expect("should serialize");
-    println!("Serialized message: {}", serialized);
+
+    let deserialized = {
+        let mut deserializer = serde_json::Deserializer::from_str(&serialized);
+        let seed = protocrap::serde::SerdeDeserialize::<Test::ProtoType>::new(&mut arena);
+        use serde::de::DeserializeSeed;
+        seed.deserialize(&mut deserializer).expect("should deserialize")
+    };
+
+    let mut buffer2 = vec![0u8; data.len()];
+    assert_eq!(deserialized.encode_flat::<100>(&mut buffer2).expect("msg should encode").len(), data.len());
+    assert_eq!(buffer2, buffer);
 }

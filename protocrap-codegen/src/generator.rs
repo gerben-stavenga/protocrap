@@ -245,7 +245,7 @@ fn generate_message_impl(
                 }
             }
 
-            const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
+            pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                 &#file_descriptor_path
             }
 

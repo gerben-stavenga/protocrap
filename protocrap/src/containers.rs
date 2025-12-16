@@ -449,6 +449,10 @@ impl String {
         String(RepeatedField::new())
     }
 
+    pub fn from_str(s: &str, arena: &mut crate::arena::Arena) -> Self {
+        String(RepeatedField::from_slice(s.as_bytes(), arena))
+    }
+
     pub const fn from_static(s: &'static str) -> Self {
         String(RepeatedField::from_static(s.as_bytes()))
     }
