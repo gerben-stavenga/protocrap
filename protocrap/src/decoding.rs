@@ -27,7 +27,6 @@ impl TableEntry {
     }
 
     pub(crate) fn offset(&self) -> u32 {
-        println!("Self {} Offset: {}", self.0, self.0 >> 16);
         self.0 >> 16
     }
 
@@ -409,7 +408,7 @@ fn decode_loop<'a>(
         'parse_loop: while cursor < limited_end {
             let tag = cursor.read_tag()?;
             let field_number = tag >> 3;
-            if true {
+            if false {
                 let descriptor = ctx.table.descriptor;
                 let field = descriptor
                     .field()
