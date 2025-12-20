@@ -264,6 +264,16 @@ fn encode_loop<'a>(
                     cursor.write_tag(tag);
                 }
             }
+            FieldKind::Bool => {
+                if obj_state.has_bit(has_bit) {
+                    if cursor <= begin {
+                        break;
+                    }
+                    let val: bool = obj_state.get::<bool>(offset);
+                    cursor.write_varint(if val { 1 } else { 0 });
+                    cursor.write_tag(tag);
+                }
+            }
             FieldKind::Fixed64 => {
                 if obj_state.has_bit(has_bit) {
                     if cursor <= begin {
@@ -387,6 +397,22 @@ fn encode_loop<'a>(
                     },
                 );
             }
+            FieldKind::RepeatedBool => {
+                let slice = obj_state.get_slice::<bool>(offset);
+                if slice.is_empty() {
+                    continue;
+                }
+                write_repeated(
+                    &mut obj_state,
+                    &mut cursor,
+                    begin,
+                    tag,
+                    slice,
+                    |cursor, &val| {
+                        cursor.write_varint(if val { 1 } else { 0 });
+                    },
+                );
+            }
             FieldKind::RepeatedFixed64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
                 if slice.is_empty() {
@@ -449,7 +475,6 @@ fn encode_loop<'a>(
             FieldKind::RepeatedMessage => {
                 let (offset, child_table) = aux_entry(offset, obj_state.table);
                 let slice = obj_state.get_slice::<*const Object>(offset);
-                println!("rep msg len {}", slice.len());
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -465,7 +490,6 @@ fn encode_loop<'a>(
             FieldKind::RepeatedGroup => {
                 let (offset, child_table) = aux_entry(offset, obj_state.table);
                 let slice = obj_state.get_slice::<*const Object>(offset);
-                println!("rep group len {}", slice.len());
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
