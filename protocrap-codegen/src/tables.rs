@@ -173,7 +173,7 @@ fn field_kind_tokens(field: &&FieldDescriptorProto) -> TokenStream {
         Type::TYPE_SINT64 => "Varint64Zigzag",
         Type::TYPE_FIXED32 | Type::TYPE_SFIXED32 | Type::TYPE_FLOAT => "Fixed32",
         Type::TYPE_FIXED64 | Type::TYPE_SFIXED64 | Type::TYPE_DOUBLE => "Fixed64",
-        Type::TYPE_BOOL => "Varint32",
+        Type::TYPE_BOOL => "Bool",
         Type::TYPE_STRING | Type::TYPE_BYTES => "Bytes",
         Type::TYPE_MESSAGE => "Message",
         Type::TYPE_GROUP => "Group",

@@ -453,7 +453,7 @@ fn decode_loop<'a>(
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            let val = cursor.read_varint()? != 0;;
+                            let val = cursor.read_varint()? != 0;
                             ctx.set(entry, val);
                         }
                         FieldKind::Fixed64 => {
