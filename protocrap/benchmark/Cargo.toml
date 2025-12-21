@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 protocrap = { path = ".." }
-codegen-tests = { path = "../codegen-tests" }
+codegen-tests = { path = "../codegen/codegen-tests" }
 prost = { version = "0.14.1" }
 serde = { version = "1.0.228" }
 
