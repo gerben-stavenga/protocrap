@@ -1,14 +1,9 @@
-// Conditionally declare the external crate
-#[cfg(feature = "bootcrap")]
-pub(crate) extern crate protocrap_stable;
+// protocrap-codegen/src/lib.rs
+#![feature(allocator_api)]
 use std::path::Path;
 
 use anyhow::Result;
-#[cfg(not(feature = "bootcrap"))]
-pub(crate) use crate as protocrap;
-#[cfg(feature = "bootcrap")]
-pub(crate) use protocrap_stable as protocrap;
-
+use protocrap_stable as protocrap;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
 use protocrap::ProtobufExt;
 

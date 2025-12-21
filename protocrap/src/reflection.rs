@@ -69,6 +69,7 @@ pub fn needs_has_bit(field: &FieldDescriptorProto) -> bool {
     return !is_repeated(field) && !is_message(field);
 }
 
+/* 
 
 struct DescriptorPool {
     pub arena: Arena<'static>,
@@ -100,8 +101,6 @@ impl DescriptorPool {
 
 pub struct DynamicMessage<'pool, 'msg> {
     pub object: &'msg mut Object,
-    pub encoding_table: &'pool [crate::encoding::TableEntry],
-    pub decoding_table: &'pool crate::decoding::Table,
     pub descriptor: &'pool FileDescriptorProto,
 }
 
@@ -253,3 +252,5 @@ pub enum Value<'pool, 'msg> {
     RepeatedBytes(&'msg [Bytes]),
     RepeatedMessage(DynamicMessageArray<'pool, 'msg>),
 }
+
+*/

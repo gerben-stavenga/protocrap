@@ -73,70 +73,63 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
+                2usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 1usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 1usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 10u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, file),
-                        child_table: &crate::google::protobuf::FileDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                2usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 1usize as u16,
                     num_decode_entries: 2usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 2usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, file) as u32,
-                        child_table: &crate::google::protobuf::FileDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FileDescriptorProto::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod FileDescriptorProto {
@@ -397,19 +390,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 13usize,
+                15usize,
                 6usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -445,12 +435,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 34u32,
                     },
@@ -458,12 +450,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 42u32,
                     },
@@ -471,12 +465,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 50u32,
                     },
@@ -484,12 +480,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 3usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 58u32,
                     },
@@ -497,12 +495,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 4usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 66u32,
                     },
@@ -510,12 +510,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 5usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 6usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
                             )) as u16,
                         encoded_tag: 74u32,
                     },
@@ -532,49 +534,13 @@ pub mod google {
                         encoded_tag: 112u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, message_type),
-                        child_table: &crate::google::protobuf::DescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, enum_type),
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, service),
-                        child_table: &crate::google::protobuf::ServiceDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, extension),
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::FileOptions::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, source_code_info),
-                        child_table: &crate::google::protobuf::SourceCodeInfo::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                15usize,
-                6usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 13usize as u16,
                     num_decode_entries: 15usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -595,55 +561,85 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 3usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 4usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 15usize, 6usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            6usize >, aux_entries
                         )
                             + 5usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                6usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedVarint32,
@@ -667,40 +663,39 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, edition),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, message_type) as u32,
-                        child_table: &crate::google::protobuf::DescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::DescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, enum_type) as u32,
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, service) as u32,
-                        child_table: &crate::google::protobuf::ServiceDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::ServiceDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, extension) as u32,
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FieldDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::FileOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FileOptions::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, source_code_info)
                             as u32,
-                        child_table: &crate::google::protobuf::SourceCodeInfo::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::SourceCodeInfo::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod DescriptorProto {
@@ -789,19 +784,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     3usize,
+                    4usize,
                     1usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -818,34 +810,25 @@ pub mod google {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Message,
                             offset: (core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 1usize >, 2
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                >, aux_entries
                             )
                                 + 0usize
-                                    * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                                 - core::mem::offset_of!(
-                                    protocrap::encoding::TableWithEntries < 3usize, 1usize >, 1
+                                    protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                    >, table
                                 )) as u16,
                             encoded_tag: 26u32,
                         },
                     ],
-                    [
-                        protocrap::encoding::AuxTableEntry {
-                            offset: core::mem::offset_of!(ProtoType, options),
-                            child_table: &crate::google::protobuf::ExtensionRangeOptions::ENCODING_TABLE
-                                .1,
-                        },
-                    ],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    4usize,
-                    1usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 3usize as u16,
                         num_decode_entries: 4usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
@@ -861,20 +844,25 @@ pub mod google {
                             protocrap::wire::FieldKind::Message,
                             0,
                             core::mem::offset_of!(
-                                protocrap::decoding::TableWithEntries < 4usize, 1usize >, 2
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                >, aux_entries
                             )
                                 + 0usize
-                                    * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                                - core::mem::offset_of!(
+                                    protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                    >, table
+                                ),
                         ),
                     ],
-                    [
-                        protocrap::decoding::AuxTableEntry {
+                    aux_entries: [
+                        protocrap::tables::AuxTableEntry {
                             offset: core::mem::offset_of!(ProtoType, options) as u32,
-                            child_table: &crate::google::protobuf::ExtensionRangeOptions::DECODING_TABLE
-                                .0,
+                            child_table: &crate::google::protobuf::ExtensionRangeOptions::TABLE
+                                .table,
                         },
                     ],
-                );
+                };
             }
             #[allow(non_snake_case)]
             pub mod ReservedRange {
@@ -918,19 +906,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
+                    3usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -944,18 +929,13 @@ pub mod google {
                             encoded_tag: 16u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    3usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 2usize as u16,
                         num_decode_entries: 3usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
@@ -968,8 +948,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, end),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -1188,19 +1168,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 10usize,
+                11usize,
                 8usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -1211,12 +1188,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -1224,12 +1203,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 50u32,
                     },
@@ -1237,12 +1218,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 26u32,
                     },
@@ -1250,12 +1233,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 3usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 34u32,
                     },
@@ -1263,12 +1248,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 4usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 42u32,
                     },
@@ -1276,12 +1263,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 5usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 66u32,
                     },
@@ -1289,12 +1278,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 6usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 58u32,
                     },
@@ -1302,12 +1293,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 10usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 7usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 10usize, 8usize >, 1
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
                             )) as u16,
                         encoded_tag: 74u32,
                     },
@@ -1318,59 +1311,13 @@ pub mod google {
                         encoded_tag: 82u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, field),
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, extension),
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, nested_type),
-                        child_table: &crate::google::protobuf::DescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, enum_type),
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, extension_range),
-                        child_table: &crate::google::protobuf::DescriptorProto::ExtensionRange::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, oneof_decl),
-                        child_table: &crate::google::protobuf::OneofDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::MessageOptions::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, reserved_range),
-                        child_table: &crate::google::protobuf::DescriptorProto::ReservedRange::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                11usize,
-                8usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 10usize as u16,
                     num_decode_entries: 11usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -1381,73 +1328,113 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 3usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 4usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 6usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 5usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 11usize, 8usize >, 2
+                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            8usize >, aux_entries
                         )
                             + 7usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                8usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedBytes,
@@ -1455,49 +1442,49 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, reserved_name),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, field) as u32,
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FieldDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, extension) as u32,
-                        child_table: &crate::google::protobuf::FieldDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FieldDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, nested_type) as u32,
-                        child_table: &crate::google::protobuf::DescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::DescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, enum_type) as u32,
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, extension_range) as u32,
-                        child_table: &crate::google::protobuf::DescriptorProto::ExtensionRange::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::DescriptorProto::ExtensionRange::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, oneof_decl) as u32,
-                        child_table: &crate::google::protobuf::OneofDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::OneofDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::MessageOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::MessageOptions::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, reserved_range) as u32,
-                        child_table: &crate::google::protobuf::DescriptorProto::ReservedRange::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::DescriptorProto::ReservedRange::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod ExtensionRangeOptions {
@@ -1588,19 +1575,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
+                    7usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -1632,18 +1616,13 @@ pub mod google {
                             encoded_tag: 48u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    7usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 5usize as u16,
                         num_decode_entries: 7usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
@@ -1672,8 +1651,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, repeated),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(i32)]
             #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1806,29 +1785,28 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
+                1000usize,
                 3usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
@@ -1836,12 +1814,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -1849,12 +1829,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 402u32,
                     },
@@ -1865,45 +1847,28 @@ pub mod google {
                         encoded_tag: 24u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, declaration),
-                        child_table: &crate::google::protobuf::ExtensionRangeOptions::Declaration::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                3usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 4usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Varint32,
@@ -1960,11 +1925,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -2918,32 +2887,35 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, declaration) as u32,
-                        child_table: &crate::google::protobuf::ExtensionRangeOptions::Declaration::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::ExtensionRangeOptions::Declaration::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod FieldDescriptorProto {
@@ -3211,19 +3183,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 11usize,
+                18usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -3282,12 +3251,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 11usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 11usize, 18usize,
+                            1usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 11usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 11usize, 18usize,
+                                1usize >, table
                             )) as u16,
                         encoded_tag: 66u32,
                     },
@@ -3298,24 +3269,13 @@ pub mod google {
                         encoded_tag: 136u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::FieldOptions::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                18usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 11usize as u16,
                     num_decode_entries: 18usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -3356,10 +3316,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 18usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 11usize, 18usize,
+                            1usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 11usize, 18usize,
+                                1usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Varint32,
@@ -3383,14 +3348,13 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, proto3_optional),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::FieldOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FieldOptions::TABLE.table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod OneofDescriptorProto {
@@ -3462,19 +3426,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 2usize,
+                3usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -3485,34 +3446,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 2usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 2usize, 3usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 2usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 2usize, 3usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::OneofOptions::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                3usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 2usize as u16,
                     num_decode_entries: 3usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -3523,20 +3475,24 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 3usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 2usize, 3usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 2usize, 3usize, 1usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::OneofOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::OneofOptions::TABLE.table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod EnumDescriptorProto {
@@ -3585,19 +3541,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
+                    3usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -3611,18 +3564,13 @@ pub mod google {
                             encoded_tag: 16u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    3usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 2usize as u16,
                         num_decode_entries: 3usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
@@ -3635,8 +3583,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, end),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -3760,19 +3708,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 5usize,
+                6usize,
                 3usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -3783,12 +3728,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 5usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 5usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -3796,12 +3743,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 5usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 5usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
                             )) as u16,
                         encoded_tag: 26u32,
                     },
@@ -3809,12 +3758,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 5usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 5usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
                             )) as u16,
                         encoded_tag: 34u32,
                     },
@@ -3825,34 +3776,13 @@ pub mod google {
                         encoded_tag: 42u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, value),
-                        child_table: &crate::google::protobuf::EnumValueDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::EnumOptions::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, reserved_range),
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                6usize,
-                3usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 5usize as u16,
                     num_decode_entries: 6usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -3863,28 +3793,43 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 6usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 6usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 6usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedBytes,
@@ -3892,24 +3837,23 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, reserved_name),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, value) as u32,
-                        child_table: &crate::google::protobuf::EnumValueDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumValueDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::EnumOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumOptions::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, reserved_range) as u32,
-                        child_table: &crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod EnumValueDescriptorProto {
@@ -3995,19 +3939,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
+                4usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -4024,34 +3965,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 26u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::EnumValueOptions::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                4usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 3usize as u16,
                     num_decode_entries: 4usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -4067,20 +3999,25 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 4usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 1usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::EnumValueOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::EnumValueOptions::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod ServiceDescriptorProto {
@@ -4173,19 +4110,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
+                4usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -4196,12 +4130,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                                >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -4209,39 +4145,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                            >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                                >, table
                             )) as u16,
                         encoded_tag: 26u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, method),
-                        child_table: &crate::google::protobuf::MethodDescriptorProto::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::ServiceOptions::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                4usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 3usize as u16,
                     num_decode_entries: 4usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -4252,34 +4174,44 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                            >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 4usize, 2usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, method) as u32,
-                        child_table: &crate::google::protobuf::MethodDescriptorProto::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::MethodDescriptorProto::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::ServiceOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::ServiceOptions::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod MethodDescriptorProto {
@@ -4403,19 +4335,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 6usize,
+                7usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -4438,12 +4367,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 6usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 6usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 34u32,
                     },
@@ -4462,24 +4393,13 @@ pub mod google {
                         encoded_tag: 48u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, options),
-                        child_table: &crate::google::protobuf::MethodOptions::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                7usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 6usize as u16,
                     num_decode_entries: 7usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -4500,10 +4420,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 7usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 1usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
@@ -4516,14 +4441,13 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, server_streaming),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, options) as u32,
-                        child_table: &crate::google::protobuf::MethodOptions::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::MethodOptions::TABLE.table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod FileOptions {
@@ -4872,19 +4796,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 22usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bytes,
@@ -5023,12 +4944,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 22usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 22usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 402u32,
                     },
@@ -5036,39 +4959,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 22usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 22usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 22usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -5203,11 +5112,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -6161,27 +6074,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod MessageOptions {
@@ -6315,19 +6231,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 7usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bool,
@@ -6367,12 +6280,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 7usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 7usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 98u32,
                     },
@@ -6380,39 +6295,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 7usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 7usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 7usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
@@ -6451,11 +6352,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -7447,27 +7352,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 7usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod FieldOptions {
@@ -7525,19 +7433,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
+                    4usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -7551,18 +7456,13 @@ pub mod google {
                             encoded_tag: 18u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    4usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 2usize as u16,
                         num_decode_entries: 4usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
@@ -7576,8 +7476,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, edition),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(i32)]
             #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7888,19 +7788,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 13usize,
+                1000usize,
                 3usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Varint32,
@@ -7965,12 +7862,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 162u32,
                     },
@@ -7978,12 +7877,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 170u32,
                     },
@@ -7991,44 +7892,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 13usize, 3usize >, 2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 13usize, 3usize >, 1
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, edition_defaults),
-                        child_table: &crate::google::protobuf::FieldOptions::EditionDefault::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                3usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 13usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Varint32,
@@ -8093,21 +7975,29 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -9090,33 +8980,36 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 3usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 2usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
+                                3usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, edition_defaults)
                             as u32,
-                        child_table: &crate::google::protobuf::FieldOptions::EditionDefault::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FieldOptions::EditionDefault::TABLE
+                            .table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod OneofOptions {
@@ -9197,29 +9090,28 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 2usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 2usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 2usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 10u32,
                     },
@@ -9227,49 +9119,39 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 2usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 2usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 2usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -10272,27 +10154,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 2usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod EnumOptions {
@@ -10406,19 +10291,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 5usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bool,
@@ -10443,12 +10325,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 5usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 5usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 58u32,
                     },
@@ -10456,39 +10340,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 5usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 5usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 5usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
@@ -10514,11 +10384,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -11515,27 +11389,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod EnumValueOptions {
@@ -11636,19 +11513,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bool,
@@ -11659,12 +11533,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -11678,39 +11554,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 4usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
@@ -11721,11 +11583,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
@@ -12731,27 +12597,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod ServiceOptions {
@@ -12842,29 +12711,28 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 274u32,
                     },
@@ -12878,39 +12746,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 3usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -12953,11 +12807,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -13927,27 +13785,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod MethodOptions {
@@ -14076,19 +13937,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
+                1000usize,
                 2usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Bool,
@@ -14106,12 +13964,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 282u32,
                     },
@@ -14119,39 +13979,25 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 4usize, 2usize >, 2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 4usize, 2usize >, 1
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, features),
-                        child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                            .1,
-                    },
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, uninterpreted_option),
-                        child_table: &crate::google::protobuf::UninterpretedOption::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                1000usize,
-                2usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 4usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -14199,11 +14045,15 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -15172,27 +15022,30 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 1000usize, 2usize >,
-                            2
+                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                            2usize >, aux_entries
                         )
                             + 1usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
+                                2usize >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
-                        child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
                     },
-                    protocrap::decoding::AuxTableEntry {
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
                             as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod UninterpretedOption {
@@ -15249,19 +15102,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
+                    3usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Bytes,
@@ -15276,18 +15126,13 @@ pub mod google {
                             encoded_tag: 16u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    3usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 2usize as u16,
                         num_decode_entries: 3usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Bytes,
@@ -15300,8 +15145,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, is_extension),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -15411,29 +15256,28 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 7usize,
+                9usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 7usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 7usize, 9usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 7usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 7usize, 9usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -15477,34 +15321,28 @@ pub mod google {
                         encoded_tag: 66u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, name),
-                        child_table: &crate::google::protobuf::UninterpretedOption::NamePart::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                9usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 7usize as u16,
                     num_decode_entries: 9usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 9usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 7usize, 9usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 7usize, 9usize, 1usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
@@ -15537,14 +15375,14 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, aggregate_value),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, name) as u32,
-                        child_table: &crate::google::protobuf::UninterpretedOption::NamePart::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::UninterpretedOption::NamePart::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod FeatureSet {
@@ -15802,19 +15640,16 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 6usize,
+                7usize,
                 0usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Varint32,
@@ -15854,18 +15689,13 @@ pub mod google {
                         encoded_tag: 48u32,
                     },
                 ],
-                [],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                7usize,
-                0usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 6usize as u16,
                     num_decode_entries: 7usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Varint32,
@@ -15898,8 +15728,8 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, json_format),
                     ),
                 ],
-                [],
-            );
+                aux_entries: [],
+            };
         }
         #[allow(non_snake_case)]
         pub mod FeatureSetDefaults {
@@ -15981,19 +15811,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
+                    4usize,
                     1usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Varint32,
@@ -16004,44 +15831,40 @@ pub mod google {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Message,
                             offset: (core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 2usize, 1usize >, 2
+                                protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                >, aux_entries
                             )
                                 + 0usize
-                                    * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                                 - core::mem::offset_of!(
-                                    protocrap::encoding::TableWithEntries < 2usize, 1usize >, 1
+                                    protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                    >, table
                                 )) as u16,
                             encoded_tag: 18u32,
                         },
                     ],
-                    [
-                        protocrap::encoding::AuxTableEntry {
-                            offset: core::mem::offset_of!(ProtoType, features),
-                            child_table: &crate::google::protobuf::FeatureSet::ENCODING_TABLE
-                                .1,
-                        },
-                    ],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    4usize,
-                    1usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 2usize as u16,
                         num_decode_entries: 4usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Message,
                             0,
                             core::mem::offset_of!(
-                                protocrap::decoding::TableWithEntries < 4usize, 1usize >, 2
+                                protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                >, aux_entries
                             )
                                 + 0usize
-                                    * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                                - core::mem::offset_of!(
+                                    protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                    >, table
+                                ),
                         ),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
@@ -16049,14 +15872,14 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, edition),
                         ),
                     ],
-                    [
-                        protocrap::decoding::AuxTableEntry {
+                    aux_entries: [
+                        protocrap::tables::AuxTableEntry {
                             offset: core::mem::offset_of!(ProtoType, features) as u32,
-                            child_table: &crate::google::protobuf::FeatureSet::DECODING_TABLE
-                                .0,
+                            child_table: &crate::google::protobuf::FeatureSet::TABLE
+                                .table,
                         },
                     ],
-                );
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -16126,29 +15949,28 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
+                6usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 3usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 6usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 3usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 10u32,
                     },
@@ -16165,33 +15987,27 @@ pub mod google {
                         encoded_tag: 40u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, defaults),
-                        child_table: &crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                6usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 3usize as u16,
                     num_decode_entries: 6usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 6usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 3usize, 6usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 1usize
+                                >, table
+                            ),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -16206,14 +16022,14 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, maximum_edition),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, defaults) as u32,
-                        child_table: &crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod SourceCodeInfo {
@@ -16317,19 +16133,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
+                    7usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::RepeatedVarint32,
@@ -16365,18 +16178,13 @@ pub mod google {
                             encoded_tag: 50u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    7usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 5usize as u16,
                         num_decode_entries: 7usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::RepeatedVarint32,
@@ -16405,8 +16213,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, leading_detached_comments),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -16443,70 +16251,63 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
+                2usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 1usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 1usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 10u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, location),
-                        child_table: &crate::google::protobuf::SourceCodeInfo::Location::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                2usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 1usize as u16,
                     num_decode_entries: 2usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 2usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, location) as u32,
-                        child_table: &crate::google::protobuf::SourceCodeInfo::Location::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::SourceCodeInfo::Location::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         #[allow(non_snake_case)]
         pub mod GeneratedCodeInfo {
@@ -16624,19 +16425,16 @@ pub mod google {
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
-                    fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                        &ENCODING_TABLE.1
-                    }
-                    fn decoding_table() -> &'static protocrap::decoding::Table {
-                        &DECODING_TABLE.0
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
                     }
                 }
-                pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+                pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
+                    6usize,
                     0usize,
-                > = protocrap::encoding::TableWithEntries(
-                    &ProtoType::descriptor_proto(),
-                    [
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::RepeatedVarint32,
@@ -16668,18 +16466,13 @@ pub mod google {
                             encoded_tag: 40u32,
                         },
                     ],
-                    [],
-                );
-                pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                    6usize,
-                    0usize,
-                > = protocrap::decoding::TableWithEntries(
-                    protocrap::decoding::Table {
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 5usize as u16,
                         num_decode_entries: 6usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
-                        descriptor: &ProtoType::descriptor_proto(),
+                        descriptor: ProtoType::descriptor_proto(),
                     },
-                    [
+                    decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::RepeatedVarint32,
@@ -16707,8 +16500,8 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, semantic),
                         ),
                     ],
-                    [],
-                );
+                    aux_entries: [],
+                };
             }
             #[repr(C)]
             #[derive(Debug, Default)]
@@ -16747,70 +16540,63 @@ pub mod google {
                 }
             }
             impl protocrap::Protobuf for ProtoType {
-                fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                    &ENCODING_TABLE.1
-                }
-                fn decoding_table() -> &'static protocrap::decoding::Table {
-                    &DECODING_TABLE.0
+                fn table() -> &'static protocrap::tables::Table {
+                    &TABLE.table
                 }
             }
-            pub static ENCODING_TABLE: protocrap::encoding::TableWithEntries<
+            pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
+                2usize,
                 1usize,
-            > = protocrap::encoding::TableWithEntries(
-                &ProtoType::descriptor_proto(),
-                [
+            > = protocrap::tables::TableWithEntries {
+                encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::encoding::TableWithEntries < 1usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::encoding::AuxTableEntry>()
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::encoding::TableWithEntries < 1usize, 1usize >, 1
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
                             )) as u16,
                         encoded_tag: 10u32,
                     },
                 ],
-                [
-                    protocrap::encoding::AuxTableEntry {
-                        offset: core::mem::offset_of!(ProtoType, annotation),
-                        child_table: &crate::google::protobuf::GeneratedCodeInfo::Annotation::ENCODING_TABLE
-                            .1,
-                    },
-                ],
-            );
-            pub static DECODING_TABLE: protocrap::decoding::TableWithEntries<
-                2usize,
-                1usize,
-            > = protocrap::decoding::TableWithEntries(
-                protocrap::decoding::Table {
+                table: protocrap::tables::Table {
+                    num_encode_entries: 1usize as u16,
                     num_decode_entries: 2usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
-                    descriptor: &ProtoType::descriptor_proto(),
+                    descriptor: ProtoType::descriptor_proto(),
                 },
-                [
+                decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::decoding::TableWithEntries < 2usize, 1usize >, 2
+                            protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                            >, aux_entries
                         )
                             + 0usize
-                                * core::mem::size_of::<protocrap::decoding::AuxTableEntry>(),
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 1usize, 2usize, 1usize
+                                >, table
+                            ),
                     ),
                 ],
-                [
-                    protocrap::decoding::AuxTableEntry {
+                aux_entries: [
+                    protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, annotation) as u32,
-                        child_table: &crate::google::protobuf::GeneratedCodeInfo::Annotation::DECODING_TABLE
-                            .0,
+                        child_table: &crate::google::protobuf::GeneratedCodeInfo::Annotation::TABLE
+                            .table,
                     },
                 ],
-            );
+            };
         }
         pub static FILE_DESCRIPTOR_PROTO: protocrap::google::protobuf::FileDescriptorProto::ProtoType = {
             protocrap::google::protobuf::FileDescriptorProto::ProtoType::from_static(

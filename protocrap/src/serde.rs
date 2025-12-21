@@ -1,26 +1,24 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
 
 use crate::base::{Message, Object};
-use crate::encoding::aux_entry;
 use crate::google::protobuf::DescriptorProto;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
-use crate::{Protobuf, decoding, encoding};
+use crate::tables::{AuxTableEntry, Table};
+use crate::{Protobuf, decoding};
 
 pub struct SerdeProtobuf<'a>(
     pub &'a Object,
-    pub &'static [encoding::TableEntry],
-    pub &'static DescriptorProto::ProtoType,
+    pub &'static Table,
 );
 
 pub struct SerdeProtobufSlice<'a>(
     pub &'a [Message],
-    pub &'static [encoding::TableEntry],
-    pub &'static DescriptorProto::ProtoType,
+    pub &'static Table,
 );
 
 impl<'a> SerdeProtobuf<'a> {
     pub fn new<T: Protobuf>(msg: &'a T) -> Self {
-        SerdeProtobuf(msg.as_object(), T::encoding_table(), T::descriptor_proto())
+        SerdeProtobuf(msg.as_object(), T::table())
     }
 }
 
@@ -29,7 +27,7 @@ impl<'a> serde::Serialize for SerdeProtobuf<'a> {
     where
         S: serde::Serializer,
     {
-        serde_serialize(self.0, self.1, self.2, serializer)
+        serde_serialize(self.0, self.1.encode_entries(), self.1.descriptor, serializer)
     }
 }
 
@@ -40,7 +38,7 @@ impl<'a> serde::Serialize for SerdeProtobufSlice<'a> {
     {
         let mut seq_serializer = serializer.serialize_seq(Some(self.0.len()))?;
         for msg in self.0 {
-            let serde_msg = SerdeProtobuf(unsafe { &*msg.0 }, self.1, self.2);
+            let serde_msg = SerdeProtobuf(unsafe { &*msg.0 }, self.1);
             seq_serializer.serialize_element(&serde_msg)?;
         }
         seq_serializer.end()
@@ -139,16 +137,13 @@ where
                         struct_serializer.serialize_field(field_name, slice)?;
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                        let (offset, child_table) = aux_entry(entry.offset as usize, table);
-                        let slice = value.get_slice::<crate::base::Message>(offset);
+                        let AuxTableEntry {offset, child_table} = Table::table(table).aux_entry(entry.offset as usize);
+                        let slice = value.get_slice::<crate::base::Message>(offset as usize);
                         if slice.is_empty() {
                             struct_serializer.skip_field(field_name)?;
                             continue;
                         }
-                        let serde_slice = SerdeProtobufSlice(slice, child_table, unsafe {
-                            *(child_table.as_ptr() as *const &'static DescriptorProto::ProtoType)
-                                .sub(1)
-                        });
+                        let serde_slice = SerdeProtobufSlice(slice, unsafe { &*child_table });
                         struct_serializer.serialize_field(field_name, &serde_slice)?;
                         continue;
                     }
@@ -232,15 +227,12 @@ where
                     };
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                    let (offset, child_table) = aux_entry(entry.offset as usize, table);
-                    let message = value.get::<crate::base::Message>(offset).0;
+                    let AuxTableEntry { offset, child_table } = Table::table(table).aux_entry(entry.offset as usize);
+                    let message = value.get::<crate::base::Message>(offset as usize).0;
                     if message.is_null() {
                         struct_serializer.skip_field(field_name)?;
                     } else {
-                        let v = SerdeProtobuf(unsafe { &*message }, child_table, unsafe {
-                            *(child_table.as_ptr() as *const &'static DescriptorProto::ProtoType)
-                                .sub(1)
-                        });
+                        let v = SerdeProtobuf(unsafe { &*message }, unsafe { &*child_table });
                         struct_serializer.serialize_field(field_name, &v)?;
                     };
                 }
@@ -293,7 +285,7 @@ impl<'de, 'arena, 'alloc, T: Protobuf + 'alloc> serde::de::DeserializeSeed<'de>
         let mut msg = T::default();
         serde_deserialize_struct(
             msg.as_object_mut(),
-            T::decoding_table(),
+            T::table(),
             arena,
             deserializer,
         )?;
@@ -303,7 +295,7 @@ impl<'de, 'arena, 'alloc, T: Protobuf + 'alloc> serde::de::DeserializeSeed<'de>
 
 pub struct ProtobufVisitor<'arena, 'alloc, 'b> {
     obj: &'b mut Object,
-    table: &'static decoding::Table,
+    table: &'static Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
 }
 
@@ -325,7 +317,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::DeserializeSeed<'de>
 
 fn serde_deserialize_struct<'arena, 'alloc, 'b, 'de, D>(
     obj: &'b mut Object,
-    table: &'static decoding::Table,
+    table: &'static Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
     deserializer: D,
 ) -> Result<(), D::Error>
@@ -373,7 +365,7 @@ impl<'de> serde::de::Visitor<'de> for StructKeyVisitor<'_> {
 
 struct ProtobufArrayfVisitor<'arena, 'alloc, 'b> {
     rf: &'b mut crate::containers::RepeatedField<crate::base::Message>,
-    table: &'static decoding::Table,
+    table: &'static Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
 }
 
@@ -512,10 +504,10 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                         }
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                        let &decoding::AuxTableEntry {
+                        let AuxTableEntry {
                             offset,
                             child_table,
-                        } = table.aux_entry(entry);
+                        } = table.aux_entry_decode(entry);
                         let child_table = unsafe { &*child_table };
                         let rf = obj
                             .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(
@@ -595,10 +587,10 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                         // TODO handle null
-                        let &decoding::AuxTableEntry {
+                        let AuxTableEntry {
                             offset,
                             child_table,
-                        } = table.aux_entry(entry);
+                        } = table.aux_entry_decode(entry);
                         let child_table = unsafe { &*child_table };
                         let child_obj = Object::create(child_table.size as u32, arena);
                         obj.set::<crate::base::Message>(

@@ -11,9 +11,7 @@ pub mod utils;
 pub mod decoding;
 pub mod encoding;
 pub mod reflection;
-
-#[cfg(feature = "codegen")]
-pub mod codegen;
+pub mod tables;
 
 use crate as protocrap;
 include!("descriptor.pc.rs");
@@ -22,10 +20,9 @@ include!("descriptor.pc.rs");
 pub mod serde;
 
 pub trait Protobuf: Default {
-    fn encoding_table() -> &'static [encoding::TableEntry];
-    fn decoding_table() -> &'static decoding::Table;
+    fn table() -> &'static tables::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
-        Self::decoding_table().descriptor
+        Self::table().descriptor
     }
 
     fn as_object(&self) -> &base::Object {

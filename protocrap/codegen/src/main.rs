@@ -3,8 +3,11 @@
 use std::fs;
 use std::io::{self, Read, Write};
 
-pub(crate) use crate as protocrap;
-mod codegen;
+use protocrap_stable as protocrap;
+mod generator;
+mod names;
+mod static_gen;
+mod tables;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().collect();
@@ -28,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("✅ Read descriptor ({} bytes)", descriptor_bytes.len());
 
     // Generate code
-    let code = codegen::generate(&descriptor_bytes)?;
+    let code = protocrap_codegen::generate(&descriptor_bytes)?;
 
     // Write output
     if args.len() > 2 {

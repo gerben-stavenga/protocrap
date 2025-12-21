@@ -14,4 +14,4 @@ criterion = "0.5"
 
 [build-dependencies]
 prost-build = "0.14.1"
-protocrap = { path = "../../protocrap", features = ["codegen"] }
+protocrap-codegen = { path = "../codegen" }
