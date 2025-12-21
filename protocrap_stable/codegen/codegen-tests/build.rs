@@ -52,7 +52,7 @@ fn generate_proto(out_dir: &str, proto_file: &str, output_name: &str) -> Result<
     let descriptor_bytes = std::fs::read(&desc_file)?;
 
     // Generate Rust code with protocrap-codegen
-    let code = protocrap::codegen::generate(&descriptor_bytes).map_err(|e| {
+    let code = protocrap_codegen::generate(&descriptor_bytes).map_err(|e| {
         std::io::Error::new(
             std::io::ErrorKind::Other,
             format!("Code generation failed: {}", e),

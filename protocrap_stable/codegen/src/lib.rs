@@ -1,17 +1,19 @@
+// protocrap-codegen/src/lib.rs
+#![feature(allocator_api)]
 use std::path::Path;
 
 use anyhow::Result;
-#[cfg(not(feature = "codegen"))]
-pub(crate) use crate as protocrap;
-#[cfg(feature = "codegen")]
-pub(crate) use protocrap_stable as protocrap;
-
+#[cfg(feature = "bootcrap")]
+use protocrap_stable as protocrap;
+#[cfg(not(feature = "bootcrap"))]
+use protocrap;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
 use protocrap::ProtobufExt;
 
 mod generator;
 mod names;
 mod static_gen;
+mod static_gen_refl;
 mod tables;
 
 /// Generate Rust code from protobuf descriptor bytes
@@ -26,9 +28,14 @@ pub fn generate(descriptor_bytes: &[u8]) -> Result<String> {
     // Generate tokens
     let tokens = generator::generate_file_set(&file_set)?;
 
-    // Pretty-print to string
-    let syntax_tree = syn::parse2(tokens)?;
-    Ok(prettyplease::unparse(&syntax_tree))
+    let should_pretty_print = true;
+    if should_pretty_print {
+        // Pretty-print to string
+        let syntax_tree = syn::parse2(tokens)?;
+        Ok(prettyplease::unparse(&syntax_tree))
+    } else {
+        Ok(tokens.to_string())
+    }
 }
 
 pub fn generate_proto(out_dir: &str, proto_file: &str, output_name: &str) -> Result<()> {

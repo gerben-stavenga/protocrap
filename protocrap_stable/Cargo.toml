@@ -15,22 +15,10 @@ proc-macro2 = { version = "1.0", optional = true }
 prettyplease = { version = "0.2", optional = true }
 prost-reflect = { version = "0.16.3", optional = true }
 
-# Library
-[lib]
-name = "protocrap_stable"
-path = "src/lib.rs"
-
-# Binary (compiler)
-[[bin]]
-name = "protocrap-codegen"
-path = "src/main.rs"
-required-features = ["codegen"]  # Binary only builds with this feature!
-
 [features]
 default = ["std", "serde_support"]
 serde_support = ["serde"]
 std = []
-codegen = ["quote", "syn", "proc-macro2", "prettyplease", "prost-reflect"]
 
 [profile.dev]
 panic = 'abort'

@@ -16,4 +16,4 @@ protocrap = { path = "../../protocrap", optional = true }
 
 [features]
 default = ["protocrap"]
-bootcrap = ["protocrap_stable"]
+# bootcrap = ["protocrap_stable"]

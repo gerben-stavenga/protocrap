@@ -4,6 +4,7 @@ use core::ptr::NonNull;
 use crate::Protobuf;
 use crate::base::Object;
 use crate::containers::{Bytes, RepeatedField};
+use crate::tables::{AuxTableEntry, Table};
 use crate::utils::{Stack, StackWithStorage};
 use crate::wire::{FieldKind, ReadCursor, SLOP_SIZE, zigzag_decode};
 
@@ -13,9 +14,7 @@ pub struct TableEntry(pub u32);
 
 impl TableEntry {
     pub const fn new(kind: FieldKind, has_bit_idx: u32, offset: usize) -> Self {
-        TableEntry(
-            ((offset & 0xFFFF) as u32) << 16 | has_bit_idx << 8 | (kind as u8 as u32),
-        )
+        TableEntry(((offset & 0xFFFF) as u32) << 16 | has_bit_idx << 8 | (kind as u8 as u32))
     }
 
     pub(crate) fn kind(&self) -> FieldKind {
@@ -35,55 +34,22 @@ impl TableEntry {
     }
 }
 
-#[repr(C)]
-pub struct AuxTableEntry {
-    pub offset: u32,
-    pub child_table: *const Table,
-}
-
-unsafe impl Send for AuxTableEntry {}
-unsafe impl Sync for AuxTableEntry {}
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct Table {
-    pub num_decode_entries: u16,
-    pub size: u16,
-    pub descriptor: &'static crate::google::protobuf::DescriptorProto::ProtoType,
-}
-
 impl Table {
     #[inline(always)]
     pub(crate) fn entry(&self, field_number: u32) -> Option<TableEntry> {
-        if field_number >= self.num_decode_entries as u32 {
+        let entries = self.decode_entries();
+        if field_number >= entries.len() as u32 {
             return None;
         }
-        unsafe {
-            let table_entry_ptr = (self as *const Table).add(1) as *const TableEntry;
-            Some(*table_entry_ptr.add(field_number as usize))
-        }
+        Some(entries[field_number as usize])
     }
 
     #[inline(always)]
-    pub(crate) fn aux_entry(&self, entry: TableEntry) -> &AuxTableEntry {
+    pub(crate) fn aux_entry_decode(&self, entry: TableEntry) -> AuxTableEntry {
         let offset = entry.aux_offset();
-        unsafe {
-            let aux_table_ptr =
-                (self as *const Table as *const u8).add(offset as usize) as *const AuxTableEntry;
-            &*aux_table_ptr
-        }
+        self.aux_entry(offset as usize)
     }
 }
-
-#[repr(C)]
-pub struct TableWithEntries<
-    const NUM_ENTRIES: usize,
-    const NUM_AUX_ENTRIES: usize,
->(
-    pub Table,
-    pub [TableEntry; NUM_ENTRIES],
-    pub [AuxTableEntry; NUM_AUX_ENTRIES],
-);
 
 struct StackEntry {
     obj: *mut Object,
@@ -226,7 +192,7 @@ impl<'a> DecodeObjectState<'a> {
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
     ) -> (&'a mut Object, &'a Table) {
-        let aux_entry = self.table.aux_entry(entry);
+        let aux_entry = self.table.aux_entry_decode(entry);
         let field = self.obj.ref_mut::<*mut Object>(aux_entry.offset);
         let child_table = unsafe { &*aux_entry.child_table };
         let child = if (*field).is_null() {
@@ -245,7 +211,7 @@ impl<'a> DecodeObjectState<'a> {
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
     ) -> (&'a mut Object, &'a Table) {
-        let aux_entry = self.table.aux_entry(entry);
+        let aux_entry = self.table.aux_entry_decode(entry);
         let field = self
             .obj
             .ref_mut::<RepeatedField<*mut Object>>(aux_entry.offset);
@@ -416,10 +382,19 @@ fn decode_loop<'a>(
                     .find(|f| f.number() as u32 == field_number);
                 if field.is_none() {
                     // field not found in descriptor, treat as unknown
-                    println!("Msg {} Unknown Field number: {}", descriptor.name(), field_number);                    
+                    println!(
+                        "Msg {} Unknown Field number: {}",
+                        descriptor.name(),
+                        field_number
+                    );
                 } else {
                     let field = field.unwrap();
-                    println!("Msg {} Field number: {}, Field name {}", descriptor.name(), field_number, field.name());
+                    println!(
+                        "Msg {} Field number: {}, Field name {}",
+                        descriptor.name(),
+                        field_number,
+                        field.name()
+                    );
                 }
             }
             if let Some(entry) = ctx.table.entry(field_number) {
@@ -522,11 +497,7 @@ fn decode_loop<'a>(
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            ctx.add(
-                                entry,
-                                zigzag_decode(cursor.read_varint()?) as i32,
-                                arena,
-                            );
+                            ctx.add(entry, zigzag_decode(cursor.read_varint()?) as i32, arena);
                         }
                         FieldKind::RepeatedBool => {
                             if tag & 7 != 0 {
@@ -708,7 +679,7 @@ pub struct ResumeableDecode<'a, const STACK_DEPTH: usize> {
 
 impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
     pub fn new<T: Protobuf + ?Sized>(obj: &'a mut T, limit: isize) -> Self {
-        let object = DecodeObject::Message(obj.as_object_mut(), T::decoding_table());
+        let object = DecodeObject::Message(obj.as_object_mut(), T::table());
         Self {
             state: MaybeUninit::new(ResumeableState {
                 limit,

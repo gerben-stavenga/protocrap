@@ -34,7 +34,7 @@ impl Object {
         }
     }
 
-    pub(crate) fn ref_at<T>(&self, offset: usize) -> &T {
+    pub fn ref_at<T>(&self, offset: usize) -> &T {
         unsafe { &*((self as *const Self as *const u8).add(offset) as *const T) }
     }
 

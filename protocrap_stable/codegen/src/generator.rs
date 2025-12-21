@@ -1,14 +1,14 @@
 // protocrap-codegen/src/generator.rs
 
-use crate::codegen::names::*;
-use crate::codegen::static_gen;
-use crate::codegen::tables;
+use crate::names::*;
+use crate::static_gen;
+use crate::tables;
 use anyhow::Result;
 use proc_macro2::TokenStream;
 use prost_reflect::DescriptorPool;
 use prost_reflect::DynamicMessage;
 use quote::{format_ident, quote};
-use crate as protocrap;
+use super::protocrap;
 use protocrap::reflection::is_repeated;
 use protocrap::reflection::needs_has_bit;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
@@ -47,7 +47,8 @@ fn generate_file(file: &FileDescriptorProto) -> Result<TokenStream> {
         items.push(generate_message(message, file, path)?);
     }
 
-    let file_descriptor = {
+    let use_prost  = true;
+    let file_descriptor = if use_prost {
         use protocrap::ProtobufExt;
         let mut buffer = vec![0; 100000];
         let encoded = file.encode_flat::<100>(&mut buffer)?;
@@ -65,6 +66,9 @@ fn generate_file(file: &FileDescriptorProto) -> Result<TokenStream> {
 
         // Generate static initializer
         static_gen::generate_static_dynamic(&dynamic)?
+    } else {
+        let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
+        crate::static_gen_refl::generate_static_dynamic(&dynamic_file)?
     };
     items.push(quote! {
         pub static FILE_DESCRIPTOR_PROTO: protocrap::google::protobuf::FileDescriptorProto::ProtoType = #file_descriptor;
@@ -213,9 +217,7 @@ fn generate_message_impl(
     // Protobuf trait impl
     let protobuf_impl = generate_protobuf_impl();
 
-    // Tables
-    let encoding_table = tables::generate_encoding_table(message, &has_bit_map)?;
-    let decoding_table = tables::generate_decoding_table(message, &has_bit_map)?;
+    let table = tables::generate_table(message, &has_bit_map)?;
 
     let file_descriptor_ident = format_ident!("FILE_DESCRIPTOR_PROTO");
 
@@ -265,8 +267,7 @@ fn generate_message_impl(
         }
 
         #protobuf_impl
-        #encoding_table
-        #decoding_table
+        #table
     })
 }
 
@@ -445,14 +446,9 @@ fn build_descriptor_accessor(path: &[usize]) -> TokenStream {
 fn generate_protobuf_impl() -> TokenStream {
     quote! {
         impl protocrap::Protobuf for ProtoType {
-            fn encoding_table() -> &'static [protocrap::encoding::TableEntry] {
-                &ENCODING_TABLE.1
+            fn table() -> &'static protocrap::tables::Table {
+                &TABLE.table
             }
-
-            fn decoding_table() -> &'static protocrap::decoding::Table {
-                &DECODING_TABLE.0
-            }
-
         }
     }
 }

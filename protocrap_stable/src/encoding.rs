@@ -4,7 +4,7 @@ use crate::{
     Protobuf,
     base::Object,
     containers::Bytes,
-    google,
+    tables::{AuxTableEntry, Table},
     utils::{Stack, StackWithStorage},
     wire::{FieldKind, SLOP_SIZE, WriteCursor, zigzag_encode},
 };
@@ -16,37 +16,6 @@ pub struct TableEntry {
     pub kind: FieldKind,
     pub offset: u16,
     pub encoded_tag: u32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct AuxTableEntry {
-    pub offset: usize,
-    pub child_table: *const [TableEntry],
-}
-
-unsafe impl Send for AuxTableEntry {}
-unsafe impl Sync for AuxTableEntry {}
-
-#[repr(C)]
-pub struct TableWithEntries<const N: usize, const M: usize>(
-    pub &'static google::protobuf::DescriptorProto::ProtoType,
-    pub [TableEntry; N],
-    pub [AuxTableEntry; M],
-);
-
-pub(crate) fn aux_entry<'a>(
-    offset: usize,
-    table: *const [TableEntry],
-) -> (usize, &'a [TableEntry]) {
-    unsafe {
-        let thin_ptr = table as *const u8;
-        let AuxTableEntry {
-            offset,
-            child_table: table,
-        } = *(thin_ptr.add(offset) as *const AuxTableEntry);
-        (offset, &*table)
-    }
 }
 
 struct StackEntry {
@@ -87,11 +56,12 @@ struct ObjectEncodeState<'a> {
 }
 
 impl<'a> ObjectEncodeState<'a> {
-    fn new(obj: &'a Object, table: &'a [TableEntry]) -> Self {
+    fn new(obj: &'a Object, table: &'a Table) -> Self {
+        let table_entries = table.encode_entries();
         Self {
             obj,
-            table,
-            field_idx: table.len(),
+            table: table_entries,
+            field_idx: table_entries.len(),
             rep_field_idx: 0,
         }
     }
@@ -221,7 +191,8 @@ fn encode_loop<'a>(
         } = obj_state.table[obj_state.field_idx - 1];
         if false {
             let descriptor = unsafe {
-                *(obj_state.table.as_ptr() as *const &'static crate::google::protobuf::DescriptorProto::ProtoType)
+                *(obj_state.table.as_ptr()
+                    as *const &'static crate::google::protobuf::DescriptorProto::ProtoType)
                     .sub(1)
             };
             let field_number = tag >> 3;
@@ -231,10 +202,21 @@ fn encode_loop<'a>(
                 .find(|f| f.number() as u32 == field_number);
             if field.is_none() {
                 // field not found in descriptor, treat as unknown
-                println!("Msg {} Unknown Field number: {} kind: {:?}", descriptor.name(), field_number, kind);
+                println!(
+                    "Msg {} Unknown Field number: {} kind: {:?}",
+                    descriptor.name(),
+                    field_number,
+                    kind
+                );
             } else {
                 let field = field.unwrap();
-                println!("Msg {} Field number: {}, Field name {} kind: {:?}", descriptor.name(), field_number, field.name(), kind);
+                println!(
+                    "Msg {} Field number: {}, Field name {} kind: {:?}",
+                    descriptor.name(),
+                    field_number,
+                    field.name(),
+                    kind
+                );
             }
         }
         let offset = offset as usize;
@@ -317,7 +299,7 @@ fn encode_loop<'a>(
                     // We don't use slop as we need to write length prefix and tag too.
                     let buffer_size = (cursor - begin) as usize;
                     if buffer_size < len {
-                        obj_state.field_idx -= 1;               
+                        obj_state.field_idx -= 1;
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                         cursor.write_slice(&bytes[len - buffer_size..]);
                         return Some((cursor, EncodeObject::String(&bytes[..len - buffer_size])));
@@ -328,30 +310,38 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Message => {
-                let (offset, child_table) = aux_entry(offset, obj_state.table);
-                let child_ptr = obj_state.get::<*const Object>(offset);
+                let AuxTableEntry {
+                    offset,
+                    child_table,
+                } = Table::table(obj_state.table).aux_entry(offset);
+                let child_ptr = obj_state.get::<*const Object>(offset as usize);
                 if !child_ptr.is_null() {
-                    obj_state.field_idx -= 1;               
+                    obj_state.field_idx -= 1;
                     obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
-                    obj_state = ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
-                    continue 'out;  // Continue with child message
+                    obj_state =
+                        ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
+                    continue 'out; // Continue with child message
                 }
             }
             FieldKind::Group => {
-                let (offset, child_table) = aux_entry(offset, obj_state.table);
-                let child_ptr = obj_state.get::<*const Object>(offset);
+                let AuxTableEntry {
+                    offset,
+                    child_table,
+                } = Table::table(obj_state.table).aux_entry(offset);
+                let child_ptr = obj_state.get::<*const Object>(offset as usize);
                 if !child_ptr.is_null() {
                     if cursor <= begin {
                         break;
                     }
-                    obj_state.field_idx -= 1;               
+                    obj_state.field_idx -= 1;
                     let mut end_tag = tag;
                     end_tag += 1; // Set wire type to END_GROUP
                     cursor.write_tag(end_tag);
-                    obj_state.field_idx -= 1;               
+                    obj_state.field_idx -= 1;
                     obj_state.push(tag, -1, stack)?;
-                    obj_state = ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
-                    continue 'out;  // Continue with child group
+                    obj_state =
+                        ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
+                    continue 'out; // Continue with child group
                 }
             }
             FieldKind::RepeatedVarint64 => {
@@ -470,8 +460,11 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::RepeatedMessage => {
-                let (offset, child_table) = aux_entry(offset, obj_state.table);
-                let slice = obj_state.get_slice::<*const Object>(offset);
+                let AuxTableEntry {
+                    offset,
+                    child_table,
+                } = Table::table(obj_state.table).aux_entry(offset);
+                let slice = obj_state.get_slice::<*const Object>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -483,14 +476,17 @@ fn encode_loop<'a>(
                     obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                     obj_state = ObjectEncodeState::new(
                         unsafe { &*slice[obj_state.rep_field_idx] },
-                        child_table,
+                        unsafe { &*child_table },
                     );
-                    continue 'out;  // Continue with child message
+                    continue 'out; // Continue with child message
                 }
             }
             FieldKind::RepeatedGroup => {
-                let (offset, child_table) = aux_entry(offset, obj_state.table);
-                let slice = obj_state.get_slice::<*const Object>(offset);
+                let AuxTableEntry {
+                    offset,
+                    child_table,
+                } = Table::table(obj_state.table).aux_entry(offset);
+                let slice = obj_state.get_slice::<*const Object>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -508,13 +504,13 @@ fn encode_loop<'a>(
                     obj_state.push(tag, -1, stack)?;
                     obj_state = ObjectEncodeState::new(
                         unsafe { &*slice[obj_state.rep_field_idx] },
-                        child_table,
+                        unsafe { &*child_table },
                     );
-                    continue 'out;  // Continue with child group
+                    continue 'out; // Continue with child group
                 }
             }
         }
-        obj_state.field_idx -= 1;               
+        obj_state.field_idx -= 1;
     }
     Some((cursor, EncodeObject::Object(obj_state)))
 }
@@ -573,13 +569,8 @@ pub(crate) enum ResumeResult<'a> {
 
 impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
     pub(crate) fn new<T: Protobuf + ?Sized>(obj: &'a T) -> Self {
-        let table = T::encoding_table();
-        let encode_ctx = ObjectEncodeState {
-            obj: obj.as_object(),
-            table,
-            field_idx: table.len(),
-            rep_field_idx: 0,
-        };
+        let table = T::table();
+        let encode_ctx = ObjectEncodeState::new(obj.as_object(), table);
         Self {
             state: MaybeUninit::new(ResumableState {
                 overrun: 0,
