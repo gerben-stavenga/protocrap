@@ -13,7 +13,6 @@ use protocrap::ProtobufExt;
 mod generator;
 mod names;
 mod static_gen;
-mod static_gen_refl;
 mod tables;
 
 /// Generate Rust code from protobuf descriptor bytes

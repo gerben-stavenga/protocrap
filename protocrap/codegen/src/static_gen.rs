@@ -2,26 +2,37 @@
 
 use anyhow::Result;
 use proc_macro2::{Literal, TokenStream};
-use prost_reflect::{DynamicMessage, FieldDescriptor, MessageDescriptor, ReflectMessage, Value};
-use quote::{format_ident, quote};
+use super::protocrap;
+use protocrap::{google::protobuf::FieldDescriptorProto::{ProtoType as FieldDescriptorProto, Type}, reflection::{DynamicMessage, Value, is_message, is_repeated, needs_has_bit}};
+use quote::{ToTokens, format_ident, quote};
+
+fn full_name(name: &str) -> Vec<proc_macro2::Ident> {
+    let mut path_parts = Vec::new();
+    path_parts.extend(["google", "protobuf"].iter().map(|s| format_ident!("{}", s)));
+    if name == "ExtensionRange" {
+        path_parts.push(format_ident!("DescriptorProto"));
+    }
+    if name == "ReservedRange" {
+        path_parts.push(format_ident!("DescriptorProto"));
+    }
+    if name == "EditionDefault" {
+        path_parts.push(format_ident!("FieldOptions"));
+    }
+    path_parts.push(format_ident!("{}", name));
+    path_parts
+}
 
 /// Generate static initializer for any proto message using runtime reflection
 pub fn generate_static_dynamic(value: &DynamicMessage) -> Result<TokenStream> {
-    let descriptor = value.descriptor();
-
     // Calculate has_bits
-    let has_bits = calculate_has_bits(&value, &descriptor);
+    let has_bits = calculate_has_bits(&value);
     let has_bits_tokens = generate_has_bits_array(&has_bits);
 
     // Generate field initializers
-    let field_inits = generate_field_initializers(&value, &descriptor)?;
+    let field_inits = generate_field_initializers(value)?;
 
     // Parse type path
-    let path_parts: Vec<_> = descriptor
-        .full_name()
-        .split(".")
-        .map(|s| format_ident!("{}", s))
-        .collect();
+    let path_parts: Vec<_> = full_name(value.descriptor().name());
 
     Ok(quote! {
         {
@@ -33,20 +44,22 @@ pub fn generate_static_dynamic(value: &DynamicMessage) -> Result<TokenStream> {
     })
 }
 
-fn calculate_has_bits(value: &DynamicMessage, descriptor: &MessageDescriptor) -> Vec<u32> {
+fn calculate_has_bits(value: &DynamicMessage) -> Vec<u32> {
+    let descriptor = value.descriptor();
     let num_has_bits = descriptor
-        .fields()
-        .filter(|field| !field.is_list() && !matches!(field.kind(), prost_reflect::Kind::Message(_)))
+        .field()
+        .iter()
+        .filter(|field| needs_has_bit(field))
         .count();
     let word_count = (num_has_bits + 31) / 32;
     let mut has_bits = vec![0u32; word_count];
 
     let mut has_bit_idx = 0;
-    for field in descriptor.fields() {
-        if field.is_list() || matches!(field.kind(), prost_reflect::Kind::Message(_)) {
+    for &field in descriptor.field() {
+        if !needs_has_bit(field) {
             continue;
         }
-        if value.has_field(&field) {
+        if let Some(_) = value.get_field(field) {
             let word_idx = has_bit_idx / 32;
             let bit_idx = has_bit_idx % 32;
             has_bits[word_idx] |= 1u32 << bit_idx;
@@ -68,14 +81,16 @@ fn generate_has_bits_array(has_bits: &[u32]) -> TokenStream {
 
 fn generate_field_initializers(
     value: &DynamicMessage,
-    descriptor: &MessageDescriptor,
 ) -> Result<Vec<TokenStream>> {
     let mut inits = Vec::new();
 
-    for field in descriptor.fields() {
-        let init = if value.has_field(&field) {
-            let field_value = value.get_field(&field);
-            generate_field_value(&field_value)?.0
+    let mut fields = Vec::from(value.descriptor().field());
+    fields.sort_by_key(|f| f.number());
+
+    for field in fields {
+        let value = value.get_field(field);
+        let init = if let Some(field_value) = value {
+            generate_field_value(field_value)?.0
         } else {
             generate_default_value(&field)
         };
@@ -86,31 +101,56 @@ fn generate_field_initializers(
     Ok(inits)
 }
 
-fn generate_field_value(value: &Value) -> Result<(TokenStream, TokenStream)> {
+fn generate_repeated_scalar<T: Copy + ToTokens>(values: &[T]) -> Result<(TokenStream, TokenStream)> {
+    let mut elements = Vec::new();
+    let type_name = format_ident!("{}", std::any::type_name::<T>());
+
+    for &value in values {
+        let elem_init = quote! {
+            #value
+        };
+        elements.push(elem_init);        
+    }
+
+    let len = elements.len();
+    Ok((
+        quote! {
+            {
+                static ELEMENTS: [#type_name; #len] = [
+                    #(#elements),*
+                ];
+                protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+            }
+        },
+        quote! { protocrap::containers::RepeatedField<#type_name> },
+    ))
+}
+
+fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
     match value {
         Value::Bool(b) => Ok((quote! { #b }, quote! { bool })),
-        Value::I32(v) | Value::EnumNumber(v) => {
-            let lit = Literal::i32_unsuffixed(*v);
+        Value::Int32(v) => {
+            let lit = Literal::i32_unsuffixed(v);
             Ok((quote! { #lit }, quote! { i32 }))
         }
-        Value::I64(v) => {
-            let lit = Literal::i64_unsuffixed(*v);
+        Value::Int64(v) => {
+            let lit = Literal::i64_unsuffixed(v);
             Ok((quote! { #lit }, quote! { i64 }))
         }
-        Value::U32(v) => {
-            let lit = Literal::u32_unsuffixed(*v);
+        Value::UInt32(v) => {
+            let lit = Literal::u32_unsuffixed(v);
             Ok((quote! { #lit }, quote! { u32 }))
         }
-        Value::U64(v) => {
-            let lit = Literal::u64_unsuffixed(*v);
+        Value::UInt64(v) => {
+            let lit = Literal::u64_unsuffixed(v);
             Ok((quote! { #lit }, quote! { u64 }))
         }
-        Value::F32(v) => {
-            let lit = Literal::f32_unsuffixed(*v);
+        Value::Float(v) => {
+            let lit = Literal::f32_unsuffixed(v);
             Ok((quote! { #lit }, quote! { f32 }))
         }
-        Value::F64(v) => {
-            let lit = Literal::f64_unsuffixed(*v);
+        Value::Double(v) => {
+            let lit = Literal::f64_unsuffixed(v);
             Ok((quote! { #lit }, quote! { f64 }))
         }
         Value::String(s) => Ok((
@@ -130,33 +170,77 @@ fn generate_field_value(value: &Value) -> Result<(TokenStream, TokenStream)> {
         }
         Value::Message(msg) => {
             // Recursively generate nested message
-            let init = generate_nested_message(msg)?;
+            let init = generate_nested_message(&msg)?;
             Ok((init, quote! { protocrap::base::Message }))
         }
-        Value::List(list) => {
-            let elements: Vec<_> = list
-                .iter()
-                .map(|v| generate_field_value(v))
-                .collect::<Result<Vec<_>, _>>()?;
-
-            let type_name = elements[0].1.clone();
-            let elements: Vec<_> = elements.into_iter().map(|(init, _)| init).collect();
+        Value::RepeatedBool(list) => generate_repeated_scalar(list),
+        Value::RepeatedInt32(list) => generate_repeated_scalar(list),
+        Value::RepeatedInt64(list) => generate_repeated_scalar(list),
+        Value::RepeatedUInt32(list) => generate_repeated_scalar(list),
+        Value::RepeatedUInt64(list) => generate_repeated_scalar(list),
+        Value::RepeatedFloat(list) => generate_repeated_scalar(list),
+        Value::RepeatedDouble(list) => generate_repeated_scalar(list),
+        Value::RepeatedString(list) => {
+            let mut elements = Vec::new();
+            for s in list {
+                let elem_init = quote! {
+                    protocrap::containers::String::from_static(#s)
+                };
+                elements.push(elem_init);
+            }
             let len = elements.len();
             Ok((
                 quote! {
                     {
-                        static ELEMENTS: [#type_name; #len] = [
+                        static ELEMENTS: [protocrap::containers::String; #len] = [
                             #(#elements),*
                         ];
                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                     }
                 },
-                quote! { protocrap::containers::RepeatedField<#type_name> },
+                quote! { protocrap::containers::RepeatedField<protocrap::containers::String> },
             ))
         }
-        Value::Map(_) => {
-            // TODO: Handle maps
-            panic!("Map fields not yet supported in static generation");
+        Value::RepeatedBytes(list) => {
+            let mut elements = Vec::new();
+            for b in list {
+                let bytes: Vec<_> = b.iter().map(|&byte| Literal::u8_unsuffixed(byte)).collect();
+                let elem_init = quote! {
+                    protocrap::containers::Bytes::from_static(&[#(#bytes),*])
+                };
+                elements.push(elem_init);
+            }
+            let len = elements.len();
+            Ok((
+                quote! {
+                    {
+                        static ELEMENTS: [protocrap::containers::Bytes; #len] = [
+                            #(#elements),*
+                        ];
+                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                    }
+                },
+                quote! { protocrap::containers::RepeatedField<protocrap::containers::Bytes> },
+            ))
+        }
+        Value::RepeatedMessage(list) => {
+            let mut elements = Vec::new();
+            for msg in list.iter() {
+                let elem_init = generate_nested_message(&msg)?;
+                elements.push(elem_init);
+            }
+            let len = elements.len();
+            Ok((
+                quote! {
+                    {
+                        static ELEMENTS: [protocrap::base::Message; #len] = [
+                            #(#elements),*
+                        ];
+                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                    }
+                },
+                quote! { protocrap::containers::RepeatedField<protocrap::base::Message> },
+            ))
         }
     }
 }
@@ -164,12 +248,7 @@ fn generate_field_value(value: &Value) -> Result<(TokenStream, TokenStream)> {
 fn generate_nested_message(msg: &DynamicMessage) -> Result<TokenStream> {
     let nested_initializer = generate_static_dynamic(msg)?;
     // Parse type path
-    let path_parts: Vec<_> = msg
-        .descriptor()
-        .full_name()
-        .split(".")
-        .map(|s| format_ident!("{}", s))
-        .collect();
+    let path_parts: Vec<_> = full_name(msg.descriptor().name());
 
     Ok(quote! {
         {
@@ -179,26 +258,23 @@ fn generate_nested_message(msg: &DynamicMessage) -> Result<TokenStream> {
     })
 }
 
-fn generate_default_value(field: &FieldDescriptor) -> TokenStream {
-    use prost_reflect::{Cardinality, Kind};
-
-    if field.cardinality() == Cardinality::Repeated {
+fn generate_default_value(field: &FieldDescriptorProto) -> TokenStream {
+    if is_repeated(field) {
         return quote! { protocrap::containers::RepeatedField::new() };
     }
 
-    match field.kind() {
-        Kind::String => quote! { protocrap::containers::String::new() },
-        Kind::Bytes => quote! { protocrap::containers::Bytes::new() },
-        Kind::Message(_) => quote! {
+    match field.r#type().unwrap() {
+        Type::TYPE_STRING => quote! { protocrap::containers::String::new() },
+        Type::TYPE_BYTES => quote! { protocrap::containers::Bytes::new() },
+        Type::TYPE_MESSAGE | Type::TYPE_GROUP => quote! {
             protocrap::base::Message(core::ptr::null_mut())
         },
-        Kind::Bool => quote! { false },
-        Kind::Int32 | Kind::Sint32 | Kind::Sfixed32 => quote! { 0i32 },
-        Kind::Int64 | Kind::Sint64 | Kind::Sfixed64 => quote! { 0i64 },
-        Kind::Uint32 | Kind::Fixed32 => quote! { 0u32 },
-        Kind::Uint64 | Kind::Fixed64 => quote! { 0u64 },
-        Kind::Float => quote! { 0.0f32 },
-        Kind::Double => quote! { 0.0f64 },
-        Kind::Enum(_) => quote! { 0i32 },
+        Type::TYPE_BOOL => quote! { false },
+        Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 | Type::TYPE_ENUM => quote! { 0i32 },
+        Type::TYPE_INT64 | Type::TYPE_SINT64 | Type::TYPE_SFIXED64 => quote! { 0i64 },
+        Type::TYPE_UINT32 | Type::TYPE_FIXED32 => quote! { 0u32 },
+        Type::TYPE_UINT64 | Type::TYPE_FIXED64 => quote! { 0u64 },
+        Type::TYPE_FLOAT => quote! { 0.0f32 },
+        Type::TYPE_DOUBLE => quote! { 0.0f64 },
     }
 }

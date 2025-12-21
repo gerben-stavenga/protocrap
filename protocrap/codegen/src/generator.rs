@@ -1,12 +1,9 @@
 // protocrap-codegen/src/generator.rs
 
 use crate::names::*;
-use crate::static_gen;
 use crate::tables;
 use anyhow::Result;
 use proc_macro2::TokenStream;
-use prost_reflect::DescriptorPool;
-use prost_reflect::DynamicMessage;
 use quote::{format_ident, quote};
 use super::protocrap;
 use protocrap::reflection::is_repeated;
@@ -47,29 +44,9 @@ fn generate_file(file: &FileDescriptorProto) -> Result<TokenStream> {
         items.push(generate_message(message, file, path)?);
     }
 
-    let use_prost  = false;
-    let file_descriptor = if use_prost {
-        use protocrap::ProtobufExt;
-        let mut buffer = vec![0; 100000];
-        let encoded = file.encode_flat::<100>(&mut buffer)?;
+    let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
+    let file_descriptor = crate::static_gen::generate_static_dynamic(&dynamic_file)?;
 
-        // Get the descriptor from global pool
-        let pool = DescriptorPool::global();
-        let descriptor = pool
-            .get_message_by_name("google.protobuf.FileDescriptorProto")
-            .ok_or(anyhow::anyhow!(
-                "FileDescriptorProto not found in global pool"
-            ))?;
-
-        // Decode as DynamicMessage
-        let dynamic = DynamicMessage::decode(descriptor.clone(), encoded)?;
-
-        // Generate static initializer
-        static_gen::generate_static_dynamic(&dynamic)?
-    } else {
-        let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
-        crate::static_gen_refl::generate_static_dynamic(&dynamic_file)?
-    };
     items.push(quote! {
         pub static FILE_DESCRIPTOR_PROTO: protocrap::google::protobuf::FileDescriptorProto::ProtoType = #file_descriptor;
     });

@@ -9,7 +9,7 @@ use crate::{
         FieldDescriptorProto::{Label, ProtoType as FieldDescriptorProto, Type},
         FileDescriptorProto::ProtoType as FileDescriptorProto,
     },
-    tables::{self, Table},
+    tables::Table,
     wire,
 };
 
@@ -144,7 +144,7 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
         None
     }
 
-    pub fn get_field_optional(
+    pub fn get_field(
         &'msg self,
         field: &'pool FieldDescriptorProto,
     ) -> Option<Value<'pool, 'msg>> {
@@ -277,7 +277,7 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
                 }
             };
             debug_assert!(needs_has_bit(field));
-            if !self.object.has_bit(entry.has_bit_idx() as u8) {
+            if self.object.has_bit(entry.has_bit_idx() as u8) {
                 Some(value)
             } else {
                 None

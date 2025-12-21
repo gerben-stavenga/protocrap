@@ -11,7 +11,6 @@ use protocrap;
 mod generator;
 mod names;
 mod static_gen;
-mod static_gen_refl;
 mod tables;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
