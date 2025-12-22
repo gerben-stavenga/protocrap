@@ -58,6 +58,9 @@ pub mod google {
                 ) -> Self {
                     Self { has_bits, file }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -75,6 +78,26 @@ pub mod google {
                     &mut crate::google::protobuf::FileDescriptorProto::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.file) }
+                }
+                pub fn add_file(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FileDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FileDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FileDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.file.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -216,36 +239,85 @@ pub mod google {
                         edition,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[1]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
+                }
+                pub const fn has_package(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn package(&self) -> &str {
                     self.package.as_str()
+                }
+                pub const fn get_package(&self) -> Option<&str> {
+                    if self.has_package() { Some(self.package.as_str()) } else { None }
                 }
                 pub fn set_package(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.package.assign(value, arena);
                 }
+                pub fn set_optional_package(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_package(v, arena),
+                        None => self.clear_package(),
+                    }
+                }
+                pub fn clear_package(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.package.clear();
+                }
                 pub const fn dependency(&self) -> &[protocrap::containers::String] {
-                    unsafe { core::mem::transmute(self.dependency.slice()) }
+                    self.dependency.slice()
                 }
                 pub fn dependency_mut(
                     &mut self,
@@ -255,7 +327,7 @@ pub mod google {
                     &mut self.dependency
                 }
                 pub const fn public_dependency(&self) -> &[i32] {
-                    unsafe { core::mem::transmute(self.public_dependency.slice()) }
+                    self.public_dependency.slice()
                 }
                 pub fn public_dependency_mut(
                     &mut self,
@@ -263,7 +335,7 @@ pub mod google {
                     &mut self.public_dependency
                 }
                 pub const fn weak_dependency(&self) -> &[i32] {
-                    unsafe { core::mem::transmute(self.weak_dependency.slice()) }
+                    self.weak_dependency.slice()
                 }
                 pub fn weak_dependency_mut(
                     &mut self,
@@ -282,6 +354,24 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.message_type) }
                 }
+                pub fn add_message_type(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::DescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<crate::google::protobuf::DescriptorProto::ProtoType>();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::DescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.message_type.push(msg, arena);
+                    value
+                }
                 pub const fn enum_type(
                     &self,
                 ) -> &[&crate::google::protobuf::EnumDescriptorProto::ProtoType] {
@@ -293,6 +383,26 @@ pub mod google {
                     &mut crate::google::protobuf::EnumDescriptorProto::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.enum_type) }
+                }
+                pub fn add_enum_type(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::EnumDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::EnumDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::EnumDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.enum_type.push(msg, arena);
+                    value
                 }
                 pub const fn service(
                     &self,
@@ -306,6 +416,26 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.service) }
                 }
+                pub fn add_service(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::ServiceDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::ServiceDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::ServiceDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.service.push(msg, arena);
+                    value
+                }
                 pub const fn extension(
                     &self,
                 ) -> &[&crate::google::protobuf::FieldDescriptorProto::ProtoType] {
@@ -318,16 +448,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.extension) }
                 }
+                pub fn add_extension(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.extension.push(msg, arena);
+                    value
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
+                }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::FileOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::FileOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -349,16 +502,22 @@ pub mod google {
                             as *mut crate::google::protobuf::FileOptions::ProtoType)
                     }
                 }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_source_code_info(&self) -> bool {
+                    !self.source_code_info.0.is_null()
+                }
                 pub const fn source_code_info(
                     &self,
                 ) -> Option<&crate::google::protobuf::SourceCodeInfo::ProtoType> {
-                    if self.source_code_info.0.is_null() {
-                        None
-                    } else {
+                    if self.has_source_code_info() {
                         Some(unsafe {
                             &*(self.source_code_info.0
                                 as *const crate::google::protobuf::SourceCodeInfo::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn source_code_info_mut(
@@ -380,23 +539,70 @@ pub mod google {
                             as *mut crate::google::protobuf::SourceCodeInfo::ProtoType)
                     }
                 }
+                pub fn clear_source_code_info(&mut self) {
+                    self.source_code_info = protocrap::base::Message(
+                        core::ptr::null_mut(),
+                    );
+                }
+                pub const fn has_syntax(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
+                }
                 pub const fn syntax(&self) -> &str {
                     self.syntax.as_str()
+                }
+                pub const fn get_syntax(&self) -> Option<&str> {
+                    if self.has_syntax() { Some(self.syntax.as_str()) } else { None }
                 }
                 pub fn set_syntax(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.syntax.assign(value, arena);
+                }
+                pub fn set_optional_syntax(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_syntax(v, arena),
+                        None => self.clear_syntax(),
+                    }
+                }
+                pub fn clear_syntax(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.syntax.clear();
+                }
+                pub const fn has_edition(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn edition(&self) -> Option<crate::google::protobuf::Edition> {
                     crate::google::protobuf::Edition::from_i32(self.edition)
                 }
                 pub fn set_edition(&mut self, value: crate::google::protobuf::Edition) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.edition = value.to_i32();
+                }
+                pub fn set_optional_edition(
+                    &mut self,
+                    value: Option<crate::google::protobuf::Edition>,
+                ) {
+                    match value {
+                        Some(v) => self.set_edition(v),
+                        None => self.clear_edition(),
+                    }
+                }
+                pub fn clear_edition(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.edition = 0;
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -747,38 +953,82 @@ pub mod google {
                             options,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[2].nested_type()[0]
                     }
+                    pub const fn has_start(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn start(&self) -> i32 {
                         self.start
                     }
+                    pub const fn get_start(&self) -> Option<i32> {
+                        if self.has_start() { Some(self.start) } else { None }
+                    }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.start = value;
+                    }
+                    pub fn set_optional_start(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_start(v),
+                            None => self.clear_start(),
+                        }
+                    }
+                    pub fn clear_start(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.start = Default::default();
+                    }
+                    pub const fn has_end(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
                     }
+                    pub const fn get_end(&self) -> Option<i32> {
+                        if self.has_end() { Some(self.end) } else { None }
+                    }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.end = value;
+                    }
+                    pub fn set_optional_end(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_end(v),
+                            None => self.clear_end(),
+                        }
+                    }
+                    pub fn clear_end(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.end = Default::default();
+                    }
+                    pub const fn has_options(&self) -> bool {
+                        !self.options.0.is_null()
                     }
                     pub const fn options(
                         &self,
                     ) -> Option<
                         &crate::google::protobuf::ExtensionRangeOptions::ProtoType,
                     > {
-                        if self.options.0.is_null() {
-                            None
-                        } else {
+                        if self.has_options() {
                             Some(unsafe {
                                 &*(self.options.0
                                     as *const crate::google::protobuf::ExtensionRangeOptions::ProtoType)
                             })
+                        } else {
+                            None
                         }
                     }
                     pub fn options_mut(
@@ -799,6 +1049,9 @@ pub mod google {
                             &mut *(self.options.0
                                 as *mut crate::google::protobuf::ExtensionRangeOptions::ProtoType)
                         }
+                    }
+                    pub fn clear_options(&mut self) {
+                        self.options = protocrap::base::Message(core::ptr::null_mut());
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -910,25 +1163,66 @@ pub mod google {
                     ) -> Self {
                         Self { has_bits, start, end }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[2].nested_type()[1]
                     }
+                    pub const fn has_start(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn start(&self) -> i32 {
                         self.start
                     }
+                    pub const fn get_start(&self) -> Option<i32> {
+                        if self.has_start() { Some(self.start) } else { None }
+                    }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.start = value;
+                    }
+                    pub fn set_optional_start(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_start(v),
+                            None => self.clear_start(),
+                        }
+                    }
+                    pub fn clear_start(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.start = Default::default();
+                    }
+                    pub const fn has_end(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
                     }
+                    pub const fn get_end(&self) -> Option<i32> {
+                        if self.has_end() { Some(self.end) } else { None }
+                    }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.end = value;
+                    }
+                    pub fn set_optional_end(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_end(v),
+                            None => self.clear_end(),
+                        }
+                    }
+                    pub fn clear_end(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.end = Default::default();
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -1055,22 +1349,48 @@ pub mod google {
                         reserved_name,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[2]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
                 }
                 pub const fn field(
                     &self,
@@ -1084,6 +1404,26 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.field) }
                 }
+                pub fn add_field(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.field.push(msg, arena);
+                    value
+                }
                 pub const fn extension(
                     &self,
                 ) -> &[&crate::google::protobuf::FieldDescriptorProto::ProtoType] {
@@ -1095,6 +1435,26 @@ pub mod google {
                     &mut crate::google::protobuf::FieldDescriptorProto::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.extension) }
+                }
+                pub fn add_extension(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FieldDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.extension.push(msg, arena);
+                    value
                 }
                 pub const fn nested_type(
                     &self,
@@ -1108,6 +1468,24 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.nested_type) }
                 }
+                pub fn add_nested_type(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::DescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<crate::google::protobuf::DescriptorProto::ProtoType>();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::DescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.nested_type.push(msg, arena);
+                    value
+                }
                 pub const fn enum_type(
                     &self,
                 ) -> &[&crate::google::protobuf::EnumDescriptorProto::ProtoType] {
@@ -1119,6 +1497,26 @@ pub mod google {
                     &mut crate::google::protobuf::EnumDescriptorProto::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.enum_type) }
+                }
+                pub fn add_enum_type(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::EnumDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::EnumDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::EnumDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.enum_type.push(msg, arena);
+                    value
                 }
                 pub const fn extension_range(
                     &self,
@@ -1132,6 +1530,26 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.extension_range) }
                 }
+                pub fn add_extension_range(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::DescriptorProto::ExtensionRange::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::DescriptorProto::ExtensionRange::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.extension_range.push(msg, arena);
+                    value
+                }
                 pub const fn oneof_decl(
                     &self,
                 ) -> &[&crate::google::protobuf::OneofDescriptorProto::ProtoType] {
@@ -1144,16 +1562,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.oneof_decl) }
                 }
+                pub fn add_oneof_decl(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::OneofDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::OneofDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::OneofDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.oneof_decl.push(msg, arena);
+                    value
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
+                }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::MessageOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::MessageOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -1175,6 +1616,9 @@ pub mod google {
                             as *mut crate::google::protobuf::MessageOptions::ProtoType)
                     }
                 }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn reserved_range(
                     &self,
                 ) -> &[&crate::google::protobuf::DescriptorProto::ReservedRange::ProtoType] {
@@ -1187,8 +1631,28 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.reserved_range) }
                 }
+                pub fn add_reserved_range(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::DescriptorProto::ReservedRange::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::DescriptorProto::ReservedRange::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::DescriptorProto::ReservedRange::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.reserved_range.push(msg, arena);
+                    value
+                }
                 pub const fn reserved_name(&self) -> &[protocrap::containers::String] {
-                    unsafe { core::mem::transmute(self.reserved_name.slice()) }
+                    self.reserved_name.slice()
                 }
                 pub fn reserved_name_mut(
                     &mut self,
@@ -1563,54 +2027,164 @@ pub mod google {
                             repeated,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[3].nested_type()[0]
                     }
+                    pub const fn has_number(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn number(&self) -> i32 {
                         self.number
                     }
+                    pub const fn get_number(&self) -> Option<i32> {
+                        if self.has_number() { Some(self.number) } else { None }
+                    }
                     pub fn set_number(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.number = value;
+                    }
+                    pub fn set_optional_number(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_number(v),
+                            None => self.clear_number(),
+                        }
+                    }
+                    pub fn clear_number(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.number = Default::default();
+                    }
+                    pub const fn has_full_name(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn full_name(&self) -> &str {
                         self.full_name.as_str()
+                    }
+                    pub const fn get_full_name(&self) -> Option<&str> {
+                        if self.has_full_name() {
+                            Some(self.full_name.as_str())
+                        } else {
+                            None
+                        }
                     }
                     pub fn set_full_name(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.full_name.assign(value, arena);
+                    }
+                    pub fn set_optional_full_name(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_full_name(v, arena),
+                            None => self.clear_full_name(),
+                        }
+                    }
+                    pub fn clear_full_name(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.full_name.clear();
+                    }
+                    pub const fn has_type(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(2usize as u8)
+                        }
                     }
                     pub const fn r#type(&self) -> &str {
                         self.r#type.as_str()
+                    }
+                    pub const fn get_type(&self) -> Option<&str> {
+                        if self.has_type() { Some(self.r#type.as_str()) } else { None }
                     }
                     pub fn set_type(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(2usize as u32);
+                        self.as_object_mut().set_has_bit(2u32);
                         self.r#type.assign(value, arena);
+                    }
+                    pub fn set_optional_type(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_type(v, arena),
+                            None => self.clear_type(),
+                        }
+                    }
+                    pub fn clear_type(&mut self) {
+                        self.as_object_mut().clear_has_bit(2u32);
+                        self.r#type.clear();
+                    }
+                    pub const fn has_reserved(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(3usize as u8)
+                        }
                     }
                     pub const fn reserved(&self) -> bool {
                         self.reserved
                     }
+                    pub const fn get_reserved(&self) -> Option<bool> {
+                        if self.has_reserved() { Some(self.reserved) } else { None }
+                    }
                     pub fn set_reserved(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(3usize as u32);
+                        self.as_object_mut().set_has_bit(3u32);
                         self.reserved = value;
+                    }
+                    pub fn set_optional_reserved(&mut self, value: Option<bool>) {
+                        match value {
+                            Some(v) => self.set_reserved(v),
+                            None => self.clear_reserved(),
+                        }
+                    }
+                    pub fn clear_reserved(&mut self) {
+                        self.as_object_mut().clear_has_bit(3u32);
+                        self.reserved = Default::default();
+                    }
+                    pub const fn has_repeated(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(4usize as u8)
+                        }
                     }
                     pub const fn repeated(&self) -> bool {
                         self.repeated
                     }
+                    pub const fn get_repeated(&self) -> Option<bool> {
+                        if self.has_repeated() { Some(self.repeated) } else { None }
+                    }
                     pub fn set_repeated(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(4usize as u32);
+                        self.as_object_mut().set_has_bit(4u32);
                         self.repeated = value;
+                    }
+                    pub fn set_optional_repeated(&mut self, value: Option<bool>) {
+                        match value {
+                            Some(v) => self.set_repeated(v),
+                            None => self.clear_repeated(),
+                        }
+                    }
+                    pub fn clear_repeated(&mut self) {
+                        self.as_object_mut().clear_has_bit(4u32);
+                        self.repeated = Default::default();
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -1750,6 +2324,9 @@ pub mod google {
                         verification,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -1768,6 +2345,26 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
                 }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
+                }
                 pub const fn declaration(
                     &self,
                 ) -> &[&crate::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType] {
@@ -1780,16 +2377,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.declaration) }
                 }
+                pub fn add_declaration(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.declaration.push(msg, arena);
+                    value
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
+                }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -1811,6 +2431,15 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_verification(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn verification(
                     &self,
                 ) -> Option<
@@ -1824,8 +2453,23 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::ExtensionRangeOptions::VerificationState,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.verification = value.to_i32();
+                }
+                pub fn set_optional_verification(
+                    &mut self,
+                    value: Option<
+                        crate::google::protobuf::ExtensionRangeOptions::VerificationState,
+                    >,
+                ) {
+                    match value {
+                        Some(v) => self.set_verification(v),
+                        None => self.clear_verification(),
+                    }
+                }
+                pub fn clear_verification(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.verification = 0;
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -3089,29 +3733,80 @@ pub mod google {
                         proto3_optional,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[4]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
+                }
+                pub const fn has_number(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn number(&self) -> i32 {
                     self.number
                 }
+                pub const fn get_number(&self) -> Option<i32> {
+                    if self.has_number() { Some(self.number) } else { None }
+                }
                 pub fn set_number(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.number = value;
+                }
+                pub fn set_optional_number(&mut self, value: Option<i32>) {
+                    match value {
+                        Some(v) => self.set_number(v),
+                        None => self.clear_number(),
+                    }
+                }
+                pub fn clear_number(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.number = Default::default();
+                }
+                pub const fn has_label(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn label(
                     &self,
@@ -3124,8 +3819,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldDescriptorProto::Label,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.label = value.to_i32();
+                }
+                pub fn set_optional_label(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FieldDescriptorProto::Label>,
+                ) {
+                    match value {
+                        Some(v) => self.set_label(v),
+                        None => self.clear_label(),
+                    }
+                }
+                pub fn clear_label(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.label = 0;
+                }
+                pub const fn has_type(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn r#type(
                     &self,
@@ -3138,70 +3852,209 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldDescriptorProto::Type,
                 ) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.r#type = value.to_i32();
+                }
+                pub fn set_optional_type(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FieldDescriptorProto::Type>,
+                ) {
+                    match value {
+                        Some(v) => self.set_type(v),
+                        None => self.clear_type(),
+                    }
+                }
+                pub fn clear_type(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.r#type = 0;
+                }
+                pub const fn has_type_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn type_name(&self) -> &str {
                     self.type_name.as_str()
+                }
+                pub const fn get_type_name(&self) -> Option<&str> {
+                    if self.has_type_name() {
+                        Some(self.type_name.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_type_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.type_name.assign(value, arena);
+                }
+                pub fn set_optional_type_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_type_name(v, arena),
+                        None => self.clear_type_name(),
+                    }
+                }
+                pub fn clear_type_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.type_name.clear();
+                }
+                pub const fn has_extendee(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(5usize as u8)
+                    }
                 }
                 pub const fn extendee(&self) -> &str {
                     self.extendee.as_str()
+                }
+                pub const fn get_extendee(&self) -> Option<&str> {
+                    if self.has_extendee() { Some(self.extendee.as_str()) } else { None }
                 }
                 pub fn set_extendee(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(5usize as u32);
+                    self.as_object_mut().set_has_bit(5u32);
                     self.extendee.assign(value, arena);
+                }
+                pub fn set_optional_extendee(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_extendee(v, arena),
+                        None => self.clear_extendee(),
+                    }
+                }
+                pub fn clear_extendee(&mut self) {
+                    self.as_object_mut().clear_has_bit(5u32);
+                    self.extendee.clear();
+                }
+                pub const fn has_default_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(6usize as u8)
+                    }
                 }
                 pub const fn default_value(&self) -> &str {
                     self.default_value.as_str()
+                }
+                pub const fn get_default_value(&self) -> Option<&str> {
+                    if self.has_default_value() {
+                        Some(self.default_value.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_default_value(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(6usize as u32);
+                    self.as_object_mut().set_has_bit(6u32);
                     self.default_value.assign(value, arena);
+                }
+                pub fn set_optional_default_value(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_default_value(v, arena),
+                        None => self.clear_default_value(),
+                    }
+                }
+                pub fn clear_default_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(6u32);
+                    self.default_value.clear();
+                }
+                pub const fn has_oneof_index(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(7usize as u8)
+                    }
                 }
                 pub const fn oneof_index(&self) -> i32 {
                     self.oneof_index
                 }
+                pub const fn get_oneof_index(&self) -> Option<i32> {
+                    if self.has_oneof_index() { Some(self.oneof_index) } else { None }
+                }
                 pub fn set_oneof_index(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(7usize as u32);
+                    self.as_object_mut().set_has_bit(7u32);
                     self.oneof_index = value;
+                }
+                pub fn set_optional_oneof_index(&mut self, value: Option<i32>) {
+                    match value {
+                        Some(v) => self.set_oneof_index(v),
+                        None => self.clear_oneof_index(),
+                    }
+                }
+                pub fn clear_oneof_index(&mut self) {
+                    self.as_object_mut().clear_has_bit(7u32);
+                    self.oneof_index = Default::default();
+                }
+                pub const fn has_json_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(8usize as u8)
+                    }
                 }
                 pub const fn json_name(&self) -> &str {
                     self.json_name.as_str()
+                }
+                pub const fn get_json_name(&self) -> Option<&str> {
+                    if self.has_json_name() {
+                        Some(self.json_name.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_json_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(8usize as u32);
+                    self.as_object_mut().set_has_bit(8u32);
                     self.json_name.assign(value, arena);
+                }
+                pub fn set_optional_json_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_json_name(v, arena),
+                        None => self.clear_json_name(),
+                    }
+                }
+                pub fn clear_json_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(8u32);
+                    self.json_name.clear();
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
                 }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::FieldOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::FieldOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -3223,12 +4076,38 @@ pub mod google {
                             as *mut crate::google::protobuf::FieldOptions::ProtoType)
                     }
                 }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_proto3_optional(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(9usize as u8)
+                    }
+                }
                 pub const fn proto3_optional(&self) -> bool {
                     self.proto3_optional
                 }
+                pub const fn get_proto3_optional(&self) -> Option<bool> {
+                    if self.has_proto3_optional() {
+                        Some(self.proto3_optional)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_proto3_optional(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(9usize as u32);
+                    self.as_object_mut().set_has_bit(9u32);
                     self.proto3_optional = value;
+                }
+                pub fn set_optional_proto3_optional(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_proto3_optional(v),
+                        None => self.clear_proto3_optional(),
+                    }
+                }
+                pub fn clear_proto3_optional(&mut self) {
+                    self.as_object_mut().clear_has_bit(9u32);
+                    self.proto3_optional = Default::default();
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -3430,33 +4309,62 @@ pub mod google {
                 ) -> Self {
                     Self { has_bits, name, options }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[5]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
                 }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::OneofOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::OneofOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -3477,6 +4385,9 @@ pub mod google {
                         &mut *(self.options.0
                             as *mut crate::google::protobuf::OneofOptions::ProtoType)
                     }
+                }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -3581,25 +4492,66 @@ pub mod google {
                     ) -> Self {
                         Self { has_bits, start, end }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[6].nested_type()[0]
                     }
+                    pub const fn has_start(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn start(&self) -> i32 {
                         self.start
                     }
+                    pub const fn get_start(&self) -> Option<i32> {
+                        if self.has_start() { Some(self.start) } else { None }
+                    }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.start = value;
+                    }
+                    pub fn set_optional_start(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_start(v),
+                            None => self.clear_start(),
+                        }
+                    }
+                    pub fn clear_start(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.start = Default::default();
+                    }
+                    pub const fn has_end(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
                     }
+                    pub const fn get_end(&self) -> Option<i32> {
+                        if self.has_end() { Some(self.end) } else { None }
+                    }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.end = value;
+                    }
+                    pub fn set_optional_end(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_end(v),
+                            None => self.clear_end(),
+                        }
+                    }
+                    pub fn clear_end(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.end = Default::default();
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -3691,22 +4643,48 @@ pub mod google {
                         reserved_name,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[6]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
                 }
                 pub const fn value(
                     &self,
@@ -3720,16 +4698,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.value) }
                 }
+                pub fn add_value(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::EnumValueDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::EnumValueDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::EnumValueDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.value.push(msg, arena);
+                    value
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
+                }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::EnumOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::EnumOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -3751,6 +4752,9 @@ pub mod google {
                             as *mut crate::google::protobuf::EnumOptions::ProtoType)
                     }
                 }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn reserved_range(
                     &self,
                 ) -> &[&crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType] {
@@ -3763,8 +4767,28 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.reserved_range) }
                 }
+                pub fn add_reserved_range(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.reserved_range.push(msg, arena);
+                    value
+                }
                 pub const fn reserved_name(&self) -> &[protocrap::containers::String] {
-                    unsafe { core::mem::transmute(self.reserved_name.slice()) }
+                    self.reserved_name.slice()
                 }
                 pub fn reserved_name_mut(
                     &mut self,
@@ -3954,40 +4978,88 @@ pub mod google {
                         options,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[7]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
+                }
+                pub const fn has_number(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn number(&self) -> i32 {
                     self.number
                 }
+                pub const fn get_number(&self) -> Option<i32> {
+                    if self.has_number() { Some(self.number) } else { None }
+                }
                 pub fn set_number(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.number = value;
+                }
+                pub fn set_optional_number(&mut self, value: Option<i32>) {
+                    match value {
+                        Some(v) => self.set_number(v),
+                        None => self.clear_number(),
+                    }
+                }
+                pub fn clear_number(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.number = Default::default();
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
                 }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::EnumValueOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::EnumValueOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -4008,6 +5080,9 @@ pub mod google {
                         &mut *(self.options.0
                             as *mut crate::google::protobuf::EnumValueOptions::ProtoType)
                     }
+                }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -4125,22 +5200,48 @@ pub mod google {
                         options,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[8]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
                 }
                 pub const fn method(
                     &self,
@@ -4154,16 +5255,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.method) }
                 }
+                pub fn add_method(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::MethodDescriptorProto::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::MethodDescriptorProto::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::MethodDescriptorProto::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.method.push(msg, arena);
+                    value
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
+                }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::ServiceOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::ServiceOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -4184,6 +5308,9 @@ pub mod google {
                         &mut *(self.options.0
                             as *mut crate::google::protobuf::ServiceOptions::ProtoType)
                     }
+                }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -4331,55 +5458,138 @@ pub mod google {
                         server_streaming,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[9]
                 }
+                pub const fn has_name(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
+                }
+                pub const fn get_name(&self) -> Option<&str> {
+                    if self.has_name() { Some(self.name.as_str()) } else { None }
                 }
                 pub fn set_name(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.name.assign(value, arena);
+                }
+                pub fn set_optional_name(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_name(v, arena),
+                        None => self.clear_name(),
+                    }
+                }
+                pub fn clear_name(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.name.clear();
+                }
+                pub const fn has_input_type(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn input_type(&self) -> &str {
                     self.input_type.as_str()
+                }
+                pub const fn get_input_type(&self) -> Option<&str> {
+                    if self.has_input_type() {
+                        Some(self.input_type.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_input_type(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.input_type.assign(value, arena);
+                }
+                pub fn set_optional_input_type(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_input_type(v, arena),
+                        None => self.clear_input_type(),
+                    }
+                }
+                pub fn clear_input_type(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.input_type.clear();
+                }
+                pub const fn has_output_type(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn output_type(&self) -> &str {
                     self.output_type.as_str()
+                }
+                pub const fn get_output_type(&self) -> Option<&str> {
+                    if self.has_output_type() {
+                        Some(self.output_type.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_output_type(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.output_type.assign(value, arena);
+                }
+                pub fn set_optional_output_type(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_output_type(v, arena),
+                        None => self.clear_output_type(),
+                    }
+                }
+                pub fn clear_output_type(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.output_type.clear();
+                }
+                pub const fn has_options(&self) -> bool {
+                    !self.options.0.is_null()
                 }
                 pub const fn options(
                     &self,
                 ) -> Option<&crate::google::protobuf::MethodOptions::ProtoType> {
-                    if self.options.0.is_null() {
-                        None
-                    } else {
+                    if self.has_options() {
                         Some(unsafe {
                             &*(self.options.0
                                 as *const crate::google::protobuf::MethodOptions::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn options_mut(
@@ -4401,19 +5611,68 @@ pub mod google {
                             as *mut crate::google::protobuf::MethodOptions::ProtoType)
                     }
                 }
+                pub fn clear_options(&mut self) {
+                    self.options = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_client_streaming(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
+                }
                 pub const fn client_streaming(&self) -> bool {
                     self.client_streaming
                 }
+                pub const fn get_client_streaming(&self) -> Option<bool> {
+                    if self.has_client_streaming() {
+                        Some(self.client_streaming)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_client_streaming(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.client_streaming = value;
+                }
+                pub fn set_optional_client_streaming(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_client_streaming(v),
+                        None => self.clear_client_streaming(),
+                    }
+                }
+                pub fn clear_client_streaming(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.client_streaming = Default::default();
+                }
+                pub const fn has_server_streaming(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn server_streaming(&self) -> bool {
                     self.server_streaming
                 }
+                pub const fn get_server_streaming(&self) -> Option<bool> {
+                    if self.has_server_streaming() {
+                        Some(self.server_streaming)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_server_streaming(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.server_streaming = value;
+                }
+                pub fn set_optional_server_streaming(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_server_streaming(v),
+                        None => self.clear_server_streaming(),
+                    }
+                }
+                pub fn clear_server_streaming(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.server_streaming = Default::default();
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -4645,54 +5904,192 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[10]
                 }
+                pub const fn has_java_package(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn java_package(&self) -> &str {
                     self.java_package.as_str()
+                }
+                pub const fn get_java_package(&self) -> Option<&str> {
+                    if self.has_java_package() {
+                        Some(self.java_package.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_java_package(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.java_package.assign(value, arena);
+                }
+                pub fn set_optional_java_package(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_java_package(v, arena),
+                        None => self.clear_java_package(),
+                    }
+                }
+                pub fn clear_java_package(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.java_package.clear();
+                }
+                pub const fn has_java_outer_classname(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn java_outer_classname(&self) -> &str {
                     self.java_outer_classname.as_str()
+                }
+                pub const fn get_java_outer_classname(&self) -> Option<&str> {
+                    if self.has_java_outer_classname() {
+                        Some(self.java_outer_classname.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_java_outer_classname(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.java_outer_classname.assign(value, arena);
+                }
+                pub fn set_optional_java_outer_classname(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_java_outer_classname(v, arena),
+                        None => self.clear_java_outer_classname(),
+                    }
+                }
+                pub fn clear_java_outer_classname(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.java_outer_classname.clear();
+                }
+                pub const fn has_java_multiple_files(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn java_multiple_files(&self) -> bool {
                     self.java_multiple_files
                 }
+                pub const fn get_java_multiple_files(&self) -> Option<bool> {
+                    if self.has_java_multiple_files() {
+                        Some(self.java_multiple_files)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_java_multiple_files(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.java_multiple_files = value;
+                }
+                pub fn set_optional_java_multiple_files(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_java_multiple_files(v),
+                        None => self.clear_java_multiple_files(),
+                    }
+                }
+                pub fn clear_java_multiple_files(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.java_multiple_files = Default::default();
+                }
+                pub const fn has_java_generate_equals_and_hash(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn java_generate_equals_and_hash(&self) -> bool {
                     self.java_generate_equals_and_hash
                 }
+                pub const fn get_java_generate_equals_and_hash(&self) -> Option<bool> {
+                    if self.has_java_generate_equals_and_hash() {
+                        Some(self.java_generate_equals_and_hash)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_java_generate_equals_and_hash(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.java_generate_equals_and_hash = value;
+                }
+                pub fn set_optional_java_generate_equals_and_hash(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_java_generate_equals_and_hash(v),
+                        None => self.clear_java_generate_equals_and_hash(),
+                    }
+                }
+                pub fn clear_java_generate_equals_and_hash(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.java_generate_equals_and_hash = Default::default();
+                }
+                pub const fn has_java_string_check_utf8(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn java_string_check_utf8(&self) -> bool {
                     self.java_string_check_utf8
                 }
+                pub const fn get_java_string_check_utf8(&self) -> Option<bool> {
+                    if self.has_java_string_check_utf8() {
+                        Some(self.java_string_check_utf8)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_java_string_check_utf8(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.java_string_check_utf8 = value;
+                }
+                pub fn set_optional_java_string_check_utf8(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_java_string_check_utf8(v),
+                        None => self.clear_java_string_check_utf8(),
+                    }
+                }
+                pub fn clear_java_string_check_utf8(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.java_string_check_utf8 = Default::default();
+                }
+                pub const fn has_optimize_for(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(5usize as u8)
+                    }
                 }
                 pub const fn optimize_for(
                     &self,
@@ -4705,149 +6102,521 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FileOptions::OptimizeMode,
                 ) {
-                    self.as_object_mut().set_has_bit(5usize as u32);
+                    self.as_object_mut().set_has_bit(5u32);
                     self.optimize_for = value.to_i32();
+                }
+                pub fn set_optional_optimize_for(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FileOptions::OptimizeMode>,
+                ) {
+                    match value {
+                        Some(v) => self.set_optimize_for(v),
+                        None => self.clear_optimize_for(),
+                    }
+                }
+                pub fn clear_optimize_for(&mut self) {
+                    self.as_object_mut().clear_has_bit(5u32);
+                    self.optimize_for = 0;
+                }
+                pub const fn has_go_package(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(6usize as u8)
+                    }
                 }
                 pub const fn go_package(&self) -> &str {
                     self.go_package.as_str()
+                }
+                pub const fn get_go_package(&self) -> Option<&str> {
+                    if self.has_go_package() {
+                        Some(self.go_package.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_go_package(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(6usize as u32);
+                    self.as_object_mut().set_has_bit(6u32);
                     self.go_package.assign(value, arena);
+                }
+                pub fn set_optional_go_package(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_go_package(v, arena),
+                        None => self.clear_go_package(),
+                    }
+                }
+                pub fn clear_go_package(&mut self) {
+                    self.as_object_mut().clear_has_bit(6u32);
+                    self.go_package.clear();
+                }
+                pub const fn has_cc_generic_services(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(7usize as u8)
+                    }
                 }
                 pub const fn cc_generic_services(&self) -> bool {
                     self.cc_generic_services
                 }
+                pub const fn get_cc_generic_services(&self) -> Option<bool> {
+                    if self.has_cc_generic_services() {
+                        Some(self.cc_generic_services)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_cc_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(7usize as u32);
+                    self.as_object_mut().set_has_bit(7u32);
                     self.cc_generic_services = value;
+                }
+                pub fn set_optional_cc_generic_services(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_cc_generic_services(v),
+                        None => self.clear_cc_generic_services(),
+                    }
+                }
+                pub fn clear_cc_generic_services(&mut self) {
+                    self.as_object_mut().clear_has_bit(7u32);
+                    self.cc_generic_services = Default::default();
+                }
+                pub const fn has_java_generic_services(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(8usize as u8)
+                    }
                 }
                 pub const fn java_generic_services(&self) -> bool {
                     self.java_generic_services
                 }
+                pub const fn get_java_generic_services(&self) -> Option<bool> {
+                    if self.has_java_generic_services() {
+                        Some(self.java_generic_services)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_java_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(8usize as u32);
+                    self.as_object_mut().set_has_bit(8u32);
                     self.java_generic_services = value;
+                }
+                pub fn set_optional_java_generic_services(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_java_generic_services(v),
+                        None => self.clear_java_generic_services(),
+                    }
+                }
+                pub fn clear_java_generic_services(&mut self) {
+                    self.as_object_mut().clear_has_bit(8u32);
+                    self.java_generic_services = Default::default();
+                }
+                pub const fn has_py_generic_services(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(9usize as u8)
+                    }
                 }
                 pub const fn py_generic_services(&self) -> bool {
                     self.py_generic_services
                 }
+                pub const fn get_py_generic_services(&self) -> Option<bool> {
+                    if self.has_py_generic_services() {
+                        Some(self.py_generic_services)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_py_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(9usize as u32);
+                    self.as_object_mut().set_has_bit(9u32);
                     self.py_generic_services = value;
+                }
+                pub fn set_optional_py_generic_services(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_py_generic_services(v),
+                        None => self.clear_py_generic_services(),
+                    }
+                }
+                pub fn clear_py_generic_services(&mut self) {
+                    self.as_object_mut().clear_has_bit(9u32);
+                    self.py_generic_services = Default::default();
+                }
+                pub const fn has_php_generic_services(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(10usize as u8)
+                    }
                 }
                 pub const fn php_generic_services(&self) -> bool {
                     self.php_generic_services
                 }
+                pub const fn get_php_generic_services(&self) -> Option<bool> {
+                    if self.has_php_generic_services() {
+                        Some(self.php_generic_services)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_php_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(10usize as u32);
+                    self.as_object_mut().set_has_bit(10u32);
                     self.php_generic_services = value;
+                }
+                pub fn set_optional_php_generic_services(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_php_generic_services(v),
+                        None => self.clear_php_generic_services(),
+                    }
+                }
+                pub fn clear_php_generic_services(&mut self) {
+                    self.as_object_mut().clear_has_bit(10u32);
+                    self.php_generic_services = Default::default();
+                }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(11usize as u8)
+                    }
                 }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(11usize as u32);
+                    self.as_object_mut().set_has_bit(11u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(11u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_cc_enable_arenas(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(12usize as u8)
+                    }
                 }
                 pub const fn cc_enable_arenas(&self) -> bool {
                     self.cc_enable_arenas
                 }
+                pub const fn get_cc_enable_arenas(&self) -> Option<bool> {
+                    if self.has_cc_enable_arenas() {
+                        Some(self.cc_enable_arenas)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_cc_enable_arenas(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(12usize as u32);
+                    self.as_object_mut().set_has_bit(12u32);
                     self.cc_enable_arenas = value;
+                }
+                pub fn set_optional_cc_enable_arenas(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_cc_enable_arenas(v),
+                        None => self.clear_cc_enable_arenas(),
+                    }
+                }
+                pub fn clear_cc_enable_arenas(&mut self) {
+                    self.as_object_mut().clear_has_bit(12u32);
+                    self.cc_enable_arenas = Default::default();
+                }
+                pub const fn has_objc_class_prefix(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(13usize as u8)
+                    }
                 }
                 pub const fn objc_class_prefix(&self) -> &str {
                     self.objc_class_prefix.as_str()
+                }
+                pub const fn get_objc_class_prefix(&self) -> Option<&str> {
+                    if self.has_objc_class_prefix() {
+                        Some(self.objc_class_prefix.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_objc_class_prefix(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(13usize as u32);
+                    self.as_object_mut().set_has_bit(13u32);
                     self.objc_class_prefix.assign(value, arena);
+                }
+                pub fn set_optional_objc_class_prefix(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_objc_class_prefix(v, arena),
+                        None => self.clear_objc_class_prefix(),
+                    }
+                }
+                pub fn clear_objc_class_prefix(&mut self) {
+                    self.as_object_mut().clear_has_bit(13u32);
+                    self.objc_class_prefix.clear();
+                }
+                pub const fn has_csharp_namespace(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(14usize as u8)
+                    }
                 }
                 pub const fn csharp_namespace(&self) -> &str {
                     self.csharp_namespace.as_str()
+                }
+                pub const fn get_csharp_namespace(&self) -> Option<&str> {
+                    if self.has_csharp_namespace() {
+                        Some(self.csharp_namespace.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_csharp_namespace(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(14usize as u32);
+                    self.as_object_mut().set_has_bit(14u32);
                     self.csharp_namespace.assign(value, arena);
+                }
+                pub fn set_optional_csharp_namespace(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_csharp_namespace(v, arena),
+                        None => self.clear_csharp_namespace(),
+                    }
+                }
+                pub fn clear_csharp_namespace(&mut self) {
+                    self.as_object_mut().clear_has_bit(14u32);
+                    self.csharp_namespace.clear();
+                }
+                pub const fn has_swift_prefix(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(15usize as u8)
+                    }
                 }
                 pub const fn swift_prefix(&self) -> &str {
                     self.swift_prefix.as_str()
+                }
+                pub const fn get_swift_prefix(&self) -> Option<&str> {
+                    if self.has_swift_prefix() {
+                        Some(self.swift_prefix.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_swift_prefix(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(15usize as u32);
+                    self.as_object_mut().set_has_bit(15u32);
                     self.swift_prefix.assign(value, arena);
+                }
+                pub fn set_optional_swift_prefix(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_swift_prefix(v, arena),
+                        None => self.clear_swift_prefix(),
+                    }
+                }
+                pub fn clear_swift_prefix(&mut self) {
+                    self.as_object_mut().clear_has_bit(15u32);
+                    self.swift_prefix.clear();
+                }
+                pub const fn has_php_class_prefix(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(16usize as u8)
+                    }
                 }
                 pub const fn php_class_prefix(&self) -> &str {
                     self.php_class_prefix.as_str()
+                }
+                pub const fn get_php_class_prefix(&self) -> Option<&str> {
+                    if self.has_php_class_prefix() {
+                        Some(self.php_class_prefix.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_php_class_prefix(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(16usize as u32);
+                    self.as_object_mut().set_has_bit(16u32);
                     self.php_class_prefix.assign(value, arena);
+                }
+                pub fn set_optional_php_class_prefix(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_php_class_prefix(v, arena),
+                        None => self.clear_php_class_prefix(),
+                    }
+                }
+                pub fn clear_php_class_prefix(&mut self) {
+                    self.as_object_mut().clear_has_bit(16u32);
+                    self.php_class_prefix.clear();
+                }
+                pub const fn has_php_namespace(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(17usize as u8)
+                    }
                 }
                 pub const fn php_namespace(&self) -> &str {
                     self.php_namespace.as_str()
+                }
+                pub const fn get_php_namespace(&self) -> Option<&str> {
+                    if self.has_php_namespace() {
+                        Some(self.php_namespace.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_php_namespace(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(17usize as u32);
+                    self.as_object_mut().set_has_bit(17u32);
                     self.php_namespace.assign(value, arena);
+                }
+                pub fn set_optional_php_namespace(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_php_namespace(v, arena),
+                        None => self.clear_php_namespace(),
+                    }
+                }
+                pub fn clear_php_namespace(&mut self) {
+                    self.as_object_mut().clear_has_bit(17u32);
+                    self.php_namespace.clear();
+                }
+                pub const fn has_php_metadata_namespace(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(18usize as u8)
+                    }
                 }
                 pub const fn php_metadata_namespace(&self) -> &str {
                     self.php_metadata_namespace.as_str()
+                }
+                pub const fn get_php_metadata_namespace(&self) -> Option<&str> {
+                    if self.has_php_metadata_namespace() {
+                        Some(self.php_metadata_namespace.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_php_metadata_namespace(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(18usize as u32);
+                    self.as_object_mut().set_has_bit(18u32);
                     self.php_metadata_namespace.assign(value, arena);
+                }
+                pub fn set_optional_php_metadata_namespace(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_php_metadata_namespace(v, arena),
+                        None => self.clear_php_metadata_namespace(),
+                    }
+                }
+                pub fn clear_php_metadata_namespace(&mut self) {
+                    self.as_object_mut().clear_has_bit(18u32);
+                    self.php_metadata_namespace.clear();
+                }
+                pub const fn has_ruby_package(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(19usize as u8)
+                    }
                 }
                 pub const fn ruby_package(&self) -> &str {
                     self.ruby_package.as_str()
+                }
+                pub const fn get_ruby_package(&self) -> Option<&str> {
+                    if self.has_ruby_package() {
+                        Some(self.ruby_package.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_ruby_package(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(19usize as u32);
+                    self.as_object_mut().set_has_bit(19u32);
                     self.ruby_package.assign(value, arena);
+                }
+                pub fn set_optional_ruby_package(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_ruby_package(v, arena),
+                        None => self.clear_ruby_package(),
+                    }
+                }
+                pub fn clear_ruby_package(&mut self) {
+                    self.as_object_mut().clear_has_bit(19u32);
+                    self.ruby_package.clear();
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
                 }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -4869,6 +6638,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -4880,6 +6652,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -6234,60 +8026,184 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[11]
                 }
+                pub const fn has_message_set_wire_format(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn message_set_wire_format(&self) -> bool {
                     self.message_set_wire_format
                 }
+                pub const fn get_message_set_wire_format(&self) -> Option<bool> {
+                    if self.has_message_set_wire_format() {
+                        Some(self.message_set_wire_format)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_message_set_wire_format(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.message_set_wire_format = value;
+                }
+                pub fn set_optional_message_set_wire_format(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_message_set_wire_format(v),
+                        None => self.clear_message_set_wire_format(),
+                    }
+                }
+                pub fn clear_message_set_wire_format(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.message_set_wire_format = Default::default();
+                }
+                pub const fn has_no_standard_descriptor_accessor(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn no_standard_descriptor_accessor(&self) -> bool {
                     self.no_standard_descriptor_accessor
                 }
+                pub const fn get_no_standard_descriptor_accessor(&self) -> Option<bool> {
+                    if self.has_no_standard_descriptor_accessor() {
+                        Some(self.no_standard_descriptor_accessor)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_no_standard_descriptor_accessor(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.no_standard_descriptor_accessor = value;
+                }
+                pub fn set_optional_no_standard_descriptor_accessor(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_no_standard_descriptor_accessor(v),
+                        None => self.clear_no_standard_descriptor_accessor(),
+                    }
+                }
+                pub fn clear_no_standard_descriptor_accessor(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.no_standard_descriptor_accessor = Default::default();
+                }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_map_entry(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn map_entry(&self) -> bool {
                     self.map_entry
                 }
+                pub const fn get_map_entry(&self) -> Option<bool> {
+                    if self.has_map_entry() { Some(self.map_entry) } else { None }
+                }
                 pub fn set_map_entry(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.map_entry = value;
+                }
+                pub fn set_optional_map_entry(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_map_entry(v),
+                        None => self.clear_map_entry(),
+                    }
+                }
+                pub fn clear_map_entry(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.map_entry = Default::default();
+                }
+                pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn deprecated_legacy_json_field_conflicts(&self) -> bool {
                     self.deprecated_legacy_json_field_conflicts
+                }
+                pub const fn get_deprecated_legacy_json_field_conflicts(
+                    &self,
+                ) -> Option<bool> {
+                    if self.has_deprecated_legacy_json_field_conflicts() {
+                        Some(self.deprecated_legacy_json_field_conflicts)
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_deprecated_legacy_json_field_conflicts(
                     &mut self,
                     value: bool,
                 ) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.deprecated_legacy_json_field_conflicts = value;
+                }
+                pub fn set_optional_deprecated_legacy_json_field_conflicts(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_deprecated_legacy_json_field_conflicts(v),
+                        None => self.clear_deprecated_legacy_json_field_conflicts(),
+                    }
+                }
+                pub fn clear_deprecated_legacy_json_field_conflicts(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.deprecated_legacy_json_field_conflicts = Default::default();
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
                 }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -6309,6 +8225,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -6320,6 +8239,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -7502,11 +9441,20 @@ pub mod google {
                     ) -> Self {
                         Self { has_bits, edition, value }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[12].nested_type()[0]
+                    }
+                    pub const fn has_edition(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
                     }
                     pub const fn edition(
                         &self,
@@ -7517,19 +9465,55 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.edition = value.to_i32();
+                    }
+                    pub fn set_optional_edition(
+                        &mut self,
+                        value: Option<crate::google::protobuf::Edition>,
+                    ) {
+                        match value {
+                            Some(v) => self.set_edition(v),
+                            None => self.clear_edition(),
+                        }
+                    }
+                    pub fn clear_edition(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.edition = 0;
+                    }
+                    pub const fn has_value(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn value(&self) -> &str {
                         self.value.as_str()
+                    }
+                    pub const fn get_value(&self) -> Option<&str> {
+                        if self.has_value() { Some(self.value.as_str()) } else { None }
                     }
                     pub fn set_value(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.value.assign(value, arena);
+                    }
+                    pub fn set_optional_value(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_value(v, arena),
+                            None => self.clear_value(),
+                        }
+                    }
+                    pub fn clear_value(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.value.clear();
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -7742,11 +9726,20 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[12]
+                }
+                pub const fn has_ctype(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
                 }
                 pub const fn ctype(
                     &self,
@@ -7757,15 +9750,53 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::CType,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.ctype = value.to_i32();
+                }
+                pub fn set_optional_ctype(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FieldOptions::CType>,
+                ) {
+                    match value {
+                        Some(v) => self.set_ctype(v),
+                        None => self.clear_ctype(),
+                    }
+                }
+                pub fn clear_ctype(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.ctype = 0;
+                }
+                pub const fn has_packed(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn packed(&self) -> bool {
                     self.packed
                 }
+                pub const fn get_packed(&self) -> Option<bool> {
+                    if self.has_packed() { Some(self.packed) } else { None }
+                }
                 pub fn set_packed(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.packed = value;
+                }
+                pub fn set_optional_packed(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_packed(v),
+                        None => self.clear_packed(),
+                    }
+                }
+                pub fn clear_packed(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.packed = Default::default();
+                }
+                pub const fn has_jstype(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn jstype(
                     &self,
@@ -7776,43 +9807,161 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::JSType,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.jstype = value.to_i32();
+                }
+                pub fn set_optional_jstype(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FieldOptions::JSType>,
+                ) {
+                    match value {
+                        Some(v) => self.set_jstype(v),
+                        None => self.clear_jstype(),
+                    }
+                }
+                pub fn clear_jstype(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.jstype = 0;
+                }
+                pub const fn has_lazy(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn lazy(&self) -> bool {
                     self.lazy
                 }
+                pub const fn get_lazy(&self) -> Option<bool> {
+                    if self.has_lazy() { Some(self.lazy) } else { None }
+                }
                 pub fn set_lazy(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.lazy = value;
+                }
+                pub fn set_optional_lazy(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_lazy(v),
+                        None => self.clear_lazy(),
+                    }
+                }
+                pub fn clear_lazy(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.lazy = Default::default();
+                }
+                pub const fn has_unverified_lazy(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn unverified_lazy(&self) -> bool {
                     self.unverified_lazy
                 }
+                pub const fn get_unverified_lazy(&self) -> Option<bool> {
+                    if self.has_unverified_lazy() {
+                        Some(self.unverified_lazy)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_unverified_lazy(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.unverified_lazy = value;
+                }
+                pub fn set_optional_unverified_lazy(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_unverified_lazy(v),
+                        None => self.clear_unverified_lazy(),
+                    }
+                }
+                pub fn clear_unverified_lazy(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.unverified_lazy = Default::default();
+                }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(5usize as u8)
+                    }
                 }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(5usize as u32);
+                    self.as_object_mut().set_has_bit(5u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(5u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_weak(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(6usize as u8)
+                    }
                 }
                 pub const fn weak(&self) -> bool {
                     self.weak
                 }
+                pub const fn get_weak(&self) -> Option<bool> {
+                    if self.has_weak() { Some(self.weak) } else { None }
+                }
                 pub fn set_weak(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(6usize as u32);
+                    self.as_object_mut().set_has_bit(6u32);
                     self.weak = value;
+                }
+                pub fn set_optional_weak(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_weak(v),
+                        None => self.clear_weak(),
+                    }
+                }
+                pub fn clear_weak(&mut self) {
+                    self.as_object_mut().clear_has_bit(6u32);
+                    self.weak = Default::default();
+                }
+                pub const fn has_debug_redact(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(7usize as u8)
+                    }
                 }
                 pub const fn debug_redact(&self) -> bool {
                     self.debug_redact
                 }
+                pub const fn get_debug_redact(&self) -> Option<bool> {
+                    if self.has_debug_redact() { Some(self.debug_redact) } else { None }
+                }
                 pub fn set_debug_redact(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(7usize as u32);
+                    self.as_object_mut().set_has_bit(7u32);
                     self.debug_redact = value;
+                }
+                pub fn set_optional_debug_redact(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_debug_redact(v),
+                        None => self.clear_debug_redact(),
+                    }
+                }
+                pub fn clear_debug_redact(&mut self) {
+                    self.as_object_mut().clear_has_bit(7u32);
+                    self.debug_redact = Default::default();
+                }
+                pub const fn has_retention(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(8usize as u8)
+                    }
                 }
                 pub const fn retention(
                     &self,
@@ -7825,11 +9974,24 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::OptionRetention,
                 ) {
-                    self.as_object_mut().set_has_bit(8usize as u32);
+                    self.as_object_mut().set_has_bit(8u32);
                     self.retention = value.to_i32();
                 }
+                pub fn set_optional_retention(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FieldOptions::OptionRetention>,
+                ) {
+                    match value {
+                        Some(v) => self.set_retention(v),
+                        None => self.clear_retention(),
+                    }
+                }
+                pub fn clear_retention(&mut self) {
+                    self.as_object_mut().clear_has_bit(8u32);
+                    self.retention = 0;
+                }
                 pub const fn targets(&self) -> &[i32] {
-                    unsafe { core::mem::transmute(self.targets.slice()) }
+                    self.targets.slice()
                 }
                 pub fn targets_mut(
                     &mut self,
@@ -7848,16 +10010,39 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.edition_defaults) }
                 }
+                pub fn add_edition_defaults(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldOptions::EditionDefault::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FieldOptions::EditionDefault::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FieldOptions::EditionDefault::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.edition_defaults.push(msg, arena);
+                    value
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
+                }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -7879,6 +10064,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -7890,6 +10078,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -9149,22 +11357,28 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[13]
                 }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
+                }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -9186,6 +11400,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -9197,6 +11414,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -10331,46 +12568,118 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[14]
                 }
+                pub const fn has_allow_alias(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn allow_alias(&self) -> bool {
                     self.allow_alias
                 }
+                pub const fn get_allow_alias(&self) -> Option<bool> {
+                    if self.has_allow_alias() { Some(self.allow_alias) } else { None }
+                }
                 pub fn set_allow_alias(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.allow_alias = value;
+                }
+                pub fn set_optional_allow_alias(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_allow_alias(v),
+                        None => self.clear_allow_alias(),
+                    }
+                }
+                pub fn clear_allow_alias(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.allow_alias = Default::default();
+                }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn deprecated_legacy_json_field_conflicts(&self) -> bool {
                     self.deprecated_legacy_json_field_conflicts
+                }
+                pub const fn get_deprecated_legacy_json_field_conflicts(
+                    &self,
+                ) -> Option<bool> {
+                    if self.has_deprecated_legacy_json_field_conflicts() {
+                        Some(self.deprecated_legacy_json_field_conflicts)
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_deprecated_legacy_json_field_conflicts(
                     &mut self,
                     value: bool,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.deprecated_legacy_json_field_conflicts = value;
+                }
+                pub fn set_optional_deprecated_legacy_json_field_conflicts(
+                    &mut self,
+                    value: Option<bool>,
+                ) {
+                    match value {
+                        Some(v) => self.set_deprecated_legacy_json_field_conflicts(v),
+                        None => self.clear_deprecated_legacy_json_field_conflicts(),
+                    }
+                }
+                pub fn clear_deprecated_legacy_json_field_conflicts(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.deprecated_legacy_json_field_conflicts = Default::default();
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
                 }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -10392,6 +12701,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -10403,6 +12715,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -11568,29 +13900,54 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[15]
                 }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
                 }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -11612,12 +13969,34 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_debug_redact(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
+                }
                 pub const fn debug_redact(&self) -> bool {
                     self.debug_redact
                 }
+                pub const fn get_debug_redact(&self) -> Option<bool> {
+                    if self.has_debug_redact() { Some(self.debug_redact) } else { None }
+                }
                 pub fn set_debug_redact(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.debug_redact = value;
+                }
+                pub fn set_optional_debug_redact(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_debug_redact(v),
+                        None => self.clear_debug_redact(),
+                    }
+                }
+                pub fn clear_debug_redact(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.debug_redact = Default::default();
                 }
                 pub const fn uninterpreted_option(
                     &self,
@@ -11630,6 +14009,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -12778,22 +15177,28 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[16]
                 }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
+                }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -12815,12 +15220,34 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.deprecated = Default::default();
                 }
                 pub const fn uninterpreted_option(
                     &self,
@@ -12833,6 +15260,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -13995,18 +16442,46 @@ pub mod google {
                         uninterpreted_option,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[17]
                 }
+                pub const fn has_deprecated(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn deprecated(&self) -> bool {
                     self.deprecated
                 }
+                pub const fn get_deprecated(&self) -> Option<bool> {
+                    if self.has_deprecated() { Some(self.deprecated) } else { None }
+                }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.deprecated = value;
+                }
+                pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
+                    match value {
+                        Some(v) => self.set_deprecated(v),
+                        None => self.clear_deprecated(),
+                    }
+                }
+                pub fn clear_deprecated(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.deprecated = Default::default();
+                }
+                pub const fn has_idempotency_level(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn idempotency_level(
                     &self,
@@ -14019,19 +16494,37 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::MethodOptions::IdempotencyLevel,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.idempotency_level = value.to_i32();
+                }
+                pub fn set_optional_idempotency_level(
+                    &mut self,
+                    value: Option<
+                        crate::google::protobuf::MethodOptions::IdempotencyLevel,
+                    >,
+                ) {
+                    match value {
+                        Some(v) => self.set_idempotency_level(v),
+                        None => self.clear_idempotency_level(),
+                    }
+                }
+                pub fn clear_idempotency_level(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.idempotency_level = 0;
+                }
+                pub const fn has_features(&self) -> bool {
+                    !self.features.0.is_null()
                 }
                 pub const fn features(
                     &self,
                 ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                    if self.features.0.is_null() {
-                        None
-                    } else {
+                    if self.has_features() {
                         Some(unsafe {
                             &*(self.features.0
                                 as *const crate::google::protobuf::FeatureSet::ProtoType)
                         })
+                    } else {
+                        None
                     }
                 }
                 pub fn features_mut(
@@ -14053,6 +16546,9 @@ pub mod google {
                             as *mut crate::google::protobuf::FeatureSet::ProtoType)
                     }
                 }
+                pub fn clear_features(&mut self) {
+                    self.features = protocrap::base::Message(core::ptr::null_mut());
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -14064,6 +16560,26 @@ pub mod google {
                     &mut crate::google::protobuf::UninterpretedOption::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.uninterpreted_option) }
+                }
+                pub fn add_uninterpreted_option(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.uninterpreted_option.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -15214,29 +17730,82 @@ pub mod google {
                             is_extension,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[18].nested_type()[0]
                     }
+                    pub const fn has_name_part(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn name_part(&self) -> &str {
                         self.name_part.as_str()
+                    }
+                    pub const fn get_name_part(&self) -> Option<&str> {
+                        if self.has_name_part() {
+                            Some(self.name_part.as_str())
+                        } else {
+                            None
+                        }
                     }
                     pub fn set_name_part(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.name_part.assign(value, arena);
+                    }
+                    pub fn set_optional_name_part(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_name_part(v, arena),
+                            None => self.clear_name_part(),
+                        }
+                    }
+                    pub fn clear_name_part(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.name_part.clear();
+                    }
+                    pub const fn has_is_extension(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn is_extension(&self) -> bool {
                         self.is_extension
                     }
+                    pub const fn get_is_extension(&self) -> Option<bool> {
+                        if self.has_is_extension() {
+                            Some(self.is_extension)
+                        } else {
+                            None
+                        }
+                    }
                     pub fn set_is_extension(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.is_extension = value;
+                    }
+                    pub fn set_optional_is_extension(&mut self, value: Option<bool>) {
+                        match value {
+                            Some(v) => self.set_is_extension(v),
+                            None => self.clear_is_extension(),
+                        }
+                    }
+                    pub fn clear_is_extension(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.is_extension = Default::default();
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -15325,6 +17894,9 @@ pub mod google {
                         aggregate_value,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -15343,59 +17915,225 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.name) }
                 }
+                pub fn add_name(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::UninterpretedOption::NamePart::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::UninterpretedOption::NamePart::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::UninterpretedOption::NamePart::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.name.push(msg, arena);
+                    value
+                }
+                pub const fn has_identifier_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn identifier_value(&self) -> &str {
                     self.identifier_value.as_str()
+                }
+                pub const fn get_identifier_value(&self) -> Option<&str> {
+                    if self.has_identifier_value() {
+                        Some(self.identifier_value.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_identifier_value(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.identifier_value.assign(value, arena);
+                }
+                pub fn set_optional_identifier_value(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_identifier_value(v, arena),
+                        None => self.clear_identifier_value(),
+                    }
+                }
+                pub fn clear_identifier_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.identifier_value.clear();
+                }
+                pub const fn has_positive_int_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn positive_int_value(&self) -> u64 {
                     self.positive_int_value
                 }
+                pub const fn get_positive_int_value(&self) -> Option<u64> {
+                    if self.has_positive_int_value() {
+                        Some(self.positive_int_value)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_positive_int_value(&mut self, value: u64) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.positive_int_value = value;
+                }
+                pub fn set_optional_positive_int_value(&mut self, value: Option<u64>) {
+                    match value {
+                        Some(v) => self.set_positive_int_value(v),
+                        None => self.clear_positive_int_value(),
+                    }
+                }
+                pub fn clear_positive_int_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.positive_int_value = Default::default();
+                }
+                pub const fn has_negative_int_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn negative_int_value(&self) -> i64 {
                     self.negative_int_value
                 }
+                pub const fn get_negative_int_value(&self) -> Option<i64> {
+                    if self.has_negative_int_value() {
+                        Some(self.negative_int_value)
+                    } else {
+                        None
+                    }
+                }
                 pub fn set_negative_int_value(&mut self, value: i64) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.negative_int_value = value;
+                }
+                pub fn set_optional_negative_int_value(&mut self, value: Option<i64>) {
+                    match value {
+                        Some(v) => self.set_negative_int_value(v),
+                        None => self.clear_negative_int_value(),
+                    }
+                }
+                pub fn clear_negative_int_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.negative_int_value = Default::default();
+                }
+                pub const fn has_double_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn double_value(&self) -> f64 {
                     self.double_value
                 }
+                pub const fn get_double_value(&self) -> Option<f64> {
+                    if self.has_double_value() { Some(self.double_value) } else { None }
+                }
                 pub fn set_double_value(&mut self, value: f64) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.double_value = value;
+                }
+                pub fn set_optional_double_value(&mut self, value: Option<f64>) {
+                    match value {
+                        Some(v) => self.set_double_value(v),
+                        None => self.clear_double_value(),
+                    }
+                }
+                pub fn clear_double_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.double_value = Default::default();
+                }
+                pub const fn has_string_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn string_value(&self) -> &[u8] {
                     self.string_value.slice()
+                }
+                pub const fn get_string_value(&self) -> Option<&[u8]> {
+                    if self.has_string_value() {
+                        Some(self.string_value.slice())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_string_value(
                     &mut self,
                     value: &[u8],
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.string_value.assign(value, arena);
+                }
+                pub fn set_optional_string_value(
+                    &mut self,
+                    value: Option<&[u8]>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_string_value(v, arena),
+                        None => self.clear_string_value(),
+                    }
+                }
+                pub fn clear_string_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.string_value.clear();
+                }
+                pub const fn has_aggregate_value(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(5usize as u8)
+                    }
                 }
                 pub const fn aggregate_value(&self) -> &str {
                     self.aggregate_value.as_str()
+                }
+                pub const fn get_aggregate_value(&self) -> Option<&str> {
+                    if self.has_aggregate_value() {
+                        Some(self.aggregate_value.as_str())
+                    } else {
+                        None
+                    }
                 }
                 pub fn set_aggregate_value(
                     &mut self,
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(5usize as u32);
+                    self.as_object_mut().set_has_bit(5u32);
                     self.aggregate_value.assign(value, arena);
+                }
+                pub fn set_optional_aggregate_value(
+                    &mut self,
+                    value: Option<&str>,
+                    arena: &mut protocrap::arena::Arena,
+                ) {
+                    match value {
+                        Some(v) => self.set_aggregate_value(v, arena),
+                        None => self.clear_aggregate_value(),
+                    }
+                }
+                pub fn clear_aggregate_value(&mut self) {
+                    self.as_object_mut().clear_has_bit(5u32);
+                    self.aggregate_value.clear();
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -15696,11 +18434,20 @@ pub mod google {
                         json_format,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
                 const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                     Self::file_descriptor().message_type()[19]
+                }
+                pub const fn has_field_presence(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
                 }
                 pub const fn field_presence(
                     &self,
@@ -15713,8 +18460,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::FieldPresence,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.field_presence = value.to_i32();
+                }
+                pub fn set_optional_field_presence(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FeatureSet::FieldPresence>,
+                ) {
+                    match value {
+                        Some(v) => self.set_field_presence(v),
+                        None => self.clear_field_presence(),
+                    }
+                }
+                pub fn clear_field_presence(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.field_presence = 0;
+                }
+                pub const fn has_enum_type(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn enum_type(
                     &self,
@@ -15727,8 +18493,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::EnumType,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.enum_type = value.to_i32();
+                }
+                pub fn set_optional_enum_type(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FeatureSet::EnumType>,
+                ) {
+                    match value {
+                        Some(v) => self.set_enum_type(v),
+                        None => self.clear_enum_type(),
+                    }
+                }
+                pub fn clear_enum_type(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.enum_type = 0;
+                }
+                pub const fn has_repeated_field_encoding(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(2usize as u8)
+                    }
                 }
                 pub const fn repeated_field_encoding(
                     &self,
@@ -15741,8 +18526,29 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::RepeatedFieldEncoding,
                 ) {
-                    self.as_object_mut().set_has_bit(2usize as u32);
+                    self.as_object_mut().set_has_bit(2u32);
                     self.repeated_field_encoding = value.to_i32();
+                }
+                pub fn set_optional_repeated_field_encoding(
+                    &mut self,
+                    value: Option<
+                        crate::google::protobuf::FeatureSet::RepeatedFieldEncoding,
+                    >,
+                ) {
+                    match value {
+                        Some(v) => self.set_repeated_field_encoding(v),
+                        None => self.clear_repeated_field_encoding(),
+                    }
+                }
+                pub fn clear_repeated_field_encoding(&mut self) {
+                    self.as_object_mut().clear_has_bit(2u32);
+                    self.repeated_field_encoding = 0;
+                }
+                pub const fn has_utf8_validation(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(3usize as u8)
+                    }
                 }
                 pub const fn utf8_validation(
                     &self,
@@ -15755,8 +18561,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::Utf8Validation,
                 ) {
-                    self.as_object_mut().set_has_bit(3usize as u32);
+                    self.as_object_mut().set_has_bit(3u32);
                     self.utf8_validation = value.to_i32();
+                }
+                pub fn set_optional_utf8_validation(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FeatureSet::Utf8Validation>,
+                ) {
+                    match value {
+                        Some(v) => self.set_utf8_validation(v),
+                        None => self.clear_utf8_validation(),
+                    }
+                }
+                pub fn clear_utf8_validation(&mut self) {
+                    self.as_object_mut().clear_has_bit(3u32);
+                    self.utf8_validation = 0;
+                }
+                pub const fn has_message_encoding(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(4usize as u8)
+                    }
                 }
                 pub const fn message_encoding(
                     &self,
@@ -15769,8 +18594,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::MessageEncoding,
                 ) {
-                    self.as_object_mut().set_has_bit(4usize as u32);
+                    self.as_object_mut().set_has_bit(4u32);
                     self.message_encoding = value.to_i32();
+                }
+                pub fn set_optional_message_encoding(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FeatureSet::MessageEncoding>,
+                ) {
+                    match value {
+                        Some(v) => self.set_message_encoding(v),
+                        None => self.clear_message_encoding(),
+                    }
+                }
+                pub fn clear_message_encoding(&mut self) {
+                    self.as_object_mut().clear_has_bit(4u32);
+                    self.message_encoding = 0;
+                }
+                pub const fn has_json_format(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(5usize as u8)
+                    }
                 }
                 pub const fn json_format(
                     &self,
@@ -15783,8 +18627,21 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::JsonFormat,
                 ) {
-                    self.as_object_mut().set_has_bit(5usize as u32);
+                    self.as_object_mut().set_has_bit(5u32);
                     self.json_format = value.to_i32();
+                }
+                pub fn set_optional_json_format(
+                    &mut self,
+                    value: Option<crate::google::protobuf::FeatureSet::JsonFormat>,
+                ) {
+                    match value {
+                        Some(v) => self.set_json_format(v),
+                        None => self.clear_json_format(),
+                    }
+                }
+                pub fn clear_json_format(&mut self) {
+                    self.as_object_mut().clear_has_bit(5u32);
+                    self.json_format = 0;
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -15916,11 +18773,20 @@ pub mod google {
                             features,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
                     const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                         Self::file_descriptor().message_type()[20].nested_type()[0]
+                    }
+                    pub const fn has_edition(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
                     }
                     pub const fn edition(
                         &self,
@@ -15931,19 +18797,35 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.edition = value.to_i32();
+                    }
+                    pub fn set_optional_edition(
+                        &mut self,
+                        value: Option<crate::google::protobuf::Edition>,
+                    ) {
+                        match value {
+                            Some(v) => self.set_edition(v),
+                            None => self.clear_edition(),
+                        }
+                    }
+                    pub fn clear_edition(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.edition = 0;
+                    }
+                    pub const fn has_features(&self) -> bool {
+                        !self.features.0.is_null()
                     }
                     pub const fn features(
                         &self,
                     ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                        if self.features.0.is_null() {
-                            None
-                        } else {
+                        if self.has_features() {
                             Some(unsafe {
                                 &*(self.features.0
                                     as *const crate::google::protobuf::FeatureSet::ProtoType)
                             })
+                        } else {
+                            None
                         }
                     }
                     pub fn features_mut(
@@ -15964,6 +18846,9 @@ pub mod google {
                             &mut *(self.features.0
                                 as *mut crate::google::protobuf::FeatureSet::ProtoType)
                         }
+                    }
+                    pub fn clear_features(&mut self) {
+                        self.features = protocrap::base::Message(core::ptr::null_mut());
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -16066,6 +18951,9 @@ pub mod google {
                         maximum_edition,
                     }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -16084,6 +18972,32 @@ pub mod google {
                 > {
                     unsafe { core::mem::transmute(&mut self.defaults) }
                 }
+                pub fn add_defaults(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.defaults.push(msg, arena);
+                    value
+                }
+                pub const fn has_minimum_edition(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(0usize as u8)
+                    }
+                }
                 pub const fn minimum_edition(
                     &self,
                 ) -> Option<crate::google::protobuf::Edition> {
@@ -16093,8 +19007,27 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::Edition,
                 ) {
-                    self.as_object_mut().set_has_bit(0usize as u32);
+                    self.as_object_mut().set_has_bit(0u32);
                     self.minimum_edition = value.to_i32();
+                }
+                pub fn set_optional_minimum_edition(
+                    &mut self,
+                    value: Option<crate::google::protobuf::Edition>,
+                ) {
+                    match value {
+                        Some(v) => self.set_minimum_edition(v),
+                        None => self.clear_minimum_edition(),
+                    }
+                }
+                pub fn clear_minimum_edition(&mut self) {
+                    self.as_object_mut().clear_has_bit(0u32);
+                    self.minimum_edition = 0;
+                }
+                pub const fn has_maximum_edition(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
                 }
                 pub const fn maximum_edition(
                     &self,
@@ -16105,8 +19038,21 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::Edition,
                 ) {
-                    self.as_object_mut().set_has_bit(1usize as u32);
+                    self.as_object_mut().set_has_bit(1u32);
                     self.maximum_edition = value.to_i32();
+                }
+                pub fn set_optional_maximum_edition(
+                    &mut self,
+                    value: Option<crate::google::protobuf::Edition>,
+                ) {
+                    match value {
+                        Some(v) => self.set_maximum_edition(v),
+                        None => self.clear_maximum_edition(),
+                    }
+                }
+                pub fn clear_maximum_edition(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.maximum_edition = 0;
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -16242,6 +19188,9 @@ pub mod google {
                             leading_detached_comments,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
@@ -16249,7 +19198,7 @@ pub mod google {
                         Self::file_descriptor().message_type()[21].nested_type()[0]
                     }
                     pub const fn path(&self) -> &[i32] {
-                        unsafe { core::mem::transmute(self.path.slice()) }
+                        self.path.slice()
                     }
                     pub fn path_mut(
                         &mut self,
@@ -16257,41 +19206,93 @@ pub mod google {
                         &mut self.path
                     }
                     pub const fn span(&self) -> &[i32] {
-                        unsafe { core::mem::transmute(self.span.slice()) }
+                        self.span.slice()
                     }
                     pub fn span_mut(
                         &mut self,
                     ) -> &mut protocrap::containers::RepeatedField<i32> {
                         &mut self.span
                     }
+                    pub const fn has_leading_comments(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn leading_comments(&self) -> &str {
                         self.leading_comments.as_str()
+                    }
+                    pub const fn get_leading_comments(&self) -> Option<&str> {
+                        if self.has_leading_comments() {
+                            Some(self.leading_comments.as_str())
+                        } else {
+                            None
+                        }
                     }
                     pub fn set_leading_comments(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.leading_comments.assign(value, arena);
+                    }
+                    pub fn set_optional_leading_comments(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_leading_comments(v, arena),
+                            None => self.clear_leading_comments(),
+                        }
+                    }
+                    pub fn clear_leading_comments(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.leading_comments.clear();
+                    }
+                    pub const fn has_trailing_comments(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn trailing_comments(&self) -> &str {
                         self.trailing_comments.as_str()
+                    }
+                    pub const fn get_trailing_comments(&self) -> Option<&str> {
+                        if self.has_trailing_comments() {
+                            Some(self.trailing_comments.as_str())
+                        } else {
+                            None
+                        }
                     }
                     pub fn set_trailing_comments(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.trailing_comments.assign(value, arena);
+                    }
+                    pub fn set_optional_trailing_comments(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_trailing_comments(v, arena),
+                            None => self.clear_trailing_comments(),
+                        }
+                    }
+                    pub fn clear_trailing_comments(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.trailing_comments.clear();
                     }
                     pub const fn leading_detached_comments(
                         &self,
                     ) -> &[protocrap::containers::String] {
-                        unsafe {
-                            core::mem::transmute(self.leading_detached_comments.slice())
-                        }
+                        self.leading_detached_comments.slice()
                     }
                     pub fn leading_detached_comments_mut(
                         &mut self,
@@ -16405,6 +19406,9 @@ pub mod google {
                 ) -> Self {
                     Self { has_bits, location }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -16422,6 +19426,26 @@ pub mod google {
                     &mut crate::google::protobuf::SourceCodeInfo::Location::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.location) }
+                }
+                pub fn add_location(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::SourceCodeInfo::Location::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::SourceCodeInfo::Location::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::SourceCodeInfo::Location::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.location.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {
@@ -16550,6 +19574,9 @@ pub mod google {
                             semantic,
                         }
                     }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                     }
@@ -16557,37 +19584,108 @@ pub mod google {
                         Self::file_descriptor().message_type()[22].nested_type()[0]
                     }
                     pub const fn path(&self) -> &[i32] {
-                        unsafe { core::mem::transmute(self.path.slice()) }
+                        self.path.slice()
                     }
                     pub fn path_mut(
                         &mut self,
                     ) -> &mut protocrap::containers::RepeatedField<i32> {
                         &mut self.path
                     }
+                    pub const fn has_source_file(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
                     pub const fn source_file(&self) -> &str {
                         self.source_file.as_str()
+                    }
+                    pub const fn get_source_file(&self) -> Option<&str> {
+                        if self.has_source_file() {
+                            Some(self.source_file.as_str())
+                        } else {
+                            None
+                        }
                     }
                     pub fn set_source_file(
                         &mut self,
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0usize as u32);
+                        self.as_object_mut().set_has_bit(0u32);
                         self.source_file.assign(value, arena);
+                    }
+                    pub fn set_optional_source_file(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_source_file(v, arena),
+                            None => self.clear_source_file(),
+                        }
+                    }
+                    pub fn clear_source_file(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.source_file.clear();
+                    }
+                    pub const fn has_begin(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
                     }
                     pub const fn begin(&self) -> i32 {
                         self.begin
                     }
+                    pub const fn get_begin(&self) -> Option<i32> {
+                        if self.has_begin() { Some(self.begin) } else { None }
+                    }
                     pub fn set_begin(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1usize as u32);
+                        self.as_object_mut().set_has_bit(1u32);
                         self.begin = value;
+                    }
+                    pub fn set_optional_begin(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_begin(v),
+                            None => self.clear_begin(),
+                        }
+                    }
+                    pub fn clear_begin(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.begin = Default::default();
+                    }
+                    pub const fn has_end(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(2usize as u8)
+                        }
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
                     }
+                    pub const fn get_end(&self) -> Option<i32> {
+                        if self.has_end() { Some(self.end) } else { None }
+                    }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(2usize as u32);
+                        self.as_object_mut().set_has_bit(2u32);
                         self.end = value;
+                    }
+                    pub fn set_optional_end(&mut self, value: Option<i32>) {
+                        match value {
+                            Some(v) => self.set_end(v),
+                            None => self.clear_end(),
+                        }
+                    }
+                    pub fn clear_end(&mut self) {
+                        self.as_object_mut().clear_has_bit(2u32);
+                        self.end = Default::default();
+                    }
+                    pub const fn has_semantic(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(3usize as u8)
+                        }
                     }
                     pub const fn semantic(
                         &self,
@@ -16602,8 +19700,23 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::GeneratedCodeInfo::Annotation::Semantic,
                     ) {
-                        self.as_object_mut().set_has_bit(3usize as u32);
+                        self.as_object_mut().set_has_bit(3u32);
                         self.semantic = value.to_i32();
+                    }
+                    pub fn set_optional_semantic(
+                        &mut self,
+                        value: Option<
+                            crate::google::protobuf::GeneratedCodeInfo::Annotation::Semantic,
+                        >,
+                    ) {
+                        match value {
+                            Some(v) => self.set_semantic(v),
+                            None => self.clear_semantic(),
+                        }
+                    }
+                    pub fn clear_semantic(&mut self) {
+                        self.as_object_mut().clear_has_bit(3u32);
+                        self.semantic = 0;
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -16707,6 +19820,9 @@ pub mod google {
                 ) -> Self {
                     Self { has_bits, annotation }
                 }
+                pub fn clear(&mut self) {
+                    *self = unsafe { core::mem::zeroed() };
+                }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
                 }
@@ -16724,6 +19840,26 @@ pub mod google {
                     &mut crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType,
                 > {
                     unsafe { core::mem::transmute(&mut self.annotation) }
+                }
+                pub fn add_annotation(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType {
+                    let elem = arena
+                        .alloc::<
+                            crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType,
+                        >();
+                    let msg = protocrap::base::Message(
+                        elem as *mut protocrap::base::Object,
+                    );
+                    let value = unsafe {
+                        elem.write(
+                            crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType::default(),
+                        );
+                        &mut *elem
+                    };
+                    self.annotation.push(msg, arena);
+                    value
                 }
             }
             impl protocrap::Protobuf for ProtoType {

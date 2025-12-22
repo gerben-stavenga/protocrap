@@ -439,7 +439,7 @@ fn generate_accessors(
                             self.#field_name = value.to_i32();
                         }
 
-                        pub fn #optional_setter_name(&mut self, value: Option<#enum_type>, arena: &mut protocrap::arena::Arena) {
+                        pub fn #optional_setter_name(&mut self, value: Option<#enum_type>) {
                             match value {
                                 Some(v) => self.#setter_name(v),
                                 None => self.#clear_name(),
@@ -473,7 +473,7 @@ fn generate_accessors(
                             self.#field_name = value;
                         }
 
-                        pub fn #optional_setter_name(&mut self, value: Option<#return_type>, arena: &mut protocrap::arena::Arena) {
+                        pub fn #optional_setter_name(&mut self, value: Option<#return_type>) {
                             match value {
                                 Some(v) => self.#setter_name(v),
                                 None => self.#clear_name(),
