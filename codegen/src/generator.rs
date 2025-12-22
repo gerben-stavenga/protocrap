@@ -264,24 +264,24 @@ fn generate_message_impl(
     })
 }
 
-fn unescape_proto_string(s: &str) -> Result<String> {
-    let mut result = String::new();
+fn unescape_proto_string(s: &str) -> Result<Vec<u8>> {
+    let mut result = Vec::new();
     let mut chars = s.chars();
 
     while let Some(ch) = chars.next() {
         if ch == '\\' {
             match chars.next() {
-                Some('n') => result.push('\n'),
-                Some('t') => result.push('\t'),
-                Some('r') => result.push('\r'),
-                Some('\\') => result.push('\\'),
-                Some('"') => result.push('"'),
-                Some('\'') => result.push('\''),
+                Some('n') => result.push('\n' as u8),
+                Some('t') => result.push('\t' as u8),
+                Some('r') => result.push('\r' as u8),
+                Some('\\') => result.push('\\' as u8),
+                Some('"') => result.push('"' as u8),
+                Some('\'') => result.push('\'' as u8),
                 Some('x') => {
                     // \xHH - hex byte
                     let hex: String = chars.by_ref().take(2).collect();
                     if let Ok(byte) = u8::from_str_radix(&hex, 16) {
-                        result.push(byte as char);
+                        result.push(byte);
                     } else {
                         anyhow::bail!("Invalid hex escape: \\x{}", hex);
                     }
@@ -300,27 +300,27 @@ fn unescape_proto_string(s: &str) -> Result<String> {
                         }
                     }
                     if let Ok(byte) = u8::from_str_radix(&octal, 8) {
-                        result.push(byte as char);
+                        result.push(byte);
                     } else {
                         anyhow::bail!("Invalid octal escape: \\{}", octal);
                     }
                 }
                 Some(c) => {
-                    // Unknown escape, keep it
-                    result.push('\\');
-                    result.push(c);
+                    anyhow::bail!("Unknown escape sequence: \\{}", c);
                 }
-                None => result.push('\\'),
+                None => {
+                    anyhow::bail!("Incomplete escape sequence at end of string");
+                }
             }
         } else {
-            result.push(ch);
+            result.push(ch as u8);
         }
     }
 
     Ok(result)
 }
 
-fn parse_scalar_default(field: &protocrap::google::protobuf::FieldDescriptorProto::ProtoType) -> Option<TokenStream> {
+fn parse_primitive_default(field: &protocrap::google::protobuf::FieldDescriptorProto::ProtoType) -> Option<TokenStream> {
     let Some(default_str) = field.get_default_value() else {
       return None;
     };
@@ -397,19 +397,31 @@ fn parse_scalar_default(field: &protocrap::google::protobuf::FieldDescriptorProt
             }
         }
         Type::TYPE_STRING => {
-            // Unescape the proto string and let quote! handle Rust escaping
+            if default_str.is_empty() {
+                return None;
+            } else {
+                Some(quote! { #default_str })
+            }
+        }
+        Type::TYPE_BYTES => {
             match unescape_proto_string(default_str) {
                 Ok(unescaped) => {
                     if unescaped.is_empty() {
                         None
                     } else {
-                        Some(quote! { #unescaped })
+                        Some(quote! { &[#(#unescaped),*] })
                     }
                 }
-                Err(_) => panic!("Invalid string default value: {}", default_str),
+                Err(_) => panic!("Invalid bytes default value: {}", default_str),
             }
         }
-        _ => None, // Other types not supported yet
+        Type::TYPE_ENUM => {
+            // TODO: Handle enum default values
+            None
+        }
+        Type::TYPE_MESSAGE |Type::TYPE_GROUP => {
+            unreachable!("Messages cannot have default values")
+        }
     }
 }
 
@@ -483,7 +495,7 @@ fn generate_accessors(
             match field.r#type().unwrap() {
                 Type::TYPE_STRING => {
                     // Parse default value if present
-                    let default_value = parse_scalar_default(field);
+                    let default_value = parse_primitive_default(field);
 
                     let getter_impl = if has_bit_map.contains_key(&field.number()) && default_value.is_some() {
                         let default_tokens = default_value.unwrap();
@@ -530,9 +542,21 @@ fn generate_accessors(
                     });
                 }
                 Type::TYPE_BYTES => {
+                    let default_value = parse_primitive_default(field);
+                    let getter_impl = if let Some(default_tokens) = default_value {
+                        quote! {
+                            if self.#has_name() {
+                                self.#field_name.slice()
+                            } else {
+                                #default_tokens
+                            }
+                        }
+                    } else {
+                        quote! { self.#field_name.slice() }
+                    };
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> &[u8] {
-                            self.#field_name.slice()
+                            #getter_impl
                         }
 
                         pub const fn #optional_name(&self) -> Option<&[u8]> {
@@ -624,7 +648,7 @@ fn generate_accessors(
                     let return_type = rust_element_type_tokens(field);
 
                     // Parse default value if present
-                    let default_value = parse_scalar_default(field);
+                    let default_value = parse_primitive_default(field);
 
                     let getter_impl = if default_value.is_some() {
                         let default_tokens = default_value.unwrap();

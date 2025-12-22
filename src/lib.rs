@@ -224,7 +224,8 @@ pub mod tests {
         let mut roundtrip_msg = T::default();
         assert!(roundtrip_msg.decode_flat::<32>(&mut arena, &data));
 
-        println!("Roundtrip message: {:#?}", roundtrip_msg);
+        println!("Encoded {} ({} bytes)", T::table().descriptor.name(), data.len());
+        // println!("Roundtrip message: {:#?}", roundtrip_msg);
 
         let roundtrip_data = roundtrip_msg.encode_vec::<32>().expect("msg should encode");
 
@@ -248,22 +249,6 @@ pub mod tests {
 
     #[test]
     fn file_descriptor_roundtrip() {
-        use crate::ProtobufExt;
-        let file_descriptor =
-            crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
-
-        let mut buffer1 = vec![0u8; 100000];
-        let encoded = file_descriptor.encode_flat::<32>(&mut buffer1).unwrap();
-
-        println!("Encoded descriptor.proto ({} bytes)", encoded.len());
-        println!("syntax: {}, edition: {:?}", file_descriptor.syntax(), file_descriptor.edition());
-
-        let mut message = crate::google::protobuf::FileDescriptorProto::ProtoType::default();
-        let mut arena = crate::arena::Arena::new(&std::alloc::Global);
-        assert!(message.decode_flat::<32>(&mut arena, encoded));
-
-        let mut buffer2 = vec![0u8; 100000];
-        let re_encoded = message.encode_flat::<32>(&mut buffer2).unwrap();
-        assert_eq!(encoded, re_encoded);
+        assert_roundtrip(&crate::google::protobuf::FILE_DESCRIPTOR_PROTO);
     }
 }

@@ -31,5 +31,5 @@ message DefaultsTest {
     optional string greeting = 10 [default = "Hello, World!"];
     optional string multiline = 11 [default = "Line1\nLine2\tTabbed"];
     optional string escaped = 12 [default = "Quote: \" Backslash: \\"];
+    optional bytes defaulted_bytes = 13 [default = "My \x0 byte array"];
 }
-

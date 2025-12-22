@@ -50,7 +50,7 @@ fn assert_json_roundtrip<T: Protobuf>(msg: &T) {
     let serialized = serde_json::to_string(&protocrap::reflection::DynamicMessage::new(msg))
         .expect("should serialize");
 
-    println!("Serialized JSON: {}", serialized);
+    // println!("Serialized JSON: {}", serialized);
 
     let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
     let roundtrip_msg = {
@@ -83,11 +83,6 @@ fn test_medium_roundtrips() {
 fn test_large_roundtrips() {
     let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
     assert_roundtrip(&make_large(&mut arena));
-}
-
-#[test]
-fn test_file_descriptor_roundtrip() {
-    assert_roundtrip(&protocrap::google::protobuf::FILE_DESCRIPTOR_PROTO);
 }
 
 #[test]
@@ -130,6 +125,7 @@ fn test_defaults() {
     assert_eq!(msg.greeting(), "Hello, World!");
     assert_eq!(msg.multiline(), "Line1\nLine2\tTabbed");
     assert_eq!(msg.escaped(), "Quote: \" Backslash: \\");
+    assert_eq!(msg.defaulted_bytes(), b"My \0 byte array");
 
     // Verify has_* methods return false for unset fields
     assert!(!msg.has_port());
