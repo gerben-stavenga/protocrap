@@ -88,8 +88,9 @@ msg.serialize(&mut bytes)?;
 🚧 **Under Construction** - Not ready for use
 
 - [x] Basic parsing
-- [ ] Arena allocation
+- [x] Arena allocation
+- [x] Basic protobuf spec compliance
 - [ ] Full protobuf spec compliance
-- [ ] Code generation tools
+- [x] Code generation tools
 - [ ] Documentation
 
