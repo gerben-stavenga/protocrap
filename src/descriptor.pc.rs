@@ -41,10 +41,15 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 file: protocrap::containers::RepeatedField<protocrap::base::Message>,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -137,7 +142,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
@@ -161,6 +166,11 @@ pub mod google {
                 source_code_info: protocrap::base::Message,
                 syntax: protocrap::containers::String,
                 edition: i32,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -708,12 +718,20 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     start: i32,
                     end: i32,
                     options: protocrap::base::Message,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -870,11 +888,19 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     start: i32,
                     end: i32,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -952,7 +978,7 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
@@ -979,6 +1005,11 @@ pub mod google {
                 reserved_name: protocrap::containers::RepeatedField<
                     protocrap::containers::String,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -1497,7 +1528,7 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     number: i32,
@@ -1505,6 +1536,14 @@ pub mod google {
                     r#type: protocrap::containers::String,
                     reserved: bool,
                     repeated: bool,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -1674,7 +1713,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 uninterpreted_option: protocrap::containers::RepeatedField<
@@ -1685,6 +1724,11 @@ pub mod google {
                 >,
                 features: protocrap::base::Message,
                 verification: i32,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -2995,7 +3039,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
@@ -3009,6 +3053,11 @@ pub mod google {
                 json_name: protocrap::containers::String,
                 options: protocrap::base::Message,
                 proto3_optional: bool,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -3362,11 +3411,16 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
                 options: protocrap::base::Message,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -3505,11 +3559,19 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     start: i32,
                     end: i32,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -3587,7 +3649,7 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
@@ -3599,6 +3661,11 @@ pub mod google {
                 reserved_name: protocrap::containers::RepeatedField<
                     protocrap::containers::String,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -3861,12 +3928,17 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
                 number: i32,
                 options: protocrap::base::Message,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -4025,12 +4097,17 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
                 method: protocrap::containers::RepeatedField<protocrap::base::Message>,
                 options: protocrap::base::Message,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -4219,7 +4296,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::String,
@@ -4228,6 +4305,11 @@ pub mod google {
                 options: protocrap::base::Message,
                 client_streaming: bool,
                 server_streaming: bool,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -4476,7 +4558,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 java_package: protocrap::containers::String,
@@ -4503,6 +4585,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -6105,7 +6192,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 message_set_wire_format: bool,
@@ -6117,6 +6204,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -7388,11 +7480,19 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     edition: i32,
                     value: protocrap::containers::String,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -7578,7 +7678,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 ctype: i32,
@@ -7598,6 +7698,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -9017,13 +9122,18 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 features: protocrap::base::Message,
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -10185,7 +10295,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 allow_alias: bool,
@@ -10195,6 +10305,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -11420,7 +11535,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 deprecated: bool,
@@ -11429,6 +11544,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -12628,7 +12748,7 @@ pub mod google {
             #[allow(unused_imports)]
             use protocrap::Protobuf;
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 features: protocrap::base::Message,
@@ -12636,6 +12756,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -13837,7 +13962,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 deprecated: bool,
@@ -13846,6 +13971,11 @@ pub mod google {
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -15058,11 +15188,19 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     name_part: protocrap::containers::String,
                     is_extension: bool,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -15149,7 +15287,7 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 name: protocrap::containers::RepeatedField<protocrap::base::Message>,
@@ -15159,6 +15297,11 @@ pub mod google {
                 double_value: f64,
                 string_value: protocrap::containers::Bytes,
                 aggregate_value: protocrap::containers::String,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -15518,7 +15661,7 @@ pub mod google {
                 }
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 field_presence: i32,
@@ -15527,6 +15670,11 @@ pub mod google {
                 utf8_validation: i32,
                 message_encoding: i32,
                 json_format: i32,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -15742,11 +15890,19 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     edition: i32,
                     features: protocrap::base::Message,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -15882,12 +16038,17 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 defaults: protocrap::containers::RepeatedField<protocrap::base::Message>,
                 minimum_edition: i32,
                 maximum_edition: i32,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -16042,7 +16203,7 @@ pub mod google {
                 #[allow(unused_imports)]
                 use protocrap::Protobuf;
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     path: protocrap::containers::RepeatedField<i32>,
@@ -16052,6 +16213,14 @@ pub mod google {
                     leading_detached_comments: protocrap::containers::RepeatedField<
                         protocrap::containers::String,
                     >,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -16217,10 +16386,15 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 location: protocrap::containers::RepeatedField<protocrap::base::Message>,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(
@@ -16341,7 +16515,7 @@ pub mod google {
                     }
                 }
                 #[repr(C)]
-                #[derive(Debug, Default)]
+                #[derive(Default)]
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     path: protocrap::containers::RepeatedField<i32>,
@@ -16349,6 +16523,14 @@ pub mod google {
                     begin: i32,
                     end: i32,
                     semantic: i32,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
                 }
                 impl ProtoType {
                     pub const fn from_static(
@@ -16504,12 +16686,17 @@ pub mod google {
                 };
             }
             #[repr(C)]
-            #[derive(Debug, Default)]
+            #[derive(Default)]
             pub struct ProtoType {
                 has_bits: [u32; 1usize],
                 annotation: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
+            }
+            impl core::fmt::Debug for ProtoType {
+                fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                    protocrap::reflection::debug_message(self, f)
+                }
             }
             impl ProtoType {
                 pub const fn from_static(

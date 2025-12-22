@@ -46,7 +46,6 @@ impl<'a> serde::Serialize for SerdeProtobufSlice<'a> {
 
 fn calculate_tag(field: &crate::google::protobuf::FieldDescriptorProto::ProtoType) -> u32 {
     let number = field.number() as u32;
-    println!("Calculating tag for field {:?}", field);
     let wire_type = match field.r#type().unwrap() {
         crate::google::protobuf::FieldDescriptorProto::Type::TYPE_DOUBLE
         | crate::google::protobuf::FieldDescriptorProto::Type::TYPE_FIXED64
@@ -80,10 +79,8 @@ where
     S: serde::Serializer,
 {
     let mut struct_serializer = serializer.serialize_struct(descriptor.name(), table.len())?;
-    println!("Serializing message of type {:?}", descriptor.name());
     for entry in table {
         let tag = entry.encoded_tag;
-        println!("Processing field with field {}", tag >> 3);
         let field = *descriptor
             .field()
             .iter()

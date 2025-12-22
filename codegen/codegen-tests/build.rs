@@ -8,12 +8,6 @@ fn main() -> Result<()> {
 
     println!("cargo:rerun-if-changed=proto/test.proto");
 
-    // Generate prost version (for comparison)
-    println!("cargo:warning=Generating prost version...");
-    prost_build::Config::new()
-        .out_dir(&out_dir)
-        .compile_protos(&["proto/test.proto"], &["proto/"])?;
-
     // Generate protocrap version with Rust codegen
     println!("cargo:warning=Generating protocrap version with Rust codegen...");
 

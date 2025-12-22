@@ -1,16 +1,11 @@
 use std::alloc::Allocator;
 
 use crate::{
-    arena::Arena,
-    base::{Message, Object},
-    containers::{Bytes, RepeatedField},
-    google::protobuf::{
+    Protobuf, arena::Arena, base::{Message, Object}, containers::{Bytes, RepeatedField}, google::protobuf::{
         DescriptorProto::ProtoType as DescriptorProto,
         FieldDescriptorProto::{Label, ProtoType as FieldDescriptorProto, Type},
         FileDescriptorProto::ProtoType as FileDescriptorProto,
-    },
-    tables::Table,
-    wire,
+    }, tables::Table, wire
 };
 
 pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
@@ -85,6 +80,12 @@ pub fn needs_has_bit(field: &FieldDescriptorProto) -> bool {
     return !is_repeated(field) && !is_message(field);
 }
 
+pub fn debug_message<T: Protobuf>(msg: &T, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+    let dynamic_msg = crate::reflection::DynamicMessage::new(msg);
+    use core::fmt::Debug;
+    dynamic_msg.fmt(f)
+}
+
 struct DescriptorPool {
     pub arena: Arena<'static>,
 
@@ -114,6 +115,18 @@ impl DescriptorPool {
 pub struct DynamicMessage<'pool, 'msg> {
     pub object: &'msg Object,
     pub table: &'pool Table,
+}
+
+impl<'pool, 'msg> core::fmt::Debug for DynamicMessage<'pool, 'msg> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut debug_struct = f.debug_struct(self.table.descriptor.name());
+        for field in self.table.descriptor.field() {
+            if let Some(value) = self.get_field(field) {
+                debug_struct.field(field.name(), &value);
+            }
+        }
+        debug_struct.finish()
+    }
 }
 
 impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
@@ -291,6 +304,17 @@ pub struct DynamicMessageArray<'pool, 'msg> {
     pub table: &'pool Table,
 }
 
+impl<'pool, 'msg> core::fmt::Debug for DynamicMessageArray<'pool, 'msg> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_list()
+            .entries(self.object.iter().map(|msg| DynamicMessage {
+                object: unsafe { &mut *msg.0 },
+                table: self.table,
+            }))
+            .finish()
+    }
+}
+
 impl<'pool, 'msg> DynamicMessageArray<'pool, 'msg> {
     pub fn len(&self) -> usize {
         self.object.len()
@@ -357,6 +381,7 @@ impl<'pool, 'msg> IntoIterator for &'msg DynamicMessageArray<'pool, 'msg> {
     }
 }
 
+#[derive(Debug)]
 pub enum Value<'pool, 'msg> {
     Int32(i32),
     Int64(i64),

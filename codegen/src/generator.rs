@@ -215,10 +215,16 @@ fn generate_message_impl(
         #(#nested_enums)*
 
         #[repr(C)]
-        #[derive(Debug, Default)]
+        #[derive(Default)]
         pub struct ProtoType {
             has_bits: [u32; #has_bits_words],
             #(#struct_fields,)*
+        }
+
+        impl core::fmt::Debug for ProtoType {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                protocrap::reflection::debug_message(self, f)
+            }
         }
 
         impl ProtoType {

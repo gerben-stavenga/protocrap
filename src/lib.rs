@@ -179,6 +179,35 @@ pub trait ProtobufExt: Protobuf {
         };
         Ok(buf)
     }
+
+    #[cfg(feature = "std")]
+    fn encode_vec<const STACK_DEPTH: usize>(&self) -> anyhow::Result<Vec<u8>> {
+        let mut buffer = vec![0u8; 1024];
+        let mut stack = Vec::new();
+        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
+        loop {
+            match resumeable_encode.resume_encode(&mut buffer)
+                .ok_or(anyhow::anyhow!("Message tree too deep"))? {
+                encoding::ResumeResult::Done(buf) => {
+                    let len = buf.len();
+                    let end = buffer.len();
+                    let start = end - len;
+                    buffer.copy_within(start..end, 0);
+                    buffer.truncate(len);
+                    break;
+                }
+                encoding::ResumeResult::NeedsMoreBuffer => {
+                    let len = buffer.len().min(1024 * 1024);
+                    stack.push(core::mem::take(&mut buffer));
+                    buffer = vec![0u8; len * 2];
+                }
+            };
+        }
+        while let Some(mut old_buffer) = stack.pop() {
+            buffer.extend_from_slice(&old_buffer);
+        }
+        Ok(buffer)
+    }
 }
 
 impl<T: Protobuf> ProtobufExt for T {}
@@ -195,9 +224,9 @@ mod tests {
         let nested_descriptor =
             crate::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::descriptor_proto();
 
-        /*assert_eq!(file_descriptor.name(), "descriptor.proto");
+        assert_eq!(file_descriptor.name(), "proto/descriptor.proto");
         assert_eq!(message_descriptor.name(), "DescriptorProto");
-        assert_eq!(nested_descriptor.name(), "ExtensionRange");*/
+        assert_eq!(nested_descriptor.name(), "ExtensionRange");
     }
 
     #[test]

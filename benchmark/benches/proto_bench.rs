@@ -8,7 +8,7 @@ use prost::Message;
 
 // Your crate
 use codegen_tests::{
-    Test::ProtoType as Test, encode_prost, make_large_prost, make_medium_prost, make_protocrap,
+    Test::ProtoType as Test, encode_test, make_large_prost, make_medium_prost, make_protocrap,
     make_small_prost, prost_gen,
 };
 use protocrap::{ProtobufExt, arena};
@@ -42,15 +42,15 @@ fn bench_decode(c: &mut Criterion) {
     let mut group = c.benchmark_group("decode");
 
     // Small message
-    let small_data = encode_prost(&make_small_prost());
+    let small_data = encode_test(&make_small_prost());
     bench_decoding(&mut group, "small", &small_data);
 
     // Medium message
-    let medium_data = encode_prost(&make_medium_prost());
+    let medium_data = encode_test(&make_medium_prost());
     bench_decoding(&mut group, "medium", &medium_data);
 
     // Large message
-    let large_data = encode_prost(&make_large_prost());
+    let large_data = encode_test(&make_large_prost());
     bench_decoding(&mut group, "large", &large_data);
 
     group.finish();
