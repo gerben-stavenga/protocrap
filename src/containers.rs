@@ -467,6 +467,10 @@ impl String {
     pub fn assign(&mut self, s: &str, arena: &mut crate::arena::Arena) {
         self.0.assign(s.as_bytes(), arena);
     }
+
+    pub fn clear(&mut self, arena: &mut crate::arena::Arena) {
+        self.0.clear();
+    }
 }
 
 impl Deref for String {

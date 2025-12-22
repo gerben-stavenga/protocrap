@@ -310,43 +310,46 @@ fn generate_accessors(
                 }
             });
         } else {
+            let setter_name = format_ident!("set_{}", field_name);
+            let clear_name = format_ident!("clear_{}", field_name);
+            let has_bit = has_bit_map.get(&field.number()).cloned().unwrap_or(0) as u32;
             match field.r#type().unwrap() {
                 Type::TYPE_STRING => {
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> &str {
                             self.#field_name.as_str()
                         }
-                    });
 
-                    if let Some(&has_bit) = has_bit_map.get(&field.number()) {
-                        let setter_name = format_ident!("set_{}", field_name);
-                        methods.push(quote! {
-                            pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
-                                self.as_object_mut().set_has_bit(#has_bit as u32);
-                                self.#field_name.assign(value, arena);
-                            }
-                        });
-                    }
+                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
+                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.#field_name.assign(value, arena);
+                        }
+
+                        pub fn #clear_name(&mut self, arena: &mut protocrap::arena::Arena) {
+                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.#field_name.clear(arena);
+                        }
+                    });
                 }
                 Type::TYPE_BYTES => {
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> &[u8] {
                             self.#field_name.slice()
                         }
-                    });
+                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
+                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.#field_name.assign(value, arena);
+                        }
 
-                    if let Some(&has_bit) = has_bit_map.get(&field.number()) {
-                        let setter_name = format_ident!("set_{}", field_name);
-                        methods.push(quote! {
-                            pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
-                                self.as_object_mut().set_has_bit(#has_bit as u32);
-                                self.#field_name.assign(value, arena);
-                            }
-                        });
-                    }
+                        pub fn #clear_name(&mut self, arena: &mut protocrap::arena::Arena) {
+                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.#field_name.clear(arena);
+                        }
+                    });
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                     let msg_type = rust_type_tokens(field);
+                    let setter_name = format_ident!("{}_mut", field_name);
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
                             if self.#field_name.0.is_null() {
@@ -355,10 +358,7 @@ fn generate_accessors(
                                 Some(unsafe { &*(self.#field_name.0 as *const #msg_type::ProtoType) })
                             }
                         }
-                    });
 
-                    let setter_name = format_ident!("{}_mut", field_name);
-                    methods.push(quote! {
                         pub fn #setter_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             let object = self.#field_name;
                             if object.0.is_null() {
@@ -370,6 +370,10 @@ fn generate_accessors(
                             }
                             unsafe { &mut *(self.#field_name.0 as *mut #msg_type::ProtoType) }
                         }
+
+                        pub fn #clear_name(&mut self) {
+                            self.#field_name = protocrap::base::Message(core::ptr::null_mut());
+                        }
                     });
                 }
                 Type::TYPE_ENUM => {
@@ -378,17 +382,17 @@ fn generate_accessors(
                         pub const fn #field_name(&self) -> Option<#enum_type> {
                             #enum_type::from_i32(self.#field_name)
                         }
-                    });
 
-                    if let Some(&has_bit) = has_bit_map.get(&field.number()) {
-                        let setter_name = format_ident!("set_{}", field_name);
-                        methods.push(quote! {
-                            pub fn #setter_name(&mut self, value: #enum_type) {
-                                self.as_object_mut().set_has_bit(#has_bit as u32);
-                                self.#field_name = value.to_i32();
-                            }
-                        });
-                    }
+                        pub fn #setter_name(&mut self, value: #enum_type) {
+                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.#field_name = value.to_i32();
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.#field_name = 0;
+                        }
+                    });
                 }
                 _ => {
                     // Scalar types
@@ -397,17 +401,17 @@ fn generate_accessors(
                         pub const fn #field_name(&self) -> #return_type {
                             self.#field_name
                         }
-                    });
 
-                    if let Some(&has_bit) = has_bit_map.get(&field.number()) {
-                        let setter_name = format_ident!("set_{}", field_name);
-                        methods.push(quote! {
-                            pub fn #setter_name(&mut self, value: #return_type) {
-                                self.as_object_mut().set_has_bit(#has_bit as u32);
-                                self.#field_name = value;
-                            }
-                        });
-                    }
+                        pub fn #setter_name(&mut self, value: #return_type) {
+                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.#field_name = value;
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.#field_name = Default::default();
+                        }
+                    });
                 }
             }
         }

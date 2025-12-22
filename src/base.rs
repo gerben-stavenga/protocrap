@@ -54,6 +54,12 @@ impl Object {
         *self.ref_mut::<u32>(has_bit_word) |= 1 << has_bit_idx;
     }
 
+    pub fn clear_has_bit(&mut self, has_bit_idx: u32) {
+        let has_bit_word = has_bit_idx / 32;
+        let has_bit_idx = has_bit_idx % 32;
+        *self.ref_mut::<u32>(has_bit_word) &= !(1 << has_bit_idx);
+    }
+
     pub(crate) fn get<T: Copy>(&self, offset: usize) -> T {
         *self.ref_at::<T>(offset)
     }
