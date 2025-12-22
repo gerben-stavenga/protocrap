@@ -262,6 +262,62 @@ fn generate_message_impl(
     })
 }
 
+fn unescape_proto_string(s: &str) -> Result<String> {
+    let mut result = String::new();
+    let mut chars = s.chars();
+
+    while let Some(ch) = chars.next() {
+        if ch == '\\' {
+            match chars.next() {
+                Some('n') => result.push('\n'),
+                Some('t') => result.push('\t'),
+                Some('r') => result.push('\r'),
+                Some('\\') => result.push('\\'),
+                Some('"') => result.push('"'),
+                Some('\'') => result.push('\''),
+                Some('x') => {
+                    // \xHH - hex byte
+                    let hex: String = chars.by_ref().take(2).collect();
+                    if let Ok(byte) = u8::from_str_radix(&hex, 16) {
+                        result.push(byte as char);
+                    } else {
+                        anyhow::bail!("Invalid hex escape: \\x{}", hex);
+                    }
+                }
+                Some(c) if c.is_ascii_digit() => {
+                    // \ooo - octal byte (up to 3 digits)
+                    let mut octal = String::from(c);
+                    for _ in 0..2 {
+                        if let Some(next) = chars.clone().next() {
+                            if next.is_ascii_digit() && next < '8' {
+                                octal.push(next);
+                                chars.next();
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    if let Ok(byte) = u8::from_str_radix(&octal, 8) {
+                        result.push(byte as char);
+                    } else {
+                        anyhow::bail!("Invalid octal escape: \\{}", octal);
+                    }
+                }
+                Some(c) => {
+                    // Unknown escape, keep it
+                    result.push('\\');
+                    result.push(c);
+                }
+                None => result.push('\\'),
+            }
+        } else {
+            result.push(ch);
+        }
+    }
+
+    Ok(result)
+}
+
 fn parse_scalar_default(field: &protocrap::google::protobuf::FieldDescriptorProto::ProtoType) -> Option<TokenStream> {
     use protocrap::google::protobuf::FieldDescriptorProto::Type;
 
@@ -340,6 +396,13 @@ fn parse_scalar_default(field: &protocrap::google::protobuf::FieldDescriptorProt
                 }
             }
         }
+        Type::TYPE_STRING => {
+            // Unescape the proto string and let quote! handle Rust escaping
+            match unescape_proto_string(default_str) {
+                Ok(unescaped) => Some(quote! { #unescaped }),
+                Err(_) => None,
+            }
+        }
         _ => None, // Other types not supported yet
     }
 }
@@ -413,9 +476,25 @@ fn generate_accessors(
             };
             match field.r#type().unwrap() {
                 Type::TYPE_STRING => {
+                    // Parse default value if present
+                    let default_value = parse_scalar_default(field);
+
+                    let getter_impl = if has_bit_map.contains_key(&field.number()) && default_value.is_some() {
+                        let default_tokens = default_value.unwrap();
+                        quote! {
+                            if self.#has_name() {
+                                self.#field_name.as_str()
+                            } else {
+                                #default_tokens
+                            }
+                        }
+                    } else {
+                        quote! { self.#field_name.as_str() }
+                    };
+
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> &str {
-                            self.#field_name.as_str()
+                            #getter_impl
                         }
 
                         pub const fn #optional_name(&self) -> Option<&str> {

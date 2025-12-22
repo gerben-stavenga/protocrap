@@ -118,3 +118,52 @@ fn test_large_serde_serialization() {
     let msg = make_large(&mut arena);
     assert_json_roundtrip(msg);
 }
+
+#[test]
+fn test_defaults() {
+    // Create a message without setting any fields
+    let msg = DefaultsTest::ProtoType::default();
+
+    // Verify default values are returned when fields are not set
+    assert_eq!(msg.port(), 8080);
+    assert_eq!(msg.enabled(), true);
+    assert_eq!(msg.ratio(), 3.14);
+    assert_eq!(msg.precise(), 2.71828);
+    assert_eq!(msg.count(), 42);
+    assert_eq!(msg.big_number(), -9223372036854775808);
+    assert_eq!(msg.special_inf(), f32::INFINITY);
+    assert_eq!(msg.special_neg_inf(), f32::NEG_INFINITY);
+    assert!(msg.special_nan().is_nan());
+    assert_eq!(msg.greeting(), "Hello, World!");
+    assert_eq!(msg.multiline(), "Line1\nLine2\tTabbed");
+    assert_eq!(msg.escaped(), "Quote: \" Backslash: \\");
+
+    // Verify has_* methods return false for unset fields
+    assert!(!msg.has_port());
+    assert!(!msg.has_enabled());
+    assert!(!msg.has_ratio());
+    assert!(!msg.has_greeting());
+    assert!(!msg.has_multiline());
+
+    // Verify get_* methods return None for unset fields
+    assert_eq!(msg.get_port(), None);
+    assert_eq!(msg.get_enabled(), None);
+    assert_eq!(msg.get_ratio(), None);
+    assert_eq!(msg.get_greeting(), None);
+    assert_eq!(msg.get_multiline(), None);
+
+    // Test set/clear behavior
+    let mut msg2 = DefaultsTest::ProtoType::default();
+
+    // Set a field to a value different from default
+    msg2.set_port(9000);
+    assert_eq!(msg2.port(), 9000);
+    assert!(msg2.has_port());
+    assert_eq!(msg2.get_port(), Some(9000));
+
+    // Clear the field - should return to default
+    msg2.clear_port();
+    assert_eq!(msg2.port(), 8080);
+    assert!(!msg2.has_port());
+    assert_eq!(msg2.get_port(), None);
+}

@@ -11,7 +11,7 @@ fn main() -> Result<()> {
     // Generate protocrap version with Rust codegen
     println!("cargo:warning=Generating protocrap version with Rust codegen...");
 
-    // Generate test.proto
+    // Generate test.proto (includes Test and DefaultsTest messages)
     generate_proto(&out_dir, "proto/test.proto", "test.pc.rs")?;
 
     Ok(())
