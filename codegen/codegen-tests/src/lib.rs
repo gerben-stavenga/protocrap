@@ -1,6 +1,6 @@
 #![feature(allocator_api)]
 
-use protocrap::{self, ProtobufExt};
+use protocrap::{self, ProtobufExt, containers::Bytes};
 include!(concat!(env!("OUT_DIR"), "/test.pc.rs"));
 
 use Test::ProtoType as TestProto;
@@ -17,7 +17,7 @@ pub fn make_medium(arena: &mut protocrap::arena::Arena) -> TestProto {
     msg.set_x(42);
     msg.set_y(0xDEADBEEF);
     msg.set_z(
-        b"Hello World! This is a test string with some content.",
+        "Hello World! This is a test string with some content.",
         arena,
     );
     let child1 = msg.child1_mut(arena);
@@ -30,15 +30,17 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
     let mut msg = TestProto::default();
     msg.set_x(42);
     msg.set_y(0xDEADBEEF);
-    msg.set_z(b"Hello World!", arena);
-    /*for i in 0..100 {
-        let mut nested_msg = msg.nested_message_mut();
-        let elem = arena.alloc::<Test::NestedMessage::ProtoType>();
-        unsafe { elem.write(Test::NestedMessage::ProtoType::default()) };
-        nested_msg.push(protocrap::base::Message(elem as *mut _), arena);
-        let child = msg.nested_message_mut(arena);
-        child.set_x(i);
-    }*/
+    msg.set_z("Hello World!", arena);
+    for i in 0..100 {
+        let nested_msg = msg.add_nested_message(arena);
+        nested_msg.set_x(i);
+    }
+    for i in 0..5 {
+        msg.rep_bytes_mut().push(
+            Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena),
+            arena,
+        );
+    }
     msg
 }
 

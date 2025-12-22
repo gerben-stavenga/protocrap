@@ -275,6 +275,7 @@ fn generate_accessors(
                 // Repeated message field
                 let msg_type = rust_type_tokens(field);
                 let field_name_mut = format_ident!("{}_mut", field_name);
+                let add_field_name = format_ident!("add_{}", field_name);
                 methods.push(quote! {
                     pub const fn #field_name(&self) -> &[&#msg_type::ProtoType] {
                         unsafe { core::mem::transmute(self.#field_name.slice()) }
@@ -283,6 +284,17 @@ fn generate_accessors(
                     pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<&mut #msg_type::ProtoType> {
                         unsafe { core::mem::transmute(&mut self.#field_name) }
                     }
+
+                    pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
+                        let elem = arena.alloc::<#msg_type::ProtoType>();
+                        let msg = protocrap::base::Message(elem as *mut protocrap::base::Object);
+                        let value = unsafe { 
+                            elem.write(#msg_type::ProtoType::default());
+                            &mut *elem
+                        };
+                        self.#field_name.push(msg, arena);
+                        value
+                    }
                 });
                 continue;
             }
@@ -290,7 +302,7 @@ fn generate_accessors(
             let field_name_mut = format_ident!("{}_mut", field_name);
             methods.push(quote! {
                 pub const fn #field_name(&self) -> &[#element_type] {
-                    unsafe { core::mem::transmute(self.#field_name.slice()) }
+                    self.#field_name.slice()
                 }
 
                 pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<#element_type> {
