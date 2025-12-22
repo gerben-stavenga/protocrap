@@ -242,6 +242,10 @@ fn generate_message_impl(
                 }
             }
 
+            pub fn clear(&mut self) {
+                *self = unsafe { core::mem::zeroed() };
+            }
+
             pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                 &#file_descriptor_path
             }
@@ -311,8 +315,20 @@ fn generate_accessors(
             });
         } else {
             let setter_name = format_ident!("set_{}", field_name);
+            let optional_setter_name = format_ident!("set_optional_{}", field_name);
+            let optional_name = format_ident!("get_{}", field_name);
             let clear_name = format_ident!("clear_{}", field_name);
-            let has_bit = has_bit_map.get(&field.number()).cloned().unwrap_or(0) as u32;
+            let has_name = format_ident!("has_{}", field_name);
+            let has_bit = if let Some(has_bit) = has_bit_map.get(&field.number()).cloned() {
+                methods.push(quote! {
+                    pub const fn #has_name(&self) -> bool {
+                        unsafe { (*(self as *const _ as *const protocrap::base::Object)).has_bit(#has_bit as u8) }
+                    }
+                });
+                has_bit as u32
+            } else {
+                0
+            };
             match field.r#type().unwrap() {
                 Type::TYPE_STRING => {
                     methods.push(quote! {
@@ -320,14 +336,29 @@ fn generate_accessors(
                             self.#field_name.as_str()
                         }
 
+                        pub const fn #optional_name(&self) -> Option<&str> {
+                            if self.#has_name() {
+                                Some(self.#field_name.as_str())
+                            } else {
+                                None
+                            }
+                        }
+
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.as_object_mut().set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
-                        pub fn #clear_name(&mut self, arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().clear_has_bit(#has_bit as u32);
-                            self.#field_name.clear(arena);
+                        pub fn #optional_setter_name(&mut self, value: Option<&str>, arena: &mut protocrap::arena::Arena) {
+                            match value {
+                                Some(v) => self.#setter_name(v, arena),
+                                None => self.#clear_name(),
+                            }
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            self.as_object_mut().clear_has_bit(#has_bit);
+                            self.#field_name.clear();
                         }
                     });
                 }
@@ -336,30 +367,50 @@ fn generate_accessors(
                         pub const fn #field_name(&self) -> &[u8] {
                             self.#field_name.slice()
                         }
+
+                        pub const fn #optional_name(&self) -> Option<&[u8]> {
+                            if self.#has_name() {
+                                Some(self.#field_name.slice())
+                            } else {
+                                None
+                            }
+                        }
+
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.as_object_mut().set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
-                        pub fn #clear_name(&mut self, arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().clear_has_bit(#has_bit as u32);
-                            self.#field_name.clear(arena);
+                        pub fn #optional_setter_name(&mut self, value: Option<&[u8]>, arena: &mut protocrap::arena::Arena) {
+                            match value {
+                                Some(v) => self.#setter_name(v, arena),
+                                None => self.#clear_name(),
+                            }
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            self.as_object_mut().clear_has_bit(#has_bit);
+                            self.#field_name.clear();
                         }
                     });
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                     let msg_type = rust_type_tokens(field);
-                    let setter_name = format_ident!("{}_mut", field_name);
+                    let field_name_mut = format_ident!("{}_mut", field_name);
                     methods.push(quote! {
+                        pub const fn #has_name(&self) -> bool {
+                            !self.#field_name.0.is_null()
+                        }
+                        
                         pub const fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
-                            if self.#field_name.0.is_null() {
-                                None
-                            } else {
+                            if self.#has_name() {
                                 Some(unsafe { &*(self.#field_name.0 as *const #msg_type::ProtoType) })
+                            } else {
+                                None
                             }
                         }
 
-                        pub fn #setter_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
+                        pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             let object = self.#field_name;
                             if object.0.is_null() {
                                 let new_object = protocrap::base::Object::create(
@@ -384,12 +435,19 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: #enum_type) {
-                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.as_object_mut().set_has_bit(#has_bit);
                             self.#field_name = value.to_i32();
                         }
 
+                        pub fn #optional_setter_name(&mut self, value: Option<#enum_type>, arena: &mut protocrap::arena::Arena) {
+                            match value {
+                                Some(v) => self.#setter_name(v),
+                                None => self.#clear_name(),
+                            }
+                        }
+
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.as_object_mut().clear_has_bit(#has_bit);
                             self.#field_name = 0;
                         }
                     });
@@ -402,13 +460,28 @@ fn generate_accessors(
                             self.#field_name
                         }
 
+                        pub const fn #optional_name(&self) -> Option<#return_type> {
+                            if self.#has_name() {
+                                Some(self.#field_name)
+                            } else {
+                                None
+                            }
+                        }
+
                         pub fn #setter_name(&mut self, value: #return_type) {
-                            self.as_object_mut().set_has_bit(#has_bit as u32);
+                            self.as_object_mut().set_has_bit(#has_bit);
                             self.#field_name = value;
                         }
 
+                        pub fn #optional_setter_name(&mut self, value: Option<#return_type>, arena: &mut protocrap::arena::Arena) {
+                            match value {
+                                Some(v) => self.#setter_name(v),
+                                None => self.#clear_name(),
+                            }
+                        }
+
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit as u32);
+                            self.as_object_mut().clear_has_bit(#has_bit);
                             self.#field_name = Default::default();
                         }
                     });

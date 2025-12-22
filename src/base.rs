@@ -34,7 +34,7 @@ impl Object {
         }
     }
 
-    pub fn ref_at<T>(&self, offset: usize) -> &T {
+    pub const fn ref_at<T>(&self, offset: usize) -> &T {
         unsafe { &*((self as *const Self as *const u8).add(offset) as *const T) }
     }
 
@@ -42,7 +42,7 @@ impl Object {
         unsafe { &mut *((self as *mut Object as *mut u8).add(offset as usize) as *mut T) }
     }
 
-    pub fn has_bit(&self, has_bit_idx: u8) -> bool {
+    pub const fn has_bit(&self, has_bit_idx: u8) -> bool {
         let has_bit_word = has_bit_idx as usize / 32;
         let has_bit_idx = has_bit_idx % 32;
         (*self.ref_at::<u32>(has_bit_word)) & (1 << has_bit_idx) != 0

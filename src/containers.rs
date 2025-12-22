@@ -468,7 +468,7 @@ impl String {
         self.0.assign(s.as_bytes(), arena);
     }
 
-    pub fn clear(&mut self, arena: &mut crate::arena::Arena) {
+    pub fn clear(&mut self) {
         self.0.clear();
     }
 }
