@@ -164,6 +164,7 @@ pub fn generate_table(
     let num_decode_entries = decoding_entries.len();
     let num_aux_entries = aux_entries.len();
     Ok(quote! {
+        #[allow(clippy::identity_op, clippy::erasing_op)]
         pub static TABLE: protocrap::tables::TableWithEntries<
             #num_encode_entries,
             #num_decode_entries,

@@ -222,10 +222,10 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
         // Loop while there are elements
         loop {
             // Create object for next element
-            let mut msg_obj = Object::create(table.size as u32, arena);
+            let msg_obj = Object::create(table.size as u32, arena);
 
             let seed = ProtobufVisitor {
-                obj: &mut msg_obj,
+                obj: msg_obj,
                 table,
                 arena,
             };

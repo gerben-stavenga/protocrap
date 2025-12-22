@@ -234,6 +234,7 @@ fn generate_message_impl(
         }
 
         impl ProtoType {
+            #[allow(clippy::too_many_arguments)]
             pub const fn from_static(
                 has_bits: [u32; #has_bits_words],
                 #(#sorted_struct_fields,)*
@@ -320,9 +321,11 @@ fn unescape_proto_string(s: &str) -> Result<Vec<u8>> {
     Ok(result)
 }
 
-fn parse_primitive_default(field: &protocrap::google::protobuf::FieldDescriptorProto::ProtoType) -> Option<TokenStream> {
+fn parse_primitive_default(
+    field: &protocrap::google::protobuf::FieldDescriptorProto::ProtoType,
+) -> Option<TokenStream> {
     let Some(default_str) = field.get_default_value() else {
-      return None;
+        return None;
     };
     match field.r#type()? {
         Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 => {
@@ -357,13 +360,11 @@ fn parse_primitive_default(field: &protocrap::google::protobuf::FieldDescriptorP
                 None
             }
         }
-        Type::TYPE_BOOL => {
-            match default_str {
-                "true" => Some(quote! { true }),
-                "false" => Some(quote! { false }),
-                _ => panic!("Invalid boolean default value: {}", default_str),
-            }
-        }
+        Type::TYPE_BOOL => match default_str {
+            "true" => Some(quote! { true }),
+            "false" => Some(quote! { false }),
+            _ => panic!("Invalid boolean default value: {}", default_str),
+        },
         Type::TYPE_FLOAT => {
             // Handle special float values
             match default_str {
@@ -403,23 +404,21 @@ fn parse_primitive_default(field: &protocrap::google::protobuf::FieldDescriptorP
                 Some(quote! { #default_str })
             }
         }
-        Type::TYPE_BYTES => {
-            match unescape_proto_string(default_str) {
-                Ok(unescaped) => {
-                    if unescaped.is_empty() {
-                        None
-                    } else {
-                        Some(quote! { &[#(#unescaped),*] })
-                    }
+        Type::TYPE_BYTES => match unescape_proto_string(default_str) {
+            Ok(unescaped) => {
+                if unescaped.is_empty() {
+                    None
+                } else {
+                    Some(quote! { &[#(#unescaped),*] })
                 }
-                Err(_) => panic!("Invalid bytes default value: {}", default_str),
             }
-        }
+            Err(_) => panic!("Invalid bytes default value: {}", default_str),
+        },
         Type::TYPE_ENUM => {
             // TODO: Handle enum default values
             None
         }
-        Type::TYPE_MESSAGE |Type::TYPE_GROUP => {
+        Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
             unreachable!("Messages cannot have default values")
         }
     }
@@ -497,18 +496,19 @@ fn generate_accessors(
                     // Parse default value if present
                     let default_value = parse_primitive_default(field);
 
-                    let getter_impl = if has_bit_map.contains_key(&field.number()) && default_value.is_some() {
-                        let default_tokens = default_value.unwrap();
-                        quote! {
-                            if self.#has_name() {
-                                self.#field_name.as_str()
-                            } else {
-                                #default_tokens
+                    let getter_impl =
+                        if has_bit_map.contains_key(&field.number()) && default_value.is_some() {
+                            let default_tokens = default_value.unwrap();
+                            quote! {
+                                if self.#has_name() {
+                                    self.#field_name.as_str()
+                                } else {
+                                    #default_tokens
+                                }
                             }
-                        }
-                    } else {
-                        quote! { self.#field_name.as_str() }
-                    };
+                        } else {
+                            quote! { self.#field_name.as_str() }
+                        };
 
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> &str {

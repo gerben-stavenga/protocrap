@@ -200,21 +200,20 @@ fn encode_loop<'a>(
                 .field()
                 .iter()
                 .find(|f| f.number() as u32 == field_number);
-            if field.is_none() {
-                // field not found in descriptor, treat as unknown
-                println!(
-                    "Msg {} Unknown Field number: {} kind: {:?}",
-                    descriptor.name(),
-                    field_number,
-                    kind
-                );
-            } else {
-                let field = field.unwrap();
+            if let Some(field) = field {
                 println!(
                     "Msg {} Field number: {}, Field name {} kind: {:?}",
                     descriptor.name(),
                     field_number,
                     field.name(),
+                    kind
+                );
+            } else {
+                // field not found in descriptor, treat as unknown
+                println!(
+                    "Msg {} Unknown Field number: {} kind: {:?}",
+                    descriptor.name(),
+                    field_number,
                     kind
                 );
             }
@@ -568,7 +567,7 @@ pub(crate) enum ResumeResult<'a> {
 }
 
 impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
-    pub(crate) fn new<T: Protobuf + ?Sized>(obj: &'a T) -> Self {
+    pub(crate) fn new<T: Protobuf>(obj: &'a T) -> Self {
         let table = T::table();
         let encode_ctx = ObjectEncodeState::new(obj.as_object(), table);
         Self {

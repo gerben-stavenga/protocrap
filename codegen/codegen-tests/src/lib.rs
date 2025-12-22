@@ -46,11 +46,12 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
     msg
 }
 
+#[cfg(test)]
 fn assert_json_roundtrip<T: Protobuf>(msg: &T) {
     let serialized = serde_json::to_string(&protocrap::reflection::DynamicMessage::new(msg))
         .expect("should serialize");
 
-    // println!("Serialized JSON: {}", serialized);
+    println!("Serialized JSON: {}", serialized);
 
     let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
     let roundtrip_msg = {

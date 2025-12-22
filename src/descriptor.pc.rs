@@ -52,6 +52,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     file: protocrap::containers::RepeatedField<protocrap::base::Message>,
@@ -105,6 +106,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
                 2usize,
@@ -196,6 +198,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -610,6 +613,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 13usize,
                 15usize,
@@ -940,6 +944,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         start: i32,
@@ -1059,6 +1064,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     3usize,
                     4usize,
@@ -1156,6 +1162,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         start: i32,
@@ -1230,6 +1237,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
                     3usize,
@@ -1306,6 +1314,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -1667,6 +1676,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 10usize,
                 11usize,
@@ -2010,6 +2020,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         number: i32,
@@ -2192,6 +2203,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
                     7usize,
@@ -2305,6 +2317,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     declaration: protocrap::containers::RepeatedField<
@@ -2477,6 +2490,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
                 1000usize,
@@ -3704,6 +3718,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -4115,6 +4130,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 11usize,
                 18usize,
@@ -4302,6 +4318,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -4395,6 +4412,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 2usize,
                 3usize,
@@ -4485,6 +4503,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         start: i32,
@@ -4559,6 +4578,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
                     3usize,
@@ -4620,6 +4640,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -4803,6 +4824,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 5usize,
                 6usize,
@@ -4965,6 +4987,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -5090,6 +5113,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
                 4usize,
@@ -5185,6 +5209,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -5318,6 +5343,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
                 4usize,
@@ -5439,6 +5465,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::String,
@@ -5688,6 +5715,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 6usize,
                 7usize,
@@ -5859,6 +5887,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     java_package: protocrap::containers::String,
@@ -6715,6 +6744,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 22usize,
                 1000usize,
@@ -8039,6 +8069,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     message_set_wire_format: bool,
@@ -8310,6 +8341,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 7usize,
                 1000usize,
@@ -9478,6 +9510,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         value: protocrap::containers::String,
@@ -9565,6 +9598,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
                     4usize,
@@ -9733,6 +9767,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     ctype: i32,
@@ -10149,6 +10184,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 13usize,
                 1000usize,
@@ -11388,6 +11424,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     features: protocrap::base::Message,
@@ -11485,6 +11522,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 2usize,
                 1000usize,
@@ -12593,6 +12631,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     allow_alias: bool,
@@ -12786,6 +12825,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 5usize,
                 1000usize,
@@ -13927,6 +13967,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     deprecated: bool,
@@ -14080,6 +14121,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
                 1000usize,
@@ -15206,6 +15248,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     deprecated: bool,
@@ -15331,6 +15374,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
                 1000usize,
@@ -16469,6 +16513,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     deprecated: bool,
@@ -16631,6 +16676,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 4usize,
                 1000usize,
@@ -17763,6 +17809,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         name_part: protocrap::containers::String,
@@ -17857,6 +17904,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
                     3usize,
@@ -17917,6 +17965,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     name: protocrap::containers::RepeatedField<protocrap::base::Message>,
@@ -18185,6 +18234,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 7usize,
                 9usize,
@@ -18459,6 +18509,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     field_presence: i32,
@@ -18693,6 +18744,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 6usize,
                 7usize,
@@ -18806,6 +18858,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         features: protocrap::base::Message,
@@ -18900,6 +18953,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     2usize,
                     4usize,
@@ -18980,6 +19034,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     defaults: protocrap::containers::RepeatedField<
@@ -19104,6 +19159,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 3usize,
                 6usize,
@@ -19213,6 +19269,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         path: protocrap::containers::RepeatedField<i32>,
@@ -19351,6 +19408,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
                     7usize,
@@ -19442,6 +19500,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     location: protocrap::containers::RepeatedField<
@@ -19497,6 +19556,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
                 2usize,
@@ -19601,6 +19661,7 @@ pub mod google {
                     }
                 }
                 impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
                         path: protocrap::containers::RepeatedField<i32>,
@@ -19768,6 +19829,7 @@ pub mod google {
                         &TABLE.table
                     }
                 }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
                     5usize,
                     6usize,
@@ -19856,6 +19918,7 @@ pub mod google {
                 }
             }
             impl ProtoType {
+                #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
                     has_bits: [u32; 1usize],
                     annotation: protocrap::containers::RepeatedField<
@@ -19911,6 +19974,7 @@ pub mod google {
                     &TABLE.table
                 }
             }
+            #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
                 1usize,
                 2usize,

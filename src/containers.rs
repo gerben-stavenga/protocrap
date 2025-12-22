@@ -321,9 +321,6 @@ impl<T> IntoIterator for RepeatedField<T> {
     type IntoIter = IntoIter<T>;
     fn into_iter(self) -> IntoIter<T> {
         let (iter, buf) = unsafe { (RawValIter::new(&self), ptr::read(&self.buf)) };
-
-        mem::forget(self);
-
         IntoIter { iter, _buf: buf }
     }
 }

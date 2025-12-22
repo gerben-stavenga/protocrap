@@ -292,14 +292,11 @@ fn skip_group<'a>(
                 }
                 4 => {
                     // end group
-                    let Some(StackEntry {
+                    let StackEntry {
                         obj,
                         table,
                         delta_limit_or_group_tag,
-                    }) = stack.pop()
-                    else {
-                        return None;
-                    };
+                    } = stack.pop()?;
                     if -delta_limit_or_group_tag != field_number as isize {
                         return None;
                     }
@@ -380,20 +377,19 @@ fn decode_loop<'a>(
                     .field()
                     .iter()
                     .find(|f| f.number() as u32 == field_number);
-                if field.is_none() {
-                    // field not found in descriptor, treat as unknown
-                    println!(
-                        "Msg {} Unknown Field number: {}",
-                        descriptor.name(),
-                        field_number
-                    );
-                } else {
-                    let field = field.unwrap();
+                if let Some(field) = field {
                     println!(
                         "Msg {} Field number: {}, Field name {}",
                         descriptor.name(),
                         field_number,
                         field.name()
+                    );
+                } else {
+                    // field not found in descriptor, treat as unknown
+                    println!(
+                        "Msg {} Unknown Field number: {}",
+                        descriptor.name(),
+                        field_number
                     );
                 }
             }
@@ -678,7 +674,7 @@ pub struct ResumeableDecode<'a, const STACK_DEPTH: usize> {
 }
 
 impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
-    pub fn new<T: Protobuf + ?Sized>(obj: &'a mut T, limit: isize) -> Self {
+    pub fn new<T: Protobuf>(obj: &'a mut T, limit: isize) -> Self {
         let object = DecodeObject::Message(obj.as_object_mut(), T::table());
         Self {
             state: MaybeUninit::new(ResumeableState {

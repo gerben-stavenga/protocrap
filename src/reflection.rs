@@ -1,14 +1,10 @@
-use std::alloc::Allocator;
-
 use crate::{
     Protobuf,
-    arena::Arena,
     base::{Message, Object},
-    containers::{Bytes, String, RepeatedField},
+    containers::{Bytes, String},
     google::protobuf::{
         DescriptorProto::ProtoType as DescriptorProto,
         FieldDescriptorProto::{Label, ProtoType as FieldDescriptorProto, Type},
-        FileDescriptorProto::ProtoType as FileDescriptorProto,
     },
     tables::Table,
     wire,
@@ -83,7 +79,7 @@ pub fn is_message(field: &FieldDescriptorProto) -> bool {
 }
 
 pub fn needs_has_bit(field: &FieldDescriptorProto) -> bool {
-    return !is_repeated(field) && !is_message(field);
+    !is_repeated(field) && !is_message(field)
 }
 
 pub fn debug_message<T: Protobuf>(msg: &T, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -157,12 +153,12 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
     }
 
     pub fn find_field_descriptor(&self, field_name: &str) -> Option<&'pool FieldDescriptorProto> {
-        for field in self.table.descriptor.field().iter() {
-            if field.name() == field_name {
-                return Some(field);
-            }
-        }
-        None
+        self.table
+            .descriptor
+            .field()
+            .iter()
+            .find(|&&field| field.name() == field_name)
+            .copied()
     }
 
     pub fn get_field(&'msg self, field: &'pool FieldDescriptorProto) -> Option<Value<'pool, 'msg>> {

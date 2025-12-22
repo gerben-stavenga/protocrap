@@ -224,7 +224,11 @@ pub mod tests {
         let mut roundtrip_msg = T::default();
         assert!(roundtrip_msg.decode_flat::<32>(&mut arena, &data));
 
-        println!("Encoded {} ({} bytes)", T::table().descriptor.name(), data.len());
+        println!(
+            "Encoded {} ({} bytes)",
+            T::table().descriptor.name(),
+            data.len()
+        );
         // println!("Roundtrip message: {:#?}", roundtrip_msg);
 
         let roundtrip_data = roundtrip_msg.encode_vec::<32>().expect("msg should encode");

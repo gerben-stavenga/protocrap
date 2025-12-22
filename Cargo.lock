@@ -601,11 +601,7 @@ version = "0.1.6"
 dependencies = [
  "anyhow",
  "futures",
- "prettyplease",
- "proc-macro2",
- "quote",
  "serde",
- "syn",
 ]
 
 [[package]]
@@ -617,7 +613,6 @@ dependencies = [
  "prost",
  "prost-build",
  "protocrap 0.1.6",
- "serde",
 ]
 
 [[package]]
