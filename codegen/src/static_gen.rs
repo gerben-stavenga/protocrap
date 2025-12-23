@@ -10,6 +10,7 @@ use protocrap::{
 use quote::{ToTokens, format_ident, quote};
 
 fn full_name(name: &str) -> Vec<proc_macro2::Ident> {
+    // HACK: Manually do name resolution to fully qualified type path
     let mut path_parts = Vec::new();
     path_parts.extend(
         ["google", "protobuf"]
@@ -27,6 +28,9 @@ fn full_name(name: &str) -> Vec<proc_macro2::Ident> {
     }
     if name == "Declaration" {
         path_parts.push(format_ident!("ExtensionRangeOptions"));
+    }
+    if name == "EnumReservedRange" {
+        path_parts.push(format_ident!("EnumDescriptorProto"));
     }
     path_parts.push(format_ident!("{}", name));
     path_parts

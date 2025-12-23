@@ -7,27 +7,56 @@ pub mod google {
         #[allow(non_camel_case_types)]
         pub enum Edition {
             EDITION_UNKNOWN = 0i32,
+            EDITION_LEGACY = 900i32,
             EDITION_PROTO2 = 998i32,
             EDITION_PROTO3 = 999i32,
             EDITION_2023 = 1000i32,
+            EDITION_2024 = 1001i32,
+            EDITION_UNSTABLE = 9999i32,
             EDITION_1_TEST_ONLY = 1i32,
             EDITION_2_TEST_ONLY = 2i32,
             EDITION_99997_TEST_ONLY = 99997i32,
             EDITION_99998_TEST_ONLY = 99998i32,
             EDITION_99999_TEST_ONLY = 99999i32,
+            EDITION_MAX = 2147483647i32,
         }
         impl Edition {
             pub const fn from_i32(value: i32) -> Option<Self> {
                 match value {
                     0i32 => Some(Self::EDITION_UNKNOWN),
+                    900i32 => Some(Self::EDITION_LEGACY),
                     998i32 => Some(Self::EDITION_PROTO2),
                     999i32 => Some(Self::EDITION_PROTO3),
                     1000i32 => Some(Self::EDITION_2023),
+                    1001i32 => Some(Self::EDITION_2024),
+                    9999i32 => Some(Self::EDITION_UNSTABLE),
                     1i32 => Some(Self::EDITION_1_TEST_ONLY),
                     2i32 => Some(Self::EDITION_2_TEST_ONLY),
                     99997i32 => Some(Self::EDITION_99997_TEST_ONLY),
                     99998i32 => Some(Self::EDITION_99998_TEST_ONLY),
                     99999i32 => Some(Self::EDITION_99999_TEST_ONLY),
+                    2147483647i32 => Some(Self::EDITION_MAX),
+                    _ => None,
+                }
+            }
+            pub const fn to_i32(self) -> i32 {
+                self as i32
+            }
+        }
+        #[repr(i32)]
+        #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+        #[allow(non_camel_case_types)]
+        pub enum SymbolVisibility {
+            VISIBILITY_UNSET = 0i32,
+            VISIBILITY_LOCAL = 1i32,
+            VISIBILITY_EXPORT = 2i32,
+        }
+        impl SymbolVisibility {
+            pub const fn from_i32(value: i32) -> Option<Self> {
+                match value {
+                    0i32 => Some(Self::VISIBILITY_UNSET),
+                    1i32 => Some(Self::VISIBILITY_LOCAL),
+                    2i32 => Some(Self::VISIBILITY_EXPORT),
                     _ => None,
                 }
             }
@@ -177,6 +206,9 @@ pub mod google {
                 >,
                 public_dependency: protocrap::containers::RepeatedField<i32>,
                 weak_dependency: protocrap::containers::RepeatedField<i32>,
+                option_dependency: protocrap::containers::RepeatedField<
+                    protocrap::containers::String,
+                >,
                 message_type: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
@@ -224,6 +256,9 @@ pub mod google {
                     weak_dependency: protocrap::containers::RepeatedField<i32>,
                     syntax: protocrap::containers::String,
                     edition: i32,
+                    option_dependency: protocrap::containers::RepeatedField<
+                        protocrap::containers::String,
+                    >,
                 ) -> Self {
                     Self {
                         has_bits,
@@ -232,6 +267,7 @@ pub mod google {
                         dependency,
                         public_dependency,
                         weak_dependency,
+                        option_dependency,
                         message_type,
                         enum_type,
                         service,
@@ -344,6 +380,18 @@ pub mod google {
                     &mut self,
                 ) -> &mut protocrap::containers::RepeatedField<i32> {
                     &mut self.weak_dependency
+                }
+                pub const fn option_dependency(
+                    &self,
+                ) -> &[protocrap::containers::String] {
+                    self.option_dependency.slice()
+                }
+                pub fn option_dependency_mut(
+                    &mut self,
+                ) -> &mut protocrap::containers::RepeatedField<
+                    protocrap::containers::String,
+                > {
+                    &mut self.option_dependency
                 }
                 pub const fn message_type(
                     &self,
@@ -615,8 +663,8 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                13usize,
-                15usize,
+                14usize,
+                16usize,
                 6usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
@@ -653,15 +701,22 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
+                        kind: protocrap::wire::FieldKind::RepeatedBytes,
+                        offset: core::mem::offset_of!(ProtoType, option_dependency)
+                            as u16,
+                        encoded_tag: 122u32,
+                    },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 34u32,
@@ -670,13 +725,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 42u32,
@@ -685,13 +740,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 50u32,
@@ -700,13 +755,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 3usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 58u32,
@@ -715,13 +770,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 4usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 66u32,
@@ -730,13 +785,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 5usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             )) as u16,
                         encoded_tag: 74u32,
@@ -755,8 +810,8 @@ pub mod google {
                     },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 13usize as u16,
-                    num_decode_entries: 15usize as u16,
+                    num_encode_entries: 14usize as u16,
+                    num_decode_entries: 16usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
                 },
@@ -781,13 +836,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -795,13 +850,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -809,13 +864,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -823,13 +878,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 3usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -837,13 +892,13 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 4usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -851,13 +906,13 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 15usize,
+                            protocrap::tables::TableWithEntries < 14usize, 16usize,
                             6usize >, aux_entries
                         )
                             + 5usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 15usize,
+                                protocrap::tables::TableWithEntries < 14usize, 16usize,
                                 6usize >, table
                             ),
                     ),
@@ -881,6 +936,11 @@ pub mod google {
                         protocrap::wire::FieldKind::Varint32,
                         3u32,
                         core::mem::offset_of!(ProtoType, edition),
+                    ),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::RepeatedBytes,
+                        0u32,
+                        core::mem::offset_of!(ProtoType, option_dependency),
                     ),
                 ],
                 aux_entries: [
@@ -1307,6 +1367,7 @@ pub mod google {
                 reserved_name: protocrap::containers::RepeatedField<
                     protocrap::containers::String,
                 >,
+                visibility: i32,
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -1343,6 +1404,7 @@ pub mod google {
                     reserved_name: protocrap::containers::RepeatedField<
                         protocrap::containers::String,
                     >,
+                    visibility: i32,
                 ) -> Self {
                     Self {
                         has_bits,
@@ -1356,6 +1418,7 @@ pub mod google {
                         options,
                         reserved_range,
                         reserved_name,
+                        visibility,
                     }
                 }
                 pub fn clear(&mut self) {
@@ -1670,6 +1733,37 @@ pub mod google {
                 > {
                     &mut self.reserved_name
                 }
+                pub const fn has_visibility(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
+                }
+                pub const fn visibility(
+                    &self,
+                ) -> Option<crate::google::protobuf::SymbolVisibility> {
+                    crate::google::protobuf::SymbolVisibility::from_i32(self.visibility)
+                }
+                pub fn set_visibility(
+                    &mut self,
+                    value: crate::google::protobuf::SymbolVisibility,
+                ) {
+                    self.as_object_mut().set_has_bit(1u32);
+                    self.visibility = value.to_i32();
+                }
+                pub fn set_optional_visibility(
+                    &mut self,
+                    value: Option<crate::google::protobuf::SymbolVisibility>,
+                ) {
+                    match value {
+                        Some(v) => self.set_visibility(v),
+                        None => self.clear_visibility(),
+                    }
+                }
+                pub fn clear_visibility(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.visibility = 0;
+                }
             }
             impl protocrap::Protobuf for ProtoType {
                 fn table() -> &'static protocrap::tables::Table {
@@ -1678,8 +1772,8 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                10usize,
                 11usize,
+                12usize,
                 8usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
@@ -1693,13 +1787,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 18u32,
@@ -1708,13 +1802,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 50u32,
@@ -1723,13 +1817,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 26u32,
@@ -1738,13 +1832,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 3usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 34u32,
@@ -1753,13 +1847,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 4usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 42u32,
@@ -1768,13 +1862,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 5usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 66u32,
@@ -1783,13 +1877,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 6usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 58u32,
@@ -1798,13 +1892,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 7usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             )) as u16,
                         encoded_tag: 74u32,
@@ -1815,10 +1909,16 @@ pub mod google {
                         offset: core::mem::offset_of!(ProtoType, reserved_name) as u16,
                         encoded_tag: 82u32,
                     },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 1u8,
+                        kind: protocrap::wire::FieldKind::Varint32,
+                        offset: core::mem::offset_of!(ProtoType, visibility) as u16,
+                        encoded_tag: 88u32,
+                    },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 10usize as u16,
-                    num_decode_entries: 11usize as u16,
+                    num_encode_entries: 11usize as u16,
+                    num_decode_entries: 12usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
                 },
@@ -1833,13 +1933,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1847,13 +1947,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1861,13 +1961,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 3usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1875,13 +1975,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 4usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1889,13 +1989,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1903,13 +2003,13 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 6usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1917,13 +2017,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 5usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1931,13 +2031,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 10usize, 11usize,
+                            protocrap::tables::TableWithEntries < 11usize, 12usize,
                             8usize >, aux_entries
                         )
                             + 7usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 10usize, 11usize,
+                                protocrap::tables::TableWithEntries < 11usize, 12usize,
                                 8usize >, table
                             ),
                     ),
@@ -1945,6 +2045,11 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedBytes,
                         0u32,
                         core::mem::offset_of!(ProtoType, reserved_name),
+                    ),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Varint32,
+                        1u32,
+                        core::mem::offset_of!(ProtoType, visibility),
                     ),
                 ],
                 aux_entries: [
@@ -4633,6 +4738,7 @@ pub mod google {
                 reserved_name: protocrap::containers::RepeatedField<
                     protocrap::containers::String,
                 >,
+                visibility: i32,
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -4654,6 +4760,7 @@ pub mod google {
                     reserved_name: protocrap::containers::RepeatedField<
                         protocrap::containers::String,
                     >,
+                    visibility: i32,
                 ) -> Self {
                     Self {
                         has_bits,
@@ -4662,6 +4769,7 @@ pub mod google {
                         options,
                         reserved_range,
                         reserved_name,
+                        visibility,
                     }
                 }
                 pub fn clear(&mut self) {
@@ -4818,6 +4926,37 @@ pub mod google {
                 > {
                     &mut self.reserved_name
                 }
+                pub const fn has_visibility(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(1usize as u8)
+                    }
+                }
+                pub const fn visibility(
+                    &self,
+                ) -> Option<crate::google::protobuf::SymbolVisibility> {
+                    crate::google::protobuf::SymbolVisibility::from_i32(self.visibility)
+                }
+                pub fn set_visibility(
+                    &mut self,
+                    value: crate::google::protobuf::SymbolVisibility,
+                ) {
+                    self.as_object_mut().set_has_bit(1u32);
+                    self.visibility = value.to_i32();
+                }
+                pub fn set_optional_visibility(
+                    &mut self,
+                    value: Option<crate::google::protobuf::SymbolVisibility>,
+                ) {
+                    match value {
+                        Some(v) => self.set_visibility(v),
+                        None => self.clear_visibility(),
+                    }
+                }
+                pub fn clear_visibility(&mut self) {
+                    self.as_object_mut().clear_has_bit(1u32);
+                    self.visibility = 0;
+                }
             }
             impl protocrap::Protobuf for ProtoType {
                 fn table() -> &'static protocrap::tables::Table {
@@ -4826,8 +4965,8 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                5usize,
                 6usize,
+                7usize,
                 3usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
@@ -4841,13 +4980,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             )) as u16,
                         encoded_tag: 18u32,
@@ -4856,13 +4995,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             )) as u16,
                         encoded_tag: 26u32,
@@ -4871,13 +5010,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             )) as u16,
                         encoded_tag: 34u32,
@@ -4888,10 +5027,16 @@ pub mod google {
                         offset: core::mem::offset_of!(ProtoType, reserved_name) as u16,
                         encoded_tag: 42u32,
                     },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 1u8,
+                        kind: protocrap::wire::FieldKind::Varint32,
+                        offset: core::mem::offset_of!(ProtoType, visibility) as u16,
+                        encoded_tag: 48u32,
+                    },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 5usize as u16,
-                    num_decode_entries: 6usize as u16,
+                    num_encode_entries: 6usize as u16,
+                    num_decode_entries: 7usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
                 },
@@ -4906,13 +5051,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             ),
                     ),
@@ -4920,13 +5065,13 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             ),
                     ),
@@ -4934,13 +5079,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                            protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                             >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 5usize, 6usize, 3usize
+                                protocrap::tables::TableWithEntries < 6usize, 7usize, 3usize
                                 >, table
                             ),
                     ),
@@ -4948,6 +5093,11 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedBytes,
                         0u32,
                         core::mem::offset_of!(ProtoType, reserved_name),
+                    ),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Varint32,
+                        1u32,
+                        core::mem::offset_of!(ProtoType, visibility),
                     ),
                 ],
                 aux_entries: [
@@ -5866,7 +6016,6 @@ pub mod google {
                 cc_generic_services: bool,
                 java_generic_services: bool,
                 py_generic_services: bool,
-                php_generic_services: bool,
                 deprecated: bool,
                 cc_enable_arenas: bool,
                 objc_class_prefix: protocrap::containers::String,
@@ -5907,7 +6056,6 @@ pub mod google {
                     swift_prefix: protocrap::containers::String,
                     php_class_prefix: protocrap::containers::String,
                     php_namespace: protocrap::containers::String,
-                    php_generic_services: bool,
                     php_metadata_namespace: protocrap::containers::String,
                     ruby_package: protocrap::containers::String,
                     features: protocrap::base::Message,
@@ -5927,7 +6075,6 @@ pub mod google {
                         cc_generic_services,
                         java_generic_services,
                         py_generic_services,
-                        php_generic_services,
                         deprecated,
                         cc_enable_arenas,
                         objc_class_prefix,
@@ -6306,47 +6453,10 @@ pub mod google {
                     self.as_object_mut().clear_has_bit(9u32);
                     self.py_generic_services = Default::default();
                 }
-                pub const fn has_php_generic_services(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(10usize as u8)
-                    }
-                }
-                pub const fn php_generic_services(&self) -> bool {
-                    if self.has_php_generic_services() {
-                        self.php_generic_services
-                    } else {
-                        false
-                    }
-                }
-                pub const fn get_php_generic_services(&self) -> Option<bool> {
-                    if self.has_php_generic_services() {
-                        Some(self.php_generic_services)
-                    } else {
-                        None
-                    }
-                }
-                pub fn set_php_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(10u32);
-                    self.php_generic_services = value;
-                }
-                pub fn set_optional_php_generic_services(
-                    &mut self,
-                    value: Option<bool>,
-                ) {
-                    match value {
-                        Some(v) => self.set_php_generic_services(v),
-                        None => self.clear_php_generic_services(),
-                    }
-                }
-                pub fn clear_php_generic_services(&mut self) {
-                    self.as_object_mut().clear_has_bit(10u32);
-                    self.php_generic_services = Default::default();
-                }
                 pub const fn has_deprecated(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(11usize as u8)
+                            .has_bit(10usize as u8)
                     }
                 }
                 pub const fn deprecated(&self) -> bool {
@@ -6356,7 +6466,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(11u32);
+                    self.as_object_mut().set_has_bit(10u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -6366,13 +6476,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(11u32);
+                    self.as_object_mut().clear_has_bit(10u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_cc_enable_arenas(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(12usize as u8)
+                            .has_bit(11usize as u8)
                     }
                 }
                 pub const fn cc_enable_arenas(&self) -> bool {
@@ -6390,7 +6500,7 @@ pub mod google {
                     }
                 }
                 pub fn set_cc_enable_arenas(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(12u32);
+                    self.as_object_mut().set_has_bit(11u32);
                     self.cc_enable_arenas = value;
                 }
                 pub fn set_optional_cc_enable_arenas(&mut self, value: Option<bool>) {
@@ -6400,13 +6510,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_cc_enable_arenas(&mut self) {
-                    self.as_object_mut().clear_has_bit(12u32);
+                    self.as_object_mut().clear_has_bit(11u32);
                     self.cc_enable_arenas = Default::default();
                 }
                 pub const fn has_objc_class_prefix(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(13usize as u8)
+                            .has_bit(12usize as u8)
                     }
                 }
                 pub const fn objc_class_prefix(&self) -> &str {
@@ -6424,7 +6534,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(13u32);
+                    self.as_object_mut().set_has_bit(12u32);
                     self.objc_class_prefix.assign(value, arena);
                 }
                 pub fn set_optional_objc_class_prefix(
@@ -6438,13 +6548,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_objc_class_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(13u32);
+                    self.as_object_mut().clear_has_bit(12u32);
                     self.objc_class_prefix.clear();
                 }
                 pub const fn has_csharp_namespace(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(14usize as u8)
+                            .has_bit(13usize as u8)
                     }
                 }
                 pub const fn csharp_namespace(&self) -> &str {
@@ -6462,7 +6572,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(14u32);
+                    self.as_object_mut().set_has_bit(13u32);
                     self.csharp_namespace.assign(value, arena);
                 }
                 pub fn set_optional_csharp_namespace(
@@ -6476,13 +6586,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_csharp_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(14u32);
+                    self.as_object_mut().clear_has_bit(13u32);
                     self.csharp_namespace.clear();
                 }
                 pub const fn has_swift_prefix(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(15usize as u8)
+                            .has_bit(14usize as u8)
                     }
                 }
                 pub const fn swift_prefix(&self) -> &str {
@@ -6500,7 +6610,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(15u32);
+                    self.as_object_mut().set_has_bit(14u32);
                     self.swift_prefix.assign(value, arena);
                 }
                 pub fn set_optional_swift_prefix(
@@ -6514,13 +6624,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_swift_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(15u32);
+                    self.as_object_mut().clear_has_bit(14u32);
                     self.swift_prefix.clear();
                 }
                 pub const fn has_php_class_prefix(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(16usize as u8)
+                            .has_bit(15usize as u8)
                     }
                 }
                 pub const fn php_class_prefix(&self) -> &str {
@@ -6538,7 +6648,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(16u32);
+                    self.as_object_mut().set_has_bit(15u32);
                     self.php_class_prefix.assign(value, arena);
                 }
                 pub fn set_optional_php_class_prefix(
@@ -6552,13 +6662,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_class_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(16u32);
+                    self.as_object_mut().clear_has_bit(15u32);
                     self.php_class_prefix.clear();
                 }
                 pub const fn has_php_namespace(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(17usize as u8)
+                            .has_bit(16usize as u8)
                     }
                 }
                 pub const fn php_namespace(&self) -> &str {
@@ -6576,7 +6686,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(17u32);
+                    self.as_object_mut().set_has_bit(16u32);
                     self.php_namespace.assign(value, arena);
                 }
                 pub fn set_optional_php_namespace(
@@ -6590,13 +6700,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(17u32);
+                    self.as_object_mut().clear_has_bit(16u32);
                     self.php_namespace.clear();
                 }
                 pub const fn has_php_metadata_namespace(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(18usize as u8)
+                            .has_bit(17usize as u8)
                     }
                 }
                 pub const fn php_metadata_namespace(&self) -> &str {
@@ -6614,7 +6724,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(18u32);
+                    self.as_object_mut().set_has_bit(17u32);
                     self.php_metadata_namespace.assign(value, arena);
                 }
                 pub fn set_optional_php_metadata_namespace(
@@ -6628,13 +6738,13 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_metadata_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(18u32);
+                    self.as_object_mut().clear_has_bit(17u32);
                     self.php_metadata_namespace.clear();
                 }
                 pub const fn has_ruby_package(&self) -> bool {
                     unsafe {
                         (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(19usize as u8)
+                            .has_bit(18usize as u8)
                     }
                 }
                 pub const fn ruby_package(&self) -> &str {
@@ -6652,7 +6762,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(19u32);
+                    self.as_object_mut().set_has_bit(18u32);
                     self.ruby_package.assign(value, arena);
                 }
                 pub fn set_optional_ruby_package(
@@ -6666,7 +6776,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_ruby_package(&mut self) {
-                    self.as_object_mut().clear_has_bit(19u32);
+                    self.as_object_mut().clear_has_bit(18u32);
                     self.ruby_package.clear();
                 }
                 pub const fn has_features(&self) -> bool {
@@ -6746,7 +6856,7 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                22usize,
+                21usize,
                 1000usize,
                 2usize,
             > = protocrap::tables::TableWithEntries {
@@ -6822,65 +6932,58 @@ pub mod google {
                     protocrap::encoding::TableEntry {
                         has_bit: 10u8,
                         kind: protocrap::wire::FieldKind::Bool,
-                        offset: core::mem::offset_of!(ProtoType, php_generic_services)
-                            as u16,
-                        encoded_tag: 336u32,
-                    },
-                    protocrap::encoding::TableEntry {
-                        has_bit: 11u8,
-                        kind: protocrap::wire::FieldKind::Bool,
                         offset: core::mem::offset_of!(ProtoType, deprecated) as u16,
                         encoded_tag: 184u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 12u8,
+                        has_bit: 11u8,
                         kind: protocrap::wire::FieldKind::Bool,
                         offset: core::mem::offset_of!(ProtoType, cc_enable_arenas)
                             as u16,
                         encoded_tag: 248u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 13u8,
+                        has_bit: 12u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, objc_class_prefix)
                             as u16,
                         encoded_tag: 290u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 14u8,
+                        has_bit: 13u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, csharp_namespace)
                             as u16,
                         encoded_tag: 298u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 15u8,
+                        has_bit: 14u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, swift_prefix) as u16,
                         encoded_tag: 314u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 16u8,
+                        has_bit: 15u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, php_class_prefix)
                             as u16,
                         encoded_tag: 322u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 17u8,
+                        has_bit: 16u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, php_namespace) as u16,
                         encoded_tag: 330u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 18u8,
+                        has_bit: 17u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, php_metadata_namespace)
                             as u16,
                         encoded_tag: 354u32,
                     },
                     protocrap::encoding::TableEntry {
-                        has_bit: 19u8,
+                        has_bit: 18u8,
                         kind: protocrap::wire::FieldKind::Bytes,
                         offset: core::mem::offset_of!(ProtoType, ruby_package) as u16,
                         encoded_tag: 362u32,
@@ -6889,13 +6992,13 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            protocrap::tables::TableWithEntries < 21usize, 1000usize,
                             2usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                protocrap::tables::TableWithEntries < 21usize, 1000usize,
                                 2usize >, table
                             )) as u16,
                         encoded_tag: 402u32,
@@ -6904,20 +7007,20 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            protocrap::tables::TableWithEntries < 21usize, 1000usize,
                             2usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                protocrap::tables::TableWithEntries < 21usize, 1000usize,
                                 2usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 22usize as u16,
+                    num_encode_entries: 21usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
@@ -6984,7 +7087,7 @@ pub mod google {
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
-                        11u32,
+                        10u32,
                         core::mem::offset_of!(ProtoType, deprecated),
                     ),
                     protocrap::decoding::TableEntry(0),
@@ -7000,7 +7103,7 @@ pub mod google {
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bool,
-                        12u32,
+                        11u32,
                         core::mem::offset_of!(ProtoType, cc_enable_arenas),
                     ),
                     protocrap::decoding::TableEntry(0),
@@ -7009,44 +7112,40 @@ pub mod google {
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        13u32,
+                        12u32,
                         core::mem::offset_of!(ProtoType, objc_class_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        14u32,
+                        13u32,
                         core::mem::offset_of!(ProtoType, csharp_namespace),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        15u32,
+                        14u32,
                         core::mem::offset_of!(ProtoType, swift_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        16u32,
+                        15u32,
                         core::mem::offset_of!(ProtoType, php_class_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        17u32,
+                        16u32,
                         core::mem::offset_of!(ProtoType, php_namespace),
                     ),
-                    protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bool,
-                        10u32,
-                        core::mem::offset_of!(ProtoType, php_generic_services),
-                    ),
+                    protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        18u32,
+                        17u32,
                         core::mem::offset_of!(ProtoType, php_metadata_namespace),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Bytes,
-                        19u32,
+                        18u32,
                         core::mem::offset_of!(ProtoType, ruby_package),
                     ),
                     protocrap::decoding::TableEntry(0),
@@ -7057,13 +7156,13 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            protocrap::tables::TableWithEntries < 21usize, 1000usize,
                             2usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                protocrap::tables::TableWithEntries < 21usize, 1000usize,
                                 2usize >, table
                             ),
                     ),
@@ -8019,13 +8118,13 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                            protocrap::tables::TableWithEntries < 21usize, 1000usize,
                             2usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 22usize, 1000usize,
+                                protocrap::tables::TableWithEntries < 21usize, 1000usize,
                                 2usize >, table
                             ),
                     ),
@@ -9641,6 +9740,316 @@ pub mod google {
                     aux_entries: [],
                 };
             }
+            #[allow(non_snake_case)]
+            pub mod FeatureSupport {
+                use super::protocrap;
+                #[allow(unused_imports)]
+                use protocrap::Protobuf;
+                #[repr(C)]
+                #[derive(Default)]
+                pub struct ProtoType {
+                    has_bits: [u32; 1usize],
+                    edition_introduced: i32,
+                    edition_deprecated: i32,
+                    deprecation_warning: protocrap::containers::String,
+                    edition_removed: i32,
+                    removal_error: protocrap::containers::String,
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
+                }
+                impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
+                    pub const fn from_static(
+                        has_bits: [u32; 1usize],
+                        edition_introduced: i32,
+                        edition_deprecated: i32,
+                        deprecation_warning: protocrap::containers::String,
+                        edition_removed: i32,
+                        removal_error: protocrap::containers::String,
+                    ) -> Self {
+                        Self {
+                            has_bits,
+                            edition_introduced,
+                            edition_deprecated,
+                            deprecation_warning,
+                            edition_removed,
+                            removal_error,
+                        }
+                    }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
+                    pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
+                        &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
+                    }
+                    const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
+                        Self::file_descriptor().message_type()[12].nested_type()[1]
+                    }
+                    pub const fn has_edition_introduced(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(0usize as u8)
+                        }
+                    }
+                    pub const fn edition_introduced(
+                        &self,
+                    ) -> Option<crate::google::protobuf::Edition> {
+                        crate::google::protobuf::Edition::from_i32(
+                            self.edition_introduced,
+                        )
+                    }
+                    pub fn set_edition_introduced(
+                        &mut self,
+                        value: crate::google::protobuf::Edition,
+                    ) {
+                        self.as_object_mut().set_has_bit(0u32);
+                        self.edition_introduced = value.to_i32();
+                    }
+                    pub fn set_optional_edition_introduced(
+                        &mut self,
+                        value: Option<crate::google::protobuf::Edition>,
+                    ) {
+                        match value {
+                            Some(v) => self.set_edition_introduced(v),
+                            None => self.clear_edition_introduced(),
+                        }
+                    }
+                    pub fn clear_edition_introduced(&mut self) {
+                        self.as_object_mut().clear_has_bit(0u32);
+                        self.edition_introduced = 0;
+                    }
+                    pub const fn has_edition_deprecated(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(1usize as u8)
+                        }
+                    }
+                    pub const fn edition_deprecated(
+                        &self,
+                    ) -> Option<crate::google::protobuf::Edition> {
+                        crate::google::protobuf::Edition::from_i32(
+                            self.edition_deprecated,
+                        )
+                    }
+                    pub fn set_edition_deprecated(
+                        &mut self,
+                        value: crate::google::protobuf::Edition,
+                    ) {
+                        self.as_object_mut().set_has_bit(1u32);
+                        self.edition_deprecated = value.to_i32();
+                    }
+                    pub fn set_optional_edition_deprecated(
+                        &mut self,
+                        value: Option<crate::google::protobuf::Edition>,
+                    ) {
+                        match value {
+                            Some(v) => self.set_edition_deprecated(v),
+                            None => self.clear_edition_deprecated(),
+                        }
+                    }
+                    pub fn clear_edition_deprecated(&mut self) {
+                        self.as_object_mut().clear_has_bit(1u32);
+                        self.edition_deprecated = 0;
+                    }
+                    pub const fn has_deprecation_warning(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(2usize as u8)
+                        }
+                    }
+                    pub const fn deprecation_warning(&self) -> &str {
+                        self.deprecation_warning.as_str()
+                    }
+                    pub const fn get_deprecation_warning(&self) -> Option<&str> {
+                        if self.has_deprecation_warning() {
+                            Some(self.deprecation_warning.as_str())
+                        } else {
+                            None
+                        }
+                    }
+                    pub fn set_deprecation_warning(
+                        &mut self,
+                        value: &str,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        self.as_object_mut().set_has_bit(2u32);
+                        self.deprecation_warning.assign(value, arena);
+                    }
+                    pub fn set_optional_deprecation_warning(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_deprecation_warning(v, arena),
+                            None => self.clear_deprecation_warning(),
+                        }
+                    }
+                    pub fn clear_deprecation_warning(&mut self) {
+                        self.as_object_mut().clear_has_bit(2u32);
+                        self.deprecation_warning.clear();
+                    }
+                    pub const fn has_edition_removed(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(3usize as u8)
+                        }
+                    }
+                    pub const fn edition_removed(
+                        &self,
+                    ) -> Option<crate::google::protobuf::Edition> {
+                        crate::google::protobuf::Edition::from_i32(self.edition_removed)
+                    }
+                    pub fn set_edition_removed(
+                        &mut self,
+                        value: crate::google::protobuf::Edition,
+                    ) {
+                        self.as_object_mut().set_has_bit(3u32);
+                        self.edition_removed = value.to_i32();
+                    }
+                    pub fn set_optional_edition_removed(
+                        &mut self,
+                        value: Option<crate::google::protobuf::Edition>,
+                    ) {
+                        match value {
+                            Some(v) => self.set_edition_removed(v),
+                            None => self.clear_edition_removed(),
+                        }
+                    }
+                    pub fn clear_edition_removed(&mut self) {
+                        self.as_object_mut().clear_has_bit(3u32);
+                        self.edition_removed = 0;
+                    }
+                    pub const fn has_removal_error(&self) -> bool {
+                        unsafe {
+                            (*(self as *const _ as *const protocrap::base::Object))
+                                .has_bit(4usize as u8)
+                        }
+                    }
+                    pub const fn removal_error(&self) -> &str {
+                        self.removal_error.as_str()
+                    }
+                    pub const fn get_removal_error(&self) -> Option<&str> {
+                        if self.has_removal_error() {
+                            Some(self.removal_error.as_str())
+                        } else {
+                            None
+                        }
+                    }
+                    pub fn set_removal_error(
+                        &mut self,
+                        value: &str,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        self.as_object_mut().set_has_bit(4u32);
+                        self.removal_error.assign(value, arena);
+                    }
+                    pub fn set_optional_removal_error(
+                        &mut self,
+                        value: Option<&str>,
+                        arena: &mut protocrap::arena::Arena,
+                    ) {
+                        match value {
+                            Some(v) => self.set_removal_error(v, arena),
+                            None => self.clear_removal_error(),
+                        }
+                    }
+                    pub fn clear_removal_error(&mut self) {
+                        self.as_object_mut().clear_has_bit(4u32);
+                        self.removal_error.clear();
+                    }
+                }
+                impl protocrap::Protobuf for ProtoType {
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
+                    }
+                }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
+                pub static TABLE: protocrap::tables::TableWithEntries<
+                    5usize,
+                    6usize,
+                    0usize,
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [
+                        protocrap::encoding::TableEntry {
+                            has_bit: 0u8,
+                            kind: protocrap::wire::FieldKind::Varint32,
+                            offset: core::mem::offset_of!(ProtoType, edition_introduced)
+                                as u16,
+                            encoded_tag: 8u32,
+                        },
+                        protocrap::encoding::TableEntry {
+                            has_bit: 1u8,
+                            kind: protocrap::wire::FieldKind::Varint32,
+                            offset: core::mem::offset_of!(ProtoType, edition_deprecated)
+                                as u16,
+                            encoded_tag: 16u32,
+                        },
+                        protocrap::encoding::TableEntry {
+                            has_bit: 2u8,
+                            kind: protocrap::wire::FieldKind::Bytes,
+                            offset: core::mem::offset_of!(ProtoType, deprecation_warning)
+                                as u16,
+                            encoded_tag: 26u32,
+                        },
+                        protocrap::encoding::TableEntry {
+                            has_bit: 3u8,
+                            kind: protocrap::wire::FieldKind::Varint32,
+                            offset: core::mem::offset_of!(ProtoType, edition_removed)
+                                as u16,
+                            encoded_tag: 32u32,
+                        },
+                        protocrap::encoding::TableEntry {
+                            has_bit: 4u8,
+                            kind: protocrap::wire::FieldKind::Bytes,
+                            offset: core::mem::offset_of!(ProtoType, removal_error)
+                                as u16,
+                            encoded_tag: 42u32,
+                        },
+                    ],
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 5usize as u16,
+                        num_decode_entries: 6usize as u16,
+                        size: core::mem::size_of::<ProtoType>() as u16,
+                        descriptor: ProtoType::descriptor_proto(),
+                    },
+                    decode_entries: [
+                        protocrap::decoding::TableEntry(0),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Varint32,
+                            0u32,
+                            core::mem::offset_of!(ProtoType, edition_introduced),
+                        ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Varint32,
+                            1u32,
+                            core::mem::offset_of!(ProtoType, edition_deprecated),
+                        ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Bytes,
+                            2u32,
+                            core::mem::offset_of!(ProtoType, deprecation_warning),
+                        ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Varint32,
+                            3u32,
+                            core::mem::offset_of!(ProtoType, edition_removed),
+                        ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Bytes,
+                            4u32,
+                            core::mem::offset_of!(ProtoType, removal_error),
+                        ),
+                    ],
+                    aux_entries: [],
+                };
+            }
             #[repr(i32)]
             #[derive(Debug, Clone, Copy, PartialEq, Eq)]
             #[allow(non_camel_case_types)]
@@ -9757,6 +10166,7 @@ pub mod google {
                     protocrap::base::Message,
                 >,
                 features: protocrap::base::Message,
+                feature_support: protocrap::base::Message,
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
@@ -9784,6 +10194,7 @@ pub mod google {
                         protocrap::base::Message,
                     >,
                     features: protocrap::base::Message,
+                    feature_support: protocrap::base::Message,
                     uninterpreted_option: protocrap::containers::RepeatedField<
                         protocrap::base::Message,
                     >,
@@ -9802,6 +10213,7 @@ pub mod google {
                         targets,
                         edition_defaults,
                         features,
+                        feature_support,
                         uninterpreted_option,
                     }
                 }
@@ -10146,6 +10558,47 @@ pub mod google {
                 pub fn clear_features(&mut self) {
                     self.features = protocrap::base::Message(core::ptr::null_mut());
                 }
+                pub const fn has_feature_support(&self) -> bool {
+                    !self.feature_support.0.is_null()
+                }
+                pub const fn feature_support(
+                    &self,
+                ) -> Option<
+                    &crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType,
+                > {
+                    if self.has_feature_support() {
+                        Some(unsafe {
+                            &*(self.feature_support.0
+                                as *const crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType)
+                        })
+                    } else {
+                        None
+                    }
+                }
+                pub fn feature_support_mut(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType {
+                    let object = self.feature_support;
+                    if object.0.is_null() {
+                        let new_object = protocrap::base::Object::create(
+                            core::mem::size_of::<
+                                crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType,
+                            >() as u32,
+                            arena,
+                        );
+                        self.feature_support = protocrap::base::Message(new_object);
+                    }
+                    unsafe {
+                        &mut *(self.feature_support.0
+                            as *mut crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType)
+                    }
+                }
+                pub fn clear_feature_support(&mut self) {
+                    self.feature_support = protocrap::base::Message(
+                        core::ptr::null_mut(),
+                    );
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -10186,9 +10639,9 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                13usize,
+                14usize,
                 1000usize,
-                3usize,
+                4usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
@@ -10255,14 +10708,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::RepeatedMessage,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             )) as u16,
                         encoded_tag: 162u32,
                     },
@@ -10270,35 +10723,50 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             )) as u16,
                         encoded_tag: 170u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedMessage,
+                        kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
                             + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
+                            )) as u16,
+                        encoded_tag: 178u32,
+                    },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 0u8,
+                        kind: protocrap::wire::FieldKind::RepeatedMessage,
+                        offset: (core::mem::offset_of!(
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
+                        )
+                            + 3usize
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 13usize as u16,
+                    num_encode_entries: 14usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
@@ -10368,31 +10836,44 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             ),
                     ),
                     protocrap::decoding::TableEntry::new(
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             ),
                     ),
-                    protocrap::decoding::TableEntry(0),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Message,
+                        0,
+                        core::mem::offset_of!(
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
+                        )
+                            + 2usize
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
+                            ),
+                    ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -11373,14 +11854,14 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                            3usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                            4usize >, aux_entries
                         )
-                            + 2usize
+                            + 3usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 13usize, 1000usize,
-                                3usize >, table
+                                protocrap::tables::TableWithEntries < 14usize, 1000usize,
+                                4usize >, table
                             ),
                     ),
                 ],
@@ -11394,6 +11875,11 @@ pub mod google {
                     protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
                         child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
+                    },
+                    protocrap::tables::AuxTableEntry {
+                        offset: core::mem::offset_of!(ProtoType, feature_support) as u32,
+                        child_table: &crate::google::protobuf::FieldOptions::FeatureSupport::TABLE
+                            .table,
                     },
                     protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
@@ -13957,6 +14443,7 @@ pub mod google {
                 deprecated: bool,
                 features: protocrap::base::Message,
                 debug_redact: bool,
+                feature_support: protocrap::base::Message,
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::Message,
                 >,
@@ -13973,6 +14460,7 @@ pub mod google {
                     deprecated: bool,
                     features: protocrap::base::Message,
                     debug_redact: bool,
+                    feature_support: protocrap::base::Message,
                     uninterpreted_option: protocrap::containers::RepeatedField<
                         protocrap::base::Message,
                     >,
@@ -13982,6 +14470,7 @@ pub mod google {
                         deprecated,
                         features,
                         debug_redact,
+                        feature_support,
                         uninterpreted_option,
                     }
                 }
@@ -14083,6 +14572,47 @@ pub mod google {
                     self.as_object_mut().clear_has_bit(1u32);
                     self.debug_redact = Default::default();
                 }
+                pub const fn has_feature_support(&self) -> bool {
+                    !self.feature_support.0.is_null()
+                }
+                pub const fn feature_support(
+                    &self,
+                ) -> Option<
+                    &crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType,
+                > {
+                    if self.has_feature_support() {
+                        Some(unsafe {
+                            &*(self.feature_support.0
+                                as *const crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType)
+                        })
+                    } else {
+                        None
+                    }
+                }
+                pub fn feature_support_mut(
+                    &mut self,
+                    arena: &mut protocrap::arena::Arena,
+                ) -> &mut crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType {
+                    let object = self.feature_support;
+                    if object.0.is_null() {
+                        let new_object = protocrap::base::Object::create(
+                            core::mem::size_of::<
+                                crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType,
+                            >() as u32,
+                            arena,
+                        );
+                        self.feature_support = protocrap::base::Message(new_object);
+                    }
+                    unsafe {
+                        &mut *(self.feature_support.0
+                            as *mut crate::google::protobuf::FieldOptions::FeatureSupport::ProtoType)
+                    }
+                }
+                pub fn clear_feature_support(&mut self) {
+                    self.feature_support = protocrap::base::Message(
+                        core::ptr::null_mut(),
+                    );
+                }
                 pub const fn uninterpreted_option(
                     &self,
                 ) -> &[&crate::google::protobuf::UninterpretedOption::ProtoType] {
@@ -14123,9 +14653,9 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                4usize,
+                5usize,
                 1000usize,
-                2usize,
+                3usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
@@ -14138,14 +14668,14 @@ pub mod google {
                         has_bit: 0u8,
                         kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                            2usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                                2usize >, table
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 18u32,
                     },
@@ -14157,22 +14687,37 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedMessage,
+                        kind: protocrap::wire::FieldKind::Message,
                         offset: (core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                            2usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 1usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                                2usize >, table
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
+                            )) as u16,
+                        encoded_tag: 34u32,
+                    },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 0u8,
+                        kind: protocrap::wire::FieldKind::RepeatedMessage,
+                        offset: (core::mem::offset_of!(
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
+                        )
+                            + 2usize
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
                             )) as u16,
                         encoded_tag: 7994u32,
                     },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 4usize as u16,
+                    num_encode_entries: 5usize as u16,
                     num_decode_entries: 1000usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
@@ -14188,14 +14733,14 @@ pub mod google {
                         protocrap::wire::FieldKind::Message,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                            2usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
                         )
                             + 0usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                                2usize >, table
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
                             ),
                     ),
                     protocrap::decoding::TableEntry::new(
@@ -14203,7 +14748,20 @@ pub mod google {
                         1u32,
                         core::mem::offset_of!(ProtoType, debug_redact),
                     ),
-                    protocrap::decoding::TableEntry(0),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Message,
+                        0,
+                        core::mem::offset_of!(
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
+                        )
+                            + 1usize
+                                * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                            - core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
+                            ),
+                    ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
@@ -15202,14 +15760,14 @@ pub mod google {
                         protocrap::wire::FieldKind::RepeatedMessage,
                         0,
                         core::mem::offset_of!(
-                            protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                            2usize >, aux_entries
+                            protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                            3usize >, aux_entries
                         )
-                            + 1usize
+                            + 2usize
                                 * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                             - core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 4usize, 1000usize,
-                                2usize >, table
+                                protocrap::tables::TableWithEntries < 5usize, 1000usize,
+                                3usize >, table
                             ),
                     ),
                 ],
@@ -15217,6 +15775,11 @@ pub mod google {
                     protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, features) as u32,
                         child_table: &crate::google::protobuf::FeatureSet::TABLE.table,
+                    },
+                    protocrap::tables::AuxTableEntry {
+                        offset: core::mem::offset_of!(ProtoType, feature_support) as u32,
+                        child_table: &crate::google::protobuf::FieldOptions::FeatureSupport::TABLE
+                            .table,
                     },
                     protocrap::tables::AuxTableEntry {
                         offset: core::mem::offset_of!(ProtoType, uninterpreted_option)
@@ -18364,6 +18927,86 @@ pub mod google {
             use super::protocrap;
             #[allow(unused_imports)]
             use protocrap::Protobuf;
+            #[allow(non_snake_case)]
+            pub mod VisibilityFeature {
+                use super::protocrap;
+                #[allow(unused_imports)]
+                use protocrap::Protobuf;
+                #[repr(i32)]
+                #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+                #[allow(non_camel_case_types)]
+                pub enum DefaultSymbolVisibility {
+                    DEFAULT_SYMBOL_VISIBILITY_UNKNOWN = 0i32,
+                    EXPORT_ALL = 1i32,
+                    EXPORT_TOP_LEVEL = 2i32,
+                    LOCAL_ALL = 3i32,
+                    STRICT = 4i32,
+                }
+                impl DefaultSymbolVisibility {
+                    pub const fn from_i32(value: i32) -> Option<Self> {
+                        match value {
+                            0i32 => Some(Self::DEFAULT_SYMBOL_VISIBILITY_UNKNOWN),
+                            1i32 => Some(Self::EXPORT_ALL),
+                            2i32 => Some(Self::EXPORT_TOP_LEVEL),
+                            3i32 => Some(Self::LOCAL_ALL),
+                            4i32 => Some(Self::STRICT),
+                            _ => None,
+                        }
+                    }
+                    pub const fn to_i32(self) -> i32 {
+                        self as i32
+                    }
+                }
+                #[repr(C)]
+                #[derive(Default)]
+                pub struct ProtoType {
+                    has_bits: [u32; 1usize],
+                }
+                impl core::fmt::Debug for ProtoType {
+                    fn fmt(
+                        &self,
+                        f: &mut core::fmt::Formatter<'_>,
+                    ) -> core::fmt::Result {
+                        protocrap::reflection::debug_message(self, f)
+                    }
+                }
+                impl ProtoType {
+                    #[allow(clippy::too_many_arguments)]
+                    pub const fn from_static(has_bits: [u32; 1usize]) -> Self {
+                        Self { has_bits }
+                    }
+                    pub fn clear(&mut self) {
+                        *self = unsafe { core::mem::zeroed() };
+                    }
+                    pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
+                        &crate::google::protobuf::FILE_DESCRIPTOR_PROTO
+                    }
+                    const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
+                        Self::file_descriptor().message_type()[19].nested_type()[0]
+                    }
+                }
+                impl protocrap::Protobuf for ProtoType {
+                    fn table() -> &'static protocrap::tables::Table {
+                        &TABLE.table
+                    }
+                }
+                #[allow(clippy::identity_op, clippy::erasing_op)]
+                pub static TABLE: protocrap::tables::TableWithEntries<
+                    0usize,
+                    1usize,
+                    0usize,
+                > = protocrap::tables::TableWithEntries {
+                    encode_entries: [],
+                    table: protocrap::tables::Table {
+                        num_encode_entries: 0usize as u16,
+                        num_decode_entries: 1usize as u16,
+                        size: core::mem::size_of::<ProtoType>() as u16,
+                        descriptor: ProtoType::descriptor_proto(),
+                    },
+                    decode_entries: [protocrap::decoding::TableEntry(0)],
+                    aux_entries: [],
+                };
+            }
             #[repr(i32)]
             #[derive(Debug, Clone, Copy, PartialEq, Eq)]
             #[allow(non_camel_case_types)]
@@ -18434,15 +19077,15 @@ pub mod google {
             #[allow(non_camel_case_types)]
             pub enum Utf8Validation {
                 UTF8_VALIDATION_UNKNOWN = 0i32,
-                NONE = 1i32,
                 VERIFY = 2i32,
+                NONE = 3i32,
             }
             impl Utf8Validation {
                 pub const fn from_i32(value: i32) -> Option<Self> {
                     match value {
                         0i32 => Some(Self::UTF8_VALIDATION_UNKNOWN),
-                        1i32 => Some(Self::NONE),
                         2i32 => Some(Self::VERIFY),
+                        3i32 => Some(Self::NONE),
                         _ => None,
                     }
                 }
@@ -18492,6 +19135,27 @@ pub mod google {
                     self as i32
                 }
             }
+            #[repr(i32)]
+            #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+            #[allow(non_camel_case_types)]
+            pub enum EnforceNamingStyle {
+                ENFORCE_NAMING_STYLE_UNKNOWN = 0i32,
+                STYLE2024 = 1i32,
+                STYLE_LEGACY = 2i32,
+            }
+            impl EnforceNamingStyle {
+                pub const fn from_i32(value: i32) -> Option<Self> {
+                    match value {
+                        0i32 => Some(Self::ENFORCE_NAMING_STYLE_UNKNOWN),
+                        1i32 => Some(Self::STYLE2024),
+                        2i32 => Some(Self::STYLE_LEGACY),
+                        _ => None,
+                    }
+                }
+                pub const fn to_i32(self) -> i32 {
+                    self as i32
+                }
+            }
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
@@ -18502,6 +19166,8 @@ pub mod google {
                 utf8_validation: i32,
                 message_encoding: i32,
                 json_format: i32,
+                enforce_naming_style: i32,
+                default_symbol_visibility: i32,
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -18518,6 +19184,8 @@ pub mod google {
                     utf8_validation: i32,
                     message_encoding: i32,
                     json_format: i32,
+                    enforce_naming_style: i32,
+                    default_symbol_visibility: i32,
                 ) -> Self {
                     Self {
                         has_bits,
@@ -18527,6 +19195,8 @@ pub mod google {
                         utf8_validation,
                         message_encoding,
                         json_format,
+                        enforce_naming_style,
+                        default_symbol_visibility,
                     }
                 }
                 pub fn clear(&mut self) {
@@ -18738,6 +19408,78 @@ pub mod google {
                     self.as_object_mut().clear_has_bit(5u32);
                     self.json_format = 0;
                 }
+                pub const fn has_enforce_naming_style(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(6usize as u8)
+                    }
+                }
+                pub const fn enforce_naming_style(
+                    &self,
+                ) -> Option<crate::google::protobuf::FeatureSet::EnforceNamingStyle> {
+                    crate::google::protobuf::FeatureSet::EnforceNamingStyle::from_i32(
+                        self.enforce_naming_style,
+                    )
+                }
+                pub fn set_enforce_naming_style(
+                    &mut self,
+                    value: crate::google::protobuf::FeatureSet::EnforceNamingStyle,
+                ) {
+                    self.as_object_mut().set_has_bit(6u32);
+                    self.enforce_naming_style = value.to_i32();
+                }
+                pub fn set_optional_enforce_naming_style(
+                    &mut self,
+                    value: Option<
+                        crate::google::protobuf::FeatureSet::EnforceNamingStyle,
+                    >,
+                ) {
+                    match value {
+                        Some(v) => self.set_enforce_naming_style(v),
+                        None => self.clear_enforce_naming_style(),
+                    }
+                }
+                pub fn clear_enforce_naming_style(&mut self) {
+                    self.as_object_mut().clear_has_bit(6u32);
+                    self.enforce_naming_style = 0;
+                }
+                pub const fn has_default_symbol_visibility(&self) -> bool {
+                    unsafe {
+                        (*(self as *const _ as *const protocrap::base::Object))
+                            .has_bit(7usize as u8)
+                    }
+                }
+                pub const fn default_symbol_visibility(
+                    &self,
+                ) -> Option<
+                    crate::google::protobuf::FeatureSet::VisibilityFeature::DefaultSymbolVisibility,
+                > {
+                    crate::google::protobuf::FeatureSet::VisibilityFeature::DefaultSymbolVisibility::from_i32(
+                        self.default_symbol_visibility,
+                    )
+                }
+                pub fn set_default_symbol_visibility(
+                    &mut self,
+                    value: crate::google::protobuf::FeatureSet::VisibilityFeature::DefaultSymbolVisibility,
+                ) {
+                    self.as_object_mut().set_has_bit(7u32);
+                    self.default_symbol_visibility = value.to_i32();
+                }
+                pub fn set_optional_default_symbol_visibility(
+                    &mut self,
+                    value: Option<
+                        crate::google::protobuf::FeatureSet::VisibilityFeature::DefaultSymbolVisibility,
+                    >,
+                ) {
+                    match value {
+                        Some(v) => self.set_default_symbol_visibility(v),
+                        None => self.clear_default_symbol_visibility(),
+                    }
+                }
+                pub fn clear_default_symbol_visibility(&mut self) {
+                    self.as_object_mut().clear_has_bit(7u32);
+                    self.default_symbol_visibility = 0;
+                }
             }
             impl protocrap::Protobuf for ProtoType {
                 fn table() -> &'static protocrap::tables::Table {
@@ -18746,8 +19488,8 @@ pub mod google {
             }
             #[allow(clippy::identity_op, clippy::erasing_op)]
             pub static TABLE: protocrap::tables::TableWithEntries<
-                6usize,
-                7usize,
+                8usize,
+                9usize,
                 0usize,
             > = protocrap::tables::TableWithEntries {
                 encode_entries: [
@@ -18789,10 +19531,25 @@ pub mod google {
                         offset: core::mem::offset_of!(ProtoType, json_format) as u16,
                         encoded_tag: 48u32,
                     },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 6u8,
+                        kind: protocrap::wire::FieldKind::Varint32,
+                        offset: core::mem::offset_of!(ProtoType, enforce_naming_style)
+                            as u16,
+                        encoded_tag: 56u32,
+                    },
+                    protocrap::encoding::TableEntry {
+                        has_bit: 7u8,
+                        kind: protocrap::wire::FieldKind::Varint32,
+                        offset: core::mem::offset_of!(
+                            ProtoType, default_symbol_visibility
+                        ) as u16,
+                        encoded_tag: 64u32,
+                    },
                 ],
                 table: protocrap::tables::Table {
-                    num_encode_entries: 6usize as u16,
-                    num_decode_entries: 7usize as u16,
+                    num_encode_entries: 8usize as u16,
+                    num_decode_entries: 9usize as u16,
                     size: core::mem::size_of::<ProtoType>() as u16,
                     descriptor: ProtoType::descriptor_proto(),
                 },
@@ -18828,6 +19585,16 @@ pub mod google {
                         5u32,
                         core::mem::offset_of!(ProtoType, json_format),
                     ),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Varint32,
+                        6u32,
+                        core::mem::offset_of!(ProtoType, enforce_naming_style),
+                    ),
+                    protocrap::decoding::TableEntry::new(
+                        protocrap::wire::FieldKind::Varint32,
+                        7u32,
+                        core::mem::offset_of!(ProtoType, default_symbol_visibility),
+                    ),
                 ],
                 aux_entries: [],
             };
@@ -18847,7 +19614,8 @@ pub mod google {
                 pub struct ProtoType {
                     has_bits: [u32; 1usize],
                     edition: i32,
-                    features: protocrap::base::Message,
+                    overridable_features: protocrap::base::Message,
+                    fixed_features: protocrap::base::Message,
                 }
                 impl core::fmt::Debug for ProtoType {
                     fn fmt(
@@ -18861,13 +19629,15 @@ pub mod google {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
                         has_bits: [u32; 1usize],
-                        features: protocrap::base::Message,
                         edition: i32,
+                        overridable_features: protocrap::base::Message,
+                        fixed_features: protocrap::base::Message,
                     ) -> Self {
                         Self {
                             has_bits,
                             edition,
-                            features,
+                            overridable_features,
+                            fixed_features,
                         }
                     }
                     pub fn clear(&mut self) {
@@ -18910,26 +19680,26 @@ pub mod google {
                         self.as_object_mut().clear_has_bit(0u32);
                         self.edition = 0;
                     }
-                    pub const fn has_features(&self) -> bool {
-                        !self.features.0.is_null()
+                    pub const fn has_overridable_features(&self) -> bool {
+                        !self.overridable_features.0.is_null()
                     }
-                    pub const fn features(
+                    pub const fn overridable_features(
                         &self,
                     ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
-                        if self.has_features() {
+                        if self.has_overridable_features() {
                             Some(unsafe {
-                                &*(self.features.0
+                                &*(self.overridable_features.0
                                     as *const crate::google::protobuf::FeatureSet::ProtoType)
                             })
                         } else {
                             None
                         }
                     }
-                    pub fn features_mut(
+                    pub fn overridable_features_mut(
                         &mut self,
                         arena: &mut protocrap::arena::Arena,
                     ) -> &mut crate::google::protobuf::FeatureSet::ProtoType {
-                        let object = self.features;
+                        let object = self.overridable_features;
                         if object.0.is_null() {
                             let new_object = protocrap::base::Object::create(
                                 core::mem::size_of::<
@@ -18937,15 +19707,58 @@ pub mod google {
                                 >() as u32,
                                 arena,
                             );
-                            self.features = protocrap::base::Message(new_object);
+                            self.overridable_features = protocrap::base::Message(
+                                new_object,
+                            );
                         }
                         unsafe {
-                            &mut *(self.features.0
+                            &mut *(self.overridable_features.0
                                 as *mut crate::google::protobuf::FeatureSet::ProtoType)
                         }
                     }
-                    pub fn clear_features(&mut self) {
-                        self.features = protocrap::base::Message(core::ptr::null_mut());
+                    pub fn clear_overridable_features(&mut self) {
+                        self.overridable_features = protocrap::base::Message(
+                            core::ptr::null_mut(),
+                        );
+                    }
+                    pub const fn has_fixed_features(&self) -> bool {
+                        !self.fixed_features.0.is_null()
+                    }
+                    pub const fn fixed_features(
+                        &self,
+                    ) -> Option<&crate::google::protobuf::FeatureSet::ProtoType> {
+                        if self.has_fixed_features() {
+                            Some(unsafe {
+                                &*(self.fixed_features.0
+                                    as *const crate::google::protobuf::FeatureSet::ProtoType)
+                            })
+                        } else {
+                            None
+                        }
+                    }
+                    pub fn fixed_features_mut(
+                        &mut self,
+                        arena: &mut protocrap::arena::Arena,
+                    ) -> &mut crate::google::protobuf::FeatureSet::ProtoType {
+                        let object = self.fixed_features;
+                        if object.0.is_null() {
+                            let new_object = protocrap::base::Object::create(
+                                core::mem::size_of::<
+                                    crate::google::protobuf::FeatureSet::ProtoType,
+                                >() as u32,
+                                arena,
+                            );
+                            self.fixed_features = protocrap::base::Message(new_object);
+                        }
+                        unsafe {
+                            &mut *(self.fixed_features.0
+                                as *mut crate::google::protobuf::FeatureSet::ProtoType)
+                        }
+                    }
+                    pub fn clear_fixed_features(&mut self) {
+                        self.fixed_features = protocrap::base::Message(
+                            core::ptr::null_mut(),
+                        );
                     }
                 }
                 impl protocrap::Protobuf for ProtoType {
@@ -18955,9 +19768,9 @@ pub mod google {
                 }
                 #[allow(clippy::identity_op, clippy::erasing_op)]
                 pub static TABLE: protocrap::tables::TableWithEntries<
+                    3usize,
+                    6usize,
                     2usize,
-                    4usize,
-                    1usize,
                 > = protocrap::tables::TableWithEntries {
                     encode_entries: [
                         protocrap::encoding::TableEntry {
@@ -18970,50 +19783,88 @@ pub mod google {
                             has_bit: 0u8,
                             kind: protocrap::wire::FieldKind::Message,
                             offset: (core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
                                 >, aux_entries
                             )
                                 + 0usize
                                     * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
                                 - core::mem::offset_of!(
-                                    protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
+                                    protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
                                     >, table
                                 )) as u16,
-                            encoded_tag: 18u32,
+                            encoded_tag: 34u32,
+                        },
+                        protocrap::encoding::TableEntry {
+                            has_bit: 0u8,
+                            kind: protocrap::wire::FieldKind::Message,
+                            offset: (core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                >, aux_entries
+                            )
+                                + 1usize
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                                - core::mem::offset_of!(
+                                    protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                    >, table
+                                )) as u16,
+                            encoded_tag: 42u32,
                         },
                     ],
                     table: protocrap::tables::Table {
-                        num_encode_entries: 2usize as u16,
-                        num_decode_entries: 4usize as u16,
+                        num_encode_entries: 3usize as u16,
+                        num_decode_entries: 6usize as u16,
                         size: core::mem::size_of::<ProtoType>() as u16,
                         descriptor: ProtoType::descriptor_proto(),
                     },
                     decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry(0),
-                        protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Message,
-                            0,
-                            core::mem::offset_of!(
-                                protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
-                                >, aux_entries
-                            )
-                                + 0usize
-                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
-                                - core::mem::offset_of!(
-                                    protocrap::tables::TableWithEntries < 2usize, 4usize, 1usize
-                                    >, table
-                                ),
-                        ),
+                        protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
                             protocrap::wire::FieldKind::Varint32,
                             0u32,
                             core::mem::offset_of!(ProtoType, edition),
                         ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Message,
+                            0,
+                            core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                >, aux_entries
+                            )
+                                + 0usize
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                                - core::mem::offset_of!(
+                                    protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                    >, table
+                                ),
+                        ),
+                        protocrap::decoding::TableEntry::new(
+                            protocrap::wire::FieldKind::Message,
+                            0,
+                            core::mem::offset_of!(
+                                protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                >, aux_entries
+                            )
+                                + 1usize
+                                    * core::mem::size_of::<protocrap::tables::AuxTableEntry>()
+                                - core::mem::offset_of!(
+                                    protocrap::tables::TableWithEntries < 3usize, 6usize, 2usize
+                                    >, table
+                                ),
+                        ),
                     ],
                     aux_entries: [
                         protocrap::tables::AuxTableEntry {
-                            offset: core::mem::offset_of!(ProtoType, features) as u32,
+                            offset: core::mem::offset_of!(
+                                ProtoType, overridable_features
+                            ) as u32,
+                            child_table: &crate::google::protobuf::FeatureSet::TABLE
+                                .table,
+                        },
+                        protocrap::tables::AuxTableEntry {
+                            offset: core::mem::offset_of!(ProtoType, fixed_features)
+                                as u32,
                             child_table: &crate::google::protobuf::FeatureSet::TABLE
                                 .table,
                         },
@@ -20072,12 +20923,60 @@ pub mod google {
                                     },
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
-                                    protocrap::containers::RepeatedField::new(),
+                                    {
+                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::from_static(
+                                                        [3],
+                                                        536000000,
+                                                        536000001,
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
+                                                                protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
+                                                                    [0],
+                                                                    {
+                                                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        536000000,
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".buf.descriptor.v1.buf_file_descriptor_set_extension",
+                                                                                        ),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".buf.descriptor.v1.FileDescriptorSetExtension",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    0i32,
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::base::Message(core::ptr::null_mut()),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -20090,7 +20989,7 @@ pub mod google {
                                         "FileDescriptorProto",
                                     ),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 13usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 14usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -20188,6 +21087,29 @@ pub mod google {
                                                         0i32,
                                                         protocrap::containers::String::from_static(
                                                             "weakDependency",
+                                                        ),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [271],
+                                                        protocrap::containers::String::from_static(
+                                                            "option_dependency",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        15,
+                                                        3,
+                                                        9,
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        0i32,
+                                                        protocrap::containers::String::from_static(
+                                                            "optionDependency",
                                                         ),
                                                         false,
                                                     )
@@ -20375,6 +21297,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -20387,7 +21310,7 @@ pub mod google {
                                         "DescriptorProto",
                                     ),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 10usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 11usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -20600,6 +21523,27 @@ pub mod google {
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
                                             },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static("visibility"),
+                                                        protocrap::containers::String::new(),
+                                                        11,
+                                                        1,
+                                                        14,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.SymbolVisibility",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        0i32,
+                                                        protocrap::containers::String::from_static("visibility"),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
                                         ];
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
@@ -20684,6 +21628,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -20744,6 +21689,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -20758,6 +21704,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -20825,6 +21772,7 @@ pub mod google {
                                                                     protocrap::containers::RepeatedField::new(),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
                                                             };
@@ -20871,7 +21819,28 @@ pub mod google {
                                                             ".google.protobuf.ExtensionRangeOptions.VerificationState",
                                                         ),
                                                         protocrap::containers::String::from_static("UNVERIFIED"),
-                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::ProtoType = {
+                                                                protocrap::google::protobuf::FieldOptions::ProtoType::from_static(
+                                                                    [256],
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    2,
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
                                                         0i32,
                                                         protocrap::containers::String::from_static("verification"),
                                                         false,
@@ -21011,6 +21980,7 @@ pub mod google {
                                                             protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                         },
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -21057,6 +22027,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -21085,6 +22056,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -21534,6 +22506,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -21590,6 +22563,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -21603,6 +22577,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -21667,6 +22642,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -21679,7 +22655,7 @@ pub mod google {
                                         "EnumDescriptorProto",
                                     ),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 5usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 6usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -21783,6 +22759,27 @@ pub mod google {
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
                                             },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static("visibility"),
+                                                        protocrap::containers::String::new(),
+                                                        6,
+                                                        1,
+                                                        14,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.SymbolVisibility",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        0i32,
+                                                        protocrap::containers::String::from_static("visibility"),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
                                         ];
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
@@ -21846,6 +22843,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -21860,6 +22858,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -21943,6 +22942,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -22026,8 +23026,28 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::base::Message(core::ptr::null_mut()),
                                     protocrap::containers::RepeatedField::new(),
-                                    protocrap::containers::RepeatedField::new(),
-                                    protocrap::containers::RepeatedField::new(),
+                                    {
+                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
+                                                        [3],
+                                                        4,
+                                                        5,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
+                                    {
+                                        static ELEMENTS: [protocrap::containers::String; 1usize] = [
+                                            protocrap::containers::String::from_static("stream"),
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -22176,6 +23196,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -22186,7 +23207,7 @@ pub mod google {
                                     [1],
                                     protocrap::containers::String::from_static("FileOptions"),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 22usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 21usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -22242,7 +23263,28 @@ pub mod google {
                                                         8,
                                                         protocrap::containers::String::new(),
                                                         protocrap::containers::String::from_static("false"),
-                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::ProtoType = {
+                                                                protocrap::google::protobuf::FieldOptions::ProtoType::from_static(
+                                                                    [0],
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
                                                         0i32,
                                                         protocrap::containers::String::from_static(
                                                             "javaMultipleFiles",
@@ -22280,6 +23322,7 @@ pub mod google {
                                                                     0i32,
                                                                     protocrap::containers::RepeatedField::new(),
                                                                     protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -22421,29 +23464,6 @@ pub mod google {
                                                         0i32,
                                                         protocrap::containers::String::from_static(
                                                             "pyGenericServices",
-                                                        ),
-                                                        false,
-                                                    )
-                                                };
-                                                protocrap::base::Message::new(&PROTO_TYPE)
-                                            },
-                                            {
-                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
-                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
-                                                        [335],
-                                                        protocrap::containers::String::from_static(
-                                                            "php_generic_services",
-                                                        ),
-                                                        protocrap::containers::String::new(),
-                                                        42,
-                                                        1,
-                                                        8,
-                                                        protocrap::containers::String::new(),
-                                                        protocrap::containers::String::from_static("false"),
-                                                        protocrap::base::Message(core::ptr::null_mut()),
-                                                        0i32,
-                                                        protocrap::containers::String::from_static(
-                                                            "phpGenericServices",
                                                         ),
                                                         false,
                                                     )
@@ -22739,6 +23759,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -22766,7 +23787,17 @@ pub mod google {
                                     protocrap::base::Message(core::ptr::null_mut()),
                                     protocrap::containers::RepeatedField::new(),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 2usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
+                                                        [3],
+                                                        42,
+                                                        43,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
                                                     protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
@@ -22780,7 +23811,15 @@ pub mod google {
                                         ];
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
-                                    protocrap::containers::RepeatedField::new(),
+                                    {
+                                        static ELEMENTS: [protocrap::containers::String; 1usize] = [
+                                            protocrap::containers::String::from_static(
+                                                "php_generic_services",
+                                            ),
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -22906,6 +23945,7 @@ pub mod google {
                                                                     0i32,
                                                                     protocrap::containers::RepeatedField::new(),
                                                                     protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -23047,6 +24087,7 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -23057,7 +24098,7 @@ pub mod google {
                                     [1],
                                     protocrap::containers::String::from_static("FieldOptions"),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 13usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 14usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -23191,7 +24232,28 @@ pub mod google {
                                                         8,
                                                         protocrap::containers::String::new(),
                                                         protocrap::containers::String::from_static("false"),
-                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::ProtoType = {
+                                                                protocrap::google::protobuf::FieldOptions::ProtoType::from_static(
+                                                                    [32],
+                                                                    0i32,
+                                                                    false,
+                                                                    true,
+                                                                    false,
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
                                                         0i32,
                                                         protocrap::containers::String::from_static("weak"),
                                                         false,
@@ -23311,6 +24373,31 @@ pub mod google {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
                                                         [287],
                                                         protocrap::containers::String::from_static(
+                                                            "feature_support",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        22,
+                                                        1,
+                                                        11,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.FieldOptions.FeatureSupport",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        0i32,
+                                                        protocrap::containers::String::from_static(
+                                                            "featureSupport",
+                                                        ),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static(
                                                             "uninterpreted_option",
                                                         ),
                                                         protocrap::containers::String::new(),
@@ -23335,7 +24422,7 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 2usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::DescriptorProto::ProtoType::from_static(
@@ -23396,6 +24483,149 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ProtoType::from_static(
+                                                        [1],
+                                                        protocrap::containers::String::from_static(
+                                                            "FeatureSupport",
+                                                        ),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 5usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [287],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "edition_introduced",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            1,
+                                                                            1,
+                                                                            14,
+                                                                            protocrap::containers::String::from_static(
+                                                                                ".google.protobuf.Edition",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static(
+                                                                                "editionIntroduced",
+                                                                            ),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [287],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "edition_deprecated",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            2,
+                                                                            1,
+                                                                            14,
+                                                                            protocrap::containers::String::from_static(
+                                                                                ".google.protobuf.Edition",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static(
+                                                                                "editionDeprecated",
+                                                                            ),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [271],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "deprecation_warning",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            3,
+                                                                            1,
+                                                                            9,
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static(
+                                                                                "deprecationWarning",
+                                                                            ),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [287],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "edition_removed",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            4,
+                                                                            1,
+                                                                            14,
+                                                                            protocrap::containers::String::from_static(
+                                                                                ".google.protobuf.Edition",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static(
+                                                                                "editionRemoved",
+                                                                            ),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [271],
+                                                                            protocrap::containers::String::from_static("removal_error"),
+                                                                            protocrap::containers::String::new(),
+                                                                            5,
+                                                                            1,
+                                                                            9,
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static("removalError"),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -23451,6 +24681,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -23501,6 +24732,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -23559,6 +24791,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -23708,6 +24941,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -23760,6 +24994,7 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -23843,6 +25078,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -23920,6 +25156,7 @@ pub mod google {
                                                                     0i32,
                                                                     protocrap::containers::RepeatedField::new(),
                                                                     protocrap::containers::RepeatedField::new(),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -24021,6 +25258,7 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -24033,7 +25271,7 @@ pub mod google {
                                         "EnumValueOptions",
                                     ),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 4usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 5usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -24098,6 +25336,31 @@ pub mod google {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
                                                         [287],
                                                         protocrap::containers::String::from_static(
+                                                            "feature_support",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        4,
+                                                        1,
+                                                        11,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.FieldOptions.FeatureSupport",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        0i32,
+                                                        protocrap::containers::String::from_static(
+                                                            "featureSupport",
+                                                        ),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static(
                                                             "uninterpreted_option",
                                                         ),
                                                         protocrap::containers::String::new(),
@@ -24144,6 +25407,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -24248,6 +25512,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -24409,6 +25674,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24437,6 +25703,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -24662,6 +25929,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24676,6 +25944,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -24686,7 +25955,7 @@ pub mod google {
                                     [1],
                                     protocrap::containers::String::from_static("FeatureSet"),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 6usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 8usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -24726,7 +25995,7 @@ pub mod google {
                                                                                     protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
                                                                                         [3],
                                                                                         protocrap::containers::String::from_static("EXPLICIT"),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24754,6 +26023,7 @@ pub mod google {
                                                                         ];
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -24804,7 +26074,7 @@ pub mod google {
                                                                                     protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
                                                                                         [3],
                                                                                         protocrap::containers::String::from_static("CLOSED"),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24822,6 +26092,7 @@ pub mod google {
                                                                         ];
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -24874,7 +26145,7 @@ pub mod google {
                                                                                     protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
                                                                                         [3],
                                                                                         protocrap::containers::String::from_static("EXPANDED"),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24892,6 +26163,7 @@ pub mod google {
                                                                         ];
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -24946,7 +26218,7 @@ pub mod google {
                                                                                     protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
                                                                                         [3],
                                                                                         protocrap::containers::String::from_static("NONE"),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -24964,6 +26236,7 @@ pub mod google {
                                                                         ];
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -25020,7 +26293,7 @@ pub mod google {
                                                                                         protocrap::containers::String::from_static(
                                                                                             "LENGTH_PREFIXED",
                                                                                         ),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25028,6 +26301,7 @@ pub mod google {
                                                                         ];
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
@@ -25082,7 +26356,7 @@ pub mod google {
                                                                                         protocrap::containers::String::from_static(
                                                                                             "LEGACY_BEST_EFFORT",
                                                                                         ),
-                                                                                        998,
+                                                                                        900,
                                                                                     )
                                                                                 };
                                                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25101,6 +26375,7 @@ pub mod google {
                                                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                                     },
                                                                     protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
                                                                     protocrap::containers::RepeatedField::new(),
                                                                 )
                                                             };
@@ -25113,12 +26388,284 @@ pub mod google {
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
                                             },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static(
+                                                            "enforce_naming_style",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        7,
+                                                        1,
+                                                        14,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.FeatureSet.EnforceNamingStyle",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::ProtoType = {
+                                                                protocrap::google::protobuf::FieldOptions::ProtoType::from_static(
+                                                                    [256],
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    2,
+                                                                    {
+                                                                        static ELEMENTS: [i32; 5usize] = [
+                                                                            5i32, 6i32, 7i32, 8i32, 9i32,
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    {
+                                                                        static ELEMENTS: [protocrap::base::Message; 2usize] = [
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType = {
+                                                                                    protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
+                                                                                        [3],
+                                                                                        protocrap::containers::String::from_static("STYLE_LEGACY"),
+                                                                                        900,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType = {
+                                                                                    protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
+                                                                                        [3],
+                                                                                        protocrap::containers::String::from_static("STYLE2024"),
+                                                                                        1001,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
+                                                        0i32,
+                                                        protocrap::containers::String::from_static(
+                                                            "enforceNamingStyle",
+                                                        ),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                        [287],
+                                                        protocrap::containers::String::from_static(
+                                                            "default_symbol_visibility",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        8,
+                                                        1,
+                                                        14,
+                                                        protocrap::containers::String::from_static(
+                                                            ".google.protobuf.FeatureSet.VisibilityFeature.DefaultSymbolVisibility",
+                                                        ),
+                                                        protocrap::containers::String::new(),
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::ProtoType = {
+                                                                protocrap::google::protobuf::FieldOptions::ProtoType::from_static(
+                                                                    [256],
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    0i32,
+                                                                    false,
+                                                                    false,
+                                                                    false,
+                                                                    2,
+                                                                    {
+                                                                        static ELEMENTS: [i32; 1usize] = [1i32];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    {
+                                                                        static ELEMENTS: [protocrap::base::Message; 2usize] = [
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType = {
+                                                                                    protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
+                                                                                        [3],
+                                                                                        protocrap::containers::String::from_static("EXPORT_ALL"),
+                                                                                        900,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType = {
+                                                                                    protocrap::google::protobuf::FieldOptions::EditionDefault::ProtoType::from_static(
+                                                                                        [3],
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            "EXPORT_TOP_LEVEL",
+                                                                                        ),
+                                                                                        1001,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
+                                                        0i32,
+                                                        protocrap::containers::String::from_static(
+                                                            "defaultSymbolVisibility",
+                                                        ),
+                                                        false,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
                                         ];
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
-                                    protocrap::containers::RepeatedField::new(),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 6usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ProtoType::from_static(
+                                                        [1],
+                                                        protocrap::containers::String::from_static(
+                                                            "VisibilityFeature",
+                                                        ),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::EnumDescriptorProto::ProtoType::from_static(
+                                                                            [1],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "DefaultSymbolVisibility",
+                                                                            ),
+                                                                            {
+                                                                                static ELEMENTS: [protocrap::base::Message; 5usize] = [
+                                                                                    {
+                                                                                        static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                                            protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                                                [3],
+                                                                                                protocrap::containers::String::from_static(
+                                                                                                    "DEFAULT_SYMBOL_VISIBILITY_UNKNOWN",
+                                                                                                ),
+                                                                                                0,
+                                                                                                protocrap::base::Message(core::ptr::null_mut()),
+                                                                                            )
+                                                                                        };
+                                                                                        protocrap::base::Message::new(&PROTO_TYPE)
+                                                                                    },
+                                                                                    {
+                                                                                        static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                                            protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                                                [3],
+                                                                                                protocrap::containers::String::from_static("EXPORT_ALL"),
+                                                                                                1,
+                                                                                                protocrap::base::Message(core::ptr::null_mut()),
+                                                                                            )
+                                                                                        };
+                                                                                        protocrap::base::Message::new(&PROTO_TYPE)
+                                                                                    },
+                                                                                    {
+                                                                                        static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                                            protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                                                [3],
+                                                                                                protocrap::containers::String::from_static(
+                                                                                                    "EXPORT_TOP_LEVEL",
+                                                                                                ),
+                                                                                                2,
+                                                                                                protocrap::base::Message(core::ptr::null_mut()),
+                                                                                            )
+                                                                                        };
+                                                                                        protocrap::base::Message::new(&PROTO_TYPE)
+                                                                                    },
+                                                                                    {
+                                                                                        static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                                            protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                                                [3],
+                                                                                                protocrap::containers::String::from_static("LOCAL_ALL"),
+                                                                                                3,
+                                                                                                protocrap::base::Message(core::ptr::null_mut()),
+                                                                                            )
+                                                                                        };
+                                                                                        protocrap::base::Message::new(&PROTO_TYPE)
+                                                                                    },
+                                                                                    {
+                                                                                        static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                                            protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                                                [3],
+                                                                                                protocrap::containers::String::from_static("STRICT"),
+                                                                                                4,
+                                                                                                protocrap::base::Message(core::ptr::null_mut()),
+                                                                                            )
+                                                                                        };
+                                                                                        protocrap::base::Message::new(&PROTO_TYPE)
+                                                                                    },
+                                                                                ];
+                                                                                protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                            },
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            protocrap::containers::RepeatedField::new(),
+                                                                            protocrap::containers::RepeatedField::new(),
+                                                                            0i32,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
+                                                                        protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
+                                                                            [3],
+                                                                            1,
+                                                                            536870912,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        0i32,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
+                                    {
+                                        static ELEMENTS: [protocrap::base::Message; 7usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::EnumDescriptorProto::ProtoType::from_static(
@@ -25180,6 +26727,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25232,6 +26780,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25286,6 +26835,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25316,8 +26866,8 @@ pub mod google {
                                                                     static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
                                                                         protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
                                                                             [3],
-                                                                            protocrap::containers::String::from_static("NONE"),
-                                                                            1,
+                                                                            protocrap::containers::String::from_static("VERIFY"),
+                                                                            2,
                                                                             protocrap::base::Message(core::ptr::null_mut()),
                                                                         )
                                                                     };
@@ -25327,8 +26877,8 @@ pub mod google {
                                                                     static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
                                                                         protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
                                                                             [3],
-                                                                            protocrap::containers::String::from_static("VERIFY"),
-                                                                            2,
+                                                                            protocrap::containers::String::from_static("NONE"),
+                                                                            3,
                                                                             protocrap::base::Message(core::ptr::null_mut()),
                                                                         )
                                                                     };
@@ -25338,8 +26888,23 @@ pub mod google {
                                                             protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                                         },
                                                         protocrap::base::Message(core::ptr::null_mut()),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType = {
+                                                                        protocrap::google::protobuf::EnumDescriptorProto::EnumReservedRange::ProtoType::from_static(
+                                                                            [3],
+                                                                            1,
+                                                                            1,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
                                                         protocrap::containers::RepeatedField::new(),
-                                                        protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25396,6 +26961,7 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25450,6 +27016,62 @@ pub mod google {
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumDescriptorProto::ProtoType::from_static(
+                                                        [1],
+                                                        protocrap::containers::String::from_static(
+                                                            "EnforceNamingStyle",
+                                                        ),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 3usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                            [3],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "ENFORCE_NAMING_STYLE_UNKNOWN",
+                                                                            ),
+                                                                            0,
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                            [3],
+                                                                            protocrap::containers::String::from_static("STYLE2024"),
+                                                                            1,
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                                            [3],
+                                                                            protocrap::containers::String::from_static("STYLE_LEGACY"),
+                                                                            2,
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25464,19 +27086,132 @@ pub mod google {
                                                     protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::from_static(
                                                         [3],
                                                         1000,
-                                                        1001,
-                                                        protocrap::base::Message(core::ptr::null_mut()),
-                                                    )
-                                                };
-                                                protocrap::base::Message::new(&PROTO_TYPE)
-                                            },
-                                            {
-                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType = {
-                                                    protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::from_static(
-                                                        [3],
-                                                        1001,
-                                                        1002,
-                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                        9995,
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
+                                                                protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
+                                                                    [0],
+                                                                    {
+                                                                        static ELEMENTS: [protocrap::base::Message; 7usize] = [
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        1000,
+                                                                                        protocrap::containers::String::from_static(".pb.cpp"),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.CppFeatures",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        1001,
+                                                                                        protocrap::containers::String::from_static(".pb.java"),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.JavaFeatures",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        1002,
+                                                                                        protocrap::containers::String::from_static(".pb.go"),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.GoFeatures",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        1003,
+                                                                                        protocrap::containers::String::from_static(".pb.python"),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.PythonFeatures",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        1100,
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".imp.impress_feature_set",
+                                                                                        ),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".imp.ImpressFeatureSet",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        9989,
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.java_mutable",
+                                                                                        ),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.JavaMutableFeatures",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        9990,
+                                                                                        protocrap::containers::String::from_static(".pb.proto1"),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".pb.Proto1Features",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    0i32,
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25487,6 +27222,17 @@ pub mod google {
                                                         [3],
                                                         9995,
                                                         10000,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::from_static(
+                                                        [3],
+                                                        10000,
+                                                        10001,
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                     )
                                                 };
@@ -25514,6 +27260,7 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -25611,7 +27358,7 @@ pub mod google {
                                                             "FeatureSetEditionDefault",
                                                         ),
                                                         {
-                                                            static ELEMENTS: [protocrap::base::Message; 2usize] = [
+                                                            static ELEMENTS: [protocrap::base::Message; 3usize] = [
                                                                 {
                                                                     static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                                         protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
@@ -25637,9 +27384,11 @@ pub mod google {
                                                                     static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
                                                                         protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
                                                                             [287],
-                                                                            protocrap::containers::String::from_static("features"),
+                                                                            protocrap::containers::String::from_static(
+                                                                                "overridable_features",
+                                                                            ),
                                                                             protocrap::containers::String::new(),
-                                                                            2,
+                                                                            4,
                                                                             1,
                                                                             11,
                                                                             protocrap::containers::String::from_static(
@@ -25648,7 +27397,32 @@ pub mod google {
                                                                             protocrap::containers::String::new(),
                                                                             protocrap::base::Message(core::ptr::null_mut()),
                                                                             0i32,
-                                                                            protocrap::containers::String::from_static("features"),
+                                                                            protocrap::containers::String::from_static(
+                                                                                "overridableFeatures",
+                                                                            ),
+                                                                            false,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::FieldDescriptorProto::ProtoType = {
+                                                                        protocrap::google::protobuf::FieldDescriptorProto::ProtoType::from_static(
+                                                                            [287],
+                                                                            protocrap::containers::String::from_static(
+                                                                                "fixed_features",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            5,
+                                                                            1,
+                                                                            11,
+                                                                            protocrap::containers::String::from_static(
+                                                                                ".google.protobuf.FeatureSet",
+                                                                            ),
+                                                                            protocrap::containers::String::new(),
+                                                                            protocrap::base::Message(core::ptr::null_mut()),
+                                                                            0i32,
+                                                                            protocrap::containers::String::from_static("fixedFeatures"),
                                                                             false,
                                                                         )
                                                                     };
@@ -25663,8 +27437,38 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                         protocrap::containers::RepeatedField::new(),
-                                                        protocrap::containers::RepeatedField::new(),
-                                                        protocrap::containers::RepeatedField::new(),
+                                                        {
+                                                            static ELEMENTS: [protocrap::base::Message; 2usize] = [
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
+                                                                        protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
+                                                                            [3],
+                                                                            1,
+                                                                            2,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                                {
+                                                                    static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType = {
+                                                                        protocrap::google::protobuf::DescriptorProto::ReservedRange::ProtoType::from_static(
+                                                                            [3],
+                                                                            2,
+                                                                            3,
+                                                                        )
+                                                                    };
+                                                                    protocrap::base::Message::new(&PROTO_TYPE)
+                                                                },
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        {
+                                                            static ELEMENTS: [protocrap::containers::String; 1usize] = [
+                                                                protocrap::containers::String::from_static("features"),
+                                                            ];
+                                                            protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                        },
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25679,6 +27483,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -25752,6 +27557,7 @@ pub mod google {
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                         protocrap::base::Message(core::ptr::null_mut()),
+                                                                                        protocrap::base::Message(core::ptr::null_mut()),
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                     )
                                                                                 };
@@ -25790,6 +27596,7 @@ pub mod google {
                                                                                         0i32,
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                         protocrap::containers::RepeatedField::new(),
+                                                                                        protocrap::base::Message(core::ptr::null_mut()),
                                                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                     )
@@ -25883,6 +27690,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -25891,12 +27699,60 @@ pub mod google {
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::containers::RepeatedField::new(),
-                                    protocrap::containers::RepeatedField::new(),
+                                    {
+                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType = {
+                                                    protocrap::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::from_static(
+                                                        [3],
+                                                        536000000,
+                                                        536000001,
+                                                        {
+                                                            static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
+                                                                protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
+                                                                    [0],
+                                                                    {
+                                                                        static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                                                                            {
+                                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType = {
+                                                                                    protocrap::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType::from_static(
+                                                                                        [7],
+                                                                                        536000000,
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".buf.descriptor.v1.buf_source_code_info_extension",
+                                                                                        ),
+                                                                                        protocrap::containers::String::from_static(
+                                                                                            ".buf.descriptor.v1.SourceCodeInfoExtension",
+                                                                                        ),
+                                                                                        false,
+                                                                                        false,
+                                                                                    )
+                                                                                };
+                                                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                                                            },
+                                                                        ];
+                                                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                                                    },
+                                                                    0i32,
+                                                                    protocrap::base::Message(core::ptr::null_mut()),
+                                                                    protocrap::containers::RepeatedField::new(),
+                                                                )
+                                                            };
+                                                            protocrap::base::Message::new(&PROTO_TYPE)
+                                                        },
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::base::Message(core::ptr::null_mut()),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -25969,6 +27825,7 @@ pub mod google {
                                                                                         0i32,
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                         protocrap::containers::RepeatedField::new(),
+                                                                                        protocrap::base::Message(core::ptr::null_mut()),
                                                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                                                         protocrap::containers::RepeatedField::new(),
                                                                                     )
@@ -26112,6 +27969,7 @@ pub mod google {
                                                                             protocrap::base::Message(core::ptr::null_mut()),
                                                                             protocrap::containers::RepeatedField::new(),
                                                                             protocrap::containers::RepeatedField::new(),
+                                                                            0i32,
                                                                         )
                                                                     };
                                                                     protocrap::base::Message::new(&PROTO_TYPE)
@@ -26125,6 +27983,7 @@ pub mod google {
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
                                                         protocrap::containers::RepeatedField::new(),
+                                                        0i32,
                                                     )
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
@@ -26139,6 +27998,7 @@ pub mod google {
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -26147,14 +28007,14 @@ pub mod google {
                     protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                 },
                 {
-                    static ELEMENTS: [protocrap::base::Message; 1usize] = [
+                    static ELEMENTS: [protocrap::base::Message; 2usize] = [
                         {
                             static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::ProtoType = {
                                 protocrap::google::protobuf::EnumDescriptorProto::ProtoType::from_static(
                                     [1],
                                     protocrap::containers::String::from_static("Edition"),
                                     {
-                                        static ELEMENTS: [protocrap::base::Message; 9usize] = [
+                                        static ELEMENTS: [protocrap::base::Message; 13usize] = [
                                             {
                                                 static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
                                                     protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
@@ -26163,6 +28023,19 @@ pub mod google {
                                                             "EDITION_UNKNOWN",
                                                         ),
                                                         0,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static(
+                                                            "EDITION_LEGACY",
+                                                        ),
+                                                        900,
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                     )
                                                 };
@@ -26200,6 +28073,30 @@ pub mod google {
                                                         [3],
                                                         protocrap::containers::String::from_static("EDITION_2023"),
                                                         1000,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static("EDITION_2024"),
+                                                        1001,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static(
+                                                            "EDITION_UNSTABLE",
+                                                        ),
+                                                        9999,
                                                         protocrap::base::Message(core::ptr::null_mut()),
                                                     )
                                                 };
@@ -26270,12 +28167,83 @@ pub mod google {
                                                 };
                                                 protocrap::base::Message::new(&PROTO_TYPE)
                                             },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static("EDITION_MAX"),
+                                                        2147483647,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
                                         ];
                                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                                     },
                                     protocrap::base::Message(core::ptr::null_mut()),
                                     protocrap::containers::RepeatedField::new(),
                                     protocrap::containers::RepeatedField::new(),
+                                    0i32,
+                                )
+                            };
+                            protocrap::base::Message::new(&PROTO_TYPE)
+                        },
+                        {
+                            static PROTO_TYPE: protocrap::google::protobuf::EnumDescriptorProto::ProtoType = {
+                                protocrap::google::protobuf::EnumDescriptorProto::ProtoType::from_static(
+                                    [1],
+                                    protocrap::containers::String::from_static(
+                                        "SymbolVisibility",
+                                    ),
+                                    {
+                                        static ELEMENTS: [protocrap::base::Message; 3usize] = [
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static(
+                                                            "VISIBILITY_UNSET",
+                                                        ),
+                                                        0,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static(
+                                                            "VISIBILITY_LOCAL",
+                                                        ),
+                                                        1,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                            {
+                                                static PROTO_TYPE: protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType = {
+                                                    protocrap::google::protobuf::EnumValueDescriptorProto::ProtoType::from_static(
+                                                        [3],
+                                                        protocrap::containers::String::from_static(
+                                                            "VISIBILITY_EXPORT",
+                                                        ),
+                                                        2,
+                                                        protocrap::base::Message(core::ptr::null_mut()),
+                                                    )
+                                                };
+                                                protocrap::base::Message::new(&PROTO_TYPE)
+                                            },
+                                        ];
+                                        protocrap::containers::RepeatedField::from_static(&ELEMENTS)
+                                    },
+                                    protocrap::base::Message(core::ptr::null_mut()),
+                                    protocrap::containers::RepeatedField::new(),
+                                    protocrap::containers::RepeatedField::new(),
+                                    0i32,
                                 )
                             };
                             protocrap::base::Message::new(&PROTO_TYPE)
@@ -26288,7 +28256,7 @@ pub mod google {
                 {
                     static PROTO_TYPE: protocrap::google::protobuf::FileOptions::ProtoType = {
                         protocrap::google::protobuf::FileOptions::ProtoType::from_static(
-                            [28771],
+                            [14435],
                             protocrap::containers::String::from_static(
                                 "com.google.protobuf",
                             ),
@@ -26314,7 +28282,6 @@ pub mod google {
                             protocrap::containers::String::new(),
                             protocrap::containers::String::new(),
                             protocrap::containers::String::new(),
-                            false,
                             protocrap::containers::String::new(),
                             protocrap::containers::String::new(),
                             protocrap::base::Message(core::ptr::null_mut()),
@@ -26328,6 +28295,7 @@ pub mod google {
                 protocrap::containers::RepeatedField::new(),
                 protocrap::containers::String::new(),
                 0i32,
+                protocrap::containers::RepeatedField::new(),
             )
         };
     }
