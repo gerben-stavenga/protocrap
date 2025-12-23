@@ -237,16 +237,21 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Count message fields for aux entries
         let num_aux_entries = descriptor.field().iter().filter(|f| is_message(f)).count();
 
-        // Allocate table with entries
-        let layout = std::alloc::Layout::from_size_align(
-            core::mem::size_of::<Table>()
-                + num_fields * core::mem::size_of::<encoding::TableEntry>()
-                + num_decode_entries * core::mem::size_of::<decoding::TableEntry>()
-                + num_aux_entries * core::mem::size_of::<AuxTableEntry>(),
-            core::mem::align_of::<Table>(),
-        )
-        .unwrap();
-        let table_ptr = self.arena.alloc_raw(layout).as_ptr() as *mut Table;
+        // Allocate table with entries - use Layout::extend to handle padding correctly
+        let encode_layout = std::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
+        let (layout, table_offset) = encode_layout.extend(std::alloc::Layout::new::<Table>()).unwrap();
+        let (layout, decode_offset) = layout.extend(
+            std::alloc::Layout::array::<decoding::TableEntry>(num_decode_entries).unwrap()
+        ).unwrap();
+        let (layout, aux_offset) = layout.extend(
+            std::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap()
+        ).unwrap();
+
+        let base_ptr = self.arena.alloc_raw(layout).as_ptr() as *mut u8;
+        let encode_ptr = base_ptr as *mut encoding::TableEntry;
+        let table_ptr = unsafe { base_ptr.add(table_offset) as *mut Table };
+        let decode_ptr = unsafe { base_ptr.add(decode_offset) as *mut decoding::TableEntry };
+        let aux_ptr = unsafe { base_ptr.add(aux_offset) as *mut AuxTableEntry };
 
         unsafe {
             // Initialize Table header
@@ -255,16 +260,6 @@ impl<'alloc> DescriptorPool<'alloc> {
             (*table_ptr).size = total_size as u16;
             // SAFETY: descriptor lives in arena with 'alloc lifetime, which outlives the table usage
             (*table_ptr).descriptor = core::mem::transmute::<&'alloc DescriptorProto, &'static DescriptorProto>(descriptor);
-
-            // Build encode entries (before table header in memory)
-            let encode_ptr = table_ptr.byte_sub(num_fields * core::mem::size_of::<encoding::TableEntry>())
-                as *mut encoding::TableEntry;
-
-            // Build decode entries (after table header)
-            let decode_ptr = table_ptr.add(1) as *mut decoding::TableEntry;
-
-            // Build aux entries (after decode entries)
-            let aux_ptr = decode_ptr.add(num_decode_entries) as *mut AuxTableEntry;
 
             // Build aux index map for message fields
             let mut aux_index_map = std::collections::HashMap::<i32, usize>::new();
