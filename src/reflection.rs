@@ -153,10 +153,23 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         let descriptor = table.descriptor;
 
-        // Get aux entry pointer
+        // Count aux entries (message fields)
+        let num_aux_entries = descriptor.field().iter().filter(|f| is_message(f)).count();
+        if num_aux_entries == 0 {
+            return;
+        }
+
+        // Get aux entry pointer - must use same Layout::extend logic as build_table_from_descriptor
         unsafe {
-            let decode_ptr = (table as *const Table).add(1) as *const crate::decoding::TableEntry;
-            let aux_ptr = decode_ptr.add(table.num_decode_entries as usize) as *mut AuxTableEntry;
+            // Recalculate aux offset using Layout::extend (accounts for padding)
+            let table_layout = std::alloc::Layout::new::<Table>();
+            let (_, aux_offset_from_table) = table_layout.extend(
+                std::alloc::Layout::array::<crate::decoding::TableEntry>(table.num_decode_entries as usize).unwrap()
+            ).unwrap().0.extend(
+                std::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap()
+            ).unwrap();
+
+            let aux_ptr = (table as *const Table as *const u8).add(aux_offset_from_table) as *mut AuxTableEntry;
 
             // Patch each aux entry with the correct child table pointer
             let mut aux_idx = 0;
