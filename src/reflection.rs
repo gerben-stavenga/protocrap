@@ -206,8 +206,15 @@ impl<'alloc> DescriptorPool<'alloc> {
             .get(message_type)
             .ok_or_else(|| anyhow::anyhow!("Message type '{}' not found in pool", message_type))?;
 
-        // Allocate object
-        let object = Object::create(table.size as u32, &mut self.arena);
+        // Allocate object with proper alignment (8 bytes for all protobuf types)
+        let layout = std::alloc::Layout::from_size_align(table.size as usize, 8)
+            .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
+        let ptr = self.arena.alloc_raw(layout).as_ptr() as *mut Object;
+        let object = unsafe {
+            // Zero-initialize the object
+            core::ptr::write_bytes(ptr, 0, table.size as usize);
+            &mut *ptr
+        };
 
         // Decode
         self.decode_into(object, table, bytes)?;
