@@ -291,13 +291,19 @@ impl<'alloc> DescriptorPool<'alloc> {
             // SAFETY: descriptor lives in arena with 'alloc lifetime, which outlives the table usage
             (*table_ptr).descriptor = core::mem::transmute::<&'alloc DescriptorProto, &'static DescriptorProto>(descriptor);
 
-            // Build aux index map for message fields
+            // Build aux index map for message fields and has_bit index map
             let mut aux_index_map = std::collections::HashMap::<i32, usize>::new();
+            let mut has_bit_index_map = std::collections::HashMap::<i32, u32>::new();
             let mut aux_idx = 0;
+            let mut has_bit_idx = 0u32;
             for &field in descriptor.field() {
                 if is_message(field) {
                     aux_index_map.insert(field.number(), aux_idx);
                     aux_idx += 1;
+                }
+                if needs_has_bit(field) {
+                    has_bit_index_map.insert(field.number(), has_bit_idx);
+                    has_bit_idx += 1;
                 }
             }
 
@@ -350,8 +356,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                             .map(|(_, o)| *o)
                             .unwrap_or(0);
                         let has_bit = if needs_has_bit(field) {
-                            // TODO: proper has_bit calculation
-                            field_number as u32
+                            has_bit_index_map[&field_number]
                         } else {
                             0
                         };
