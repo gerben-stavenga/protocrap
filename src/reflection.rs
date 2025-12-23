@@ -97,6 +97,11 @@ impl<'alloc> DescriptorPool<'alloc> {
         }
     }
 
+    /// Strip leading dot from type name (protobuf returns ".package.Type", we store "package.Type")
+    fn normalize_type_name(type_name: &str) -> &str {
+        type_name.strip_prefix('.').unwrap_or(type_name)
+    }
+
     /// Add a FileDescriptorProto to the pool
     pub fn add_file(&mut self, file: &'alloc FileDescriptorProto) {
         let package = if file.has_package() {
@@ -157,7 +162,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             let mut aux_idx = 0;
             for field in descriptor.field() {
                 if is_message(field) {
-                    let child_type_name = field.type_name();
+                    let child_type_name = Self::normalize_type_name(field.type_name());
                     let child_table_ptr = self.tables.get(child_type_name)
                         .map(|&t| t as *const Table)
                         .unwrap_or(core::ptr::null());
@@ -344,7 +349,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                 .filter(|(f, _)| is_message(f))
                 .enumerate()
             {
-                let child_type_name = field.type_name();
+                let child_type_name = Self::normalize_type_name(field.type_name());
                 let child_table_ptr = self.tables.get(child_type_name)
                     .map(|&t| t as *const Table)
                     .unwrap_or(core::ptr::null());
