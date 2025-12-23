@@ -178,11 +178,11 @@ impl<'alloc> DescriptorPool<'alloc> {
     }
 
     /// Create a DynamicMessage by decoding bytes with the given message type
-    pub fn decode_message(
-        &'alloc mut self,
+    pub fn decode_message<'msg>(
+        &'msg mut self,
         message_type: &str,
         bytes: &[u8],
-    ) -> anyhow::Result<DynamicMessage<'alloc, 'alloc>> {
+    ) -> anyhow::Result<DynamicMessage<'alloc, 'msg>> {
         let table = *self
             .tables
             .get(message_type)

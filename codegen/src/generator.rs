@@ -7,6 +7,7 @@ use crate::names::*;
 use crate::tables;
 use anyhow::Result;
 use proc_macro2::TokenStream;
+use protocrap::ProtobufExt;
 use protocrap::google::protobuf::DescriptorProto::ProtoType as DescriptorProto;
 use protocrap::google::protobuf::EnumDescriptorProto::ProtoType as EnumDescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::Type;
@@ -46,8 +47,17 @@ fn generate_file(file: &FileDescriptorProto) -> Result<TokenStream> {
         items.push(generate_message(message, file, path)?);
     }
 
-    let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
-    let file_descriptor = crate::static_gen::generate_static_dynamic(&dynamic_file)?;
+    let file_descriptor = if file.name() == "proto/descriptor.proto" {
+        // Special case: generate FileDescriptorProto static
+        let mut pool = protocrap::reflection::DescriptorPool::new(&std::alloc::Global);
+        pool.add_file(file);
+        let serialized = file.encode_vec::<100>()?;
+        let dyn_file_descriptor = pool.decode_message("google::protobuf::FileDescriptorProto", &serialized)?;
+        crate::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
+    } else {
+        let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
+        crate::static_gen::generate_static_dynamic(&dynamic_file)?
+    };
 
     items.push(quote! {
         pub static FILE_DESCRIPTOR_PROTO: protocrap::google::protobuf::FileDescriptorProto::ProtoType = #file_descriptor;
