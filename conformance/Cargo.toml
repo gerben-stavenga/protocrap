@@ -1,0 +1,14 @@
+[package]
+name = "protocrap-conformance"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "conformance-protocrap"
+path = "src/main.rs"
+
+[dependencies]
+protocrap = { path = ".." }
+anyhow = "1.0"
+byteorder = "1.5.0"

@@ -77,6 +77,7 @@ impl RawVec {
         self
     }
 
+    #[inline(always)]
     pub unsafe fn push_uninitialized(
         &mut self,
         len: &mut usize,
@@ -202,14 +203,16 @@ impl<T> RepeatedField<T> {
         }
     }
 
+    #[inline(always)]
     pub fn push(&mut self, elem: T, arena: &mut crate::arena::Arena) {
-        unsafe {
-            (self
-                .buf
-                .push_uninitialized(&mut self.len, Layout::new::<T>(), arena)
-                as *mut T)
-                .write(elem)
-        };
+        let l = self.len;
+        if l == self.cap() {
+            self.buf = self.buf.grow(0, Layout::new::<T>(), arena);
+        }
+        unsafe { self.ptr().add(l).write(elem) };
+
+        // Can't overflow, we'll OOM first.
+        self.len = l + 1;
     }
 
     pub fn pop(&mut self) -> Option<T> {

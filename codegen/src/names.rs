@@ -22,6 +22,16 @@ pub fn sanitize_field_name(name: &str) -> String {
     }
 }
 
+/// Sanitize a module name by appending underscore for keywords
+/// (can't use r# prefix for modules, especially with leading underscores)
+pub fn sanitize_module_name(name: &str) -> String {
+    if RUST_KEYWORDS.contains(&name) {
+        format!("{}_", name)
+    } else {
+        name.to_string()
+    }
+}
+
 pub fn rust_field_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     use protocrap::google::protobuf::FieldDescriptorProto::Label;
 

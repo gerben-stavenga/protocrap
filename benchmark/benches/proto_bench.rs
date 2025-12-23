@@ -1,5 +1,7 @@
 #![feature(allocator_api)]
 
+use std::default;
+
 use criterion::{
     BenchmarkGroup, Criterion, Throughput, black_box, criterion_group, criterion_main,
     measurement::Measurement,
@@ -111,5 +113,46 @@ fn bench_encode(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_decode, bench_encode);
+#[inline(never)]
+pub fn push_loop_protocrap_inner(arena: &mut arena::Arena) {
+    let mut repeated_field = protocrap::containers::RepeatedField::<i32>::new();
+    repeated_field.reserve(100000, arena);
+    for i in 0..100000 {
+        repeated_field.push(i, arena);
+    }
+    black_box(repeated_field.slice());
+}
+
+pub fn push_loop_protocrap() {
+    let mut arena = arena::Arena::new(&std::alloc::Global);
+    push_loop_protocrap_inner(&mut arena);
+}
+
+#[inline(never)]
+pub fn push_loop_vec() {
+    let mut v = Vec::<i32>::with_capacity(100000);
+    for i in 0..100000 {
+        v.push(i);
+    }
+    black_box(v.as_slice());
+}
+
+fn bench_repeated_field(c: &mut Criterion) {
+    let mut group = c.benchmark_group("repeated_field_push");
+
+    group.bench_function("protocrap", |b| {
+        b.iter(|| {
+            push_loop_protocrap();
+        })
+    });
+
+    group.bench_function("vec", |b| {
+        b.iter(|| {
+            push_loop_vec();
+        })
+    });
+    group.finish();
+}
+
+criterion_group!(benches, bench_decode, bench_encode, bench_repeated_field);
 criterion_main!(benches);

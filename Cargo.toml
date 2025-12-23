@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "codegen/codegen-tests", "benchmark", "codegen"]
+members = [".", "codegen/codegen-tests", "benchmark", "codegen", "conformance"]
 resolver = "2"
 
 [package]

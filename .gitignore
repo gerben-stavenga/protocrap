@@ -1,5 +1,6 @@
 /target
 /bazel-*
 /external
+/conformance/bazel-*
 
 compile_commands.json

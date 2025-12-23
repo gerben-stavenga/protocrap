@@ -1,0 +1,7 @@
+# Conformance Test Runner
+
+alias(
+    name = "conformance_test_runner",
+    actual = "@protobuf//conformance:conformance_test_runner",
+    visibility = ["//visibility:public"],
+)

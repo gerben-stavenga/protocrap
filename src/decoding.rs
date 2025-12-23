@@ -721,6 +721,10 @@ impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
             mut stack,
         } = self;
         let state = unsafe { state.assume_init() };
+        if matches!(state.object, DecodeObject::None) {
+            println!("Decode already finished");
+            return false;
+        }
         let Some(state) = state.go_decode(&patch_buffer[..SLOP_SIZE], &mut stack, arena) else {
             return false;
         };

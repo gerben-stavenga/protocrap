@@ -1,6 +1,41 @@
 # Protocrap TODO List
 
+## Critical - Blocking Conformance Tests
+
+### Codegen: Package/Module Deduplication
+- [x] **FIXED: Merge FileDescriptorProtos with same package** (2024-12-23)
+  - Implemented package tree structure in `codegen/src/generator.rs`
+  - Properly handles hierarchical packages (e.g., `protobuf_test_messages.proto2` and `protobuf_test_messages.proto3`)
+  - Also handles enum aliasing by deduplicating enum variants with same value
+  - Conformance tests now compile successfully!
+
+### Build Script Integration
+- [x] **FIXED: build.rs cargo deadlock issue** (2024-12-23)
+  - Implemented workaround: Find pre-built codegen binary instead of `cargo run`
+  - Pattern works: looks for binary in target/release or target/debug
+  - Future improvement: Create `protocrap-build` crate with compile_protos() API (similar to `prost-build`)
+  - See: `conformance/build.rs` for working implementation
+
 ## High Priority
+
+### Conformance Tests
+- [ ] **Complete conformance test setup** (95% done - ready to run!)
+  - ✅ Test protocol implementation (parse → serialize roundtrip)
+  - ✅ Varint read/write for test runner protocol
+  - ✅ Binary compiled and runs
+  - ✅ Package deduplication fixed - test messages compile
+  - ✅ Generated code uses proper module structure
+  - ❌ Need to download/build Google's conformance_test_runner
+  - ❌ Need to run actual conformance tests
+  - Location: `conformance/` directory, binary at `target/debug/conformance-protocrap`
+
+- [ ] **Proto Package → Rust Crate Design** (architectural decision needed)
+  - Option 1: Create `protocrap-types` crate for Google well-known types (recommended)
+  - Option 2: Merge packages in codegen (current blocker fix)
+  - Option 3: One crate per package root (too many crates)
+  - Option 4: External types flag `--external-types protocrap_types`
+  - See discussion: impedance mismatch between proto packages and Rust crates
+  - Recommendation: Short-term fix #2, long-term implement #1 + #4
 
 ### Code Quality & Completeness
 - [ ] **Enum default values** (`codegen/src/generator.rs:428`)
@@ -85,6 +120,17 @@
   - Publishing to crates.io checklist
 
 ## Completed ✓
+- [x] Fix codegen package/module deduplication (2024-12-23)
+  - Implemented package tree structure for hierarchical packages
+  - Fixed duplicate module errors in conformance tests
+- [x] Fix enum aliasing in codegen (2024-12-23)
+  - Deduplicate enum variants with same numeric value
+  - Rust doesn't support aliased enums like protobuf does
+- [x] Fix build.rs cargo deadlock (2024-12-23)
+  - Use pre-built codegen binary instead of `cargo run`
+- [x] Conformance test infrastructure (2024-12-23)
+  - Binary compiles and runs successfully
+  - Ready for Google conformance test runner
 - [x] Fix alignment bugs in has_bit operations (2024-12-22)
 - [x] Fix decode table has_bit calculation (2024-12-22)
 - [x] Support latest descriptor.proto (2024-12-22)
