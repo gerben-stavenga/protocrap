@@ -12,3 +12,5 @@ path = "src/main.rs"
 protocrap = { path = ".." }
 anyhow = "1.0"
 byteorder = "1.5.0"
+serde_json = "1.0.147"
+serde = "1.0.228"

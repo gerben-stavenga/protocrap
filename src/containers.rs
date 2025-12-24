@@ -77,6 +77,7 @@ impl RawVec {
         self
     }
 
+    #[allow(dead_code)]
     #[inline(always)]
     pub unsafe fn push_uninitialized(
         &mut self,

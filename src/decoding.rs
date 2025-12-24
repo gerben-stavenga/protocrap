@@ -472,47 +472,118 @@ fn decode_loop<'a>(
                             (ctx.obj, ctx.table) = ctx.get_or_create_child_object(entry, arena);
                         }
                         FieldKind::RepeatedVarint64 => {
-                            if tag & 7 != 0 {
+                            if tag & 7 == 0 {
+                                // Unpacked
+                                ctx.add(entry, cursor.read_varint()?, arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, packed_cursor.read_varint()?, arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, cursor.read_varint()?, arena);
+                            }
                         }
                         FieldKind::RepeatedVarint32 => {
-                            if tag & 7 != 0 {
+                            if tag & 7 == 0 {
+                                // Unpacked
+                                ctx.add(entry, cursor.read_varint()? as u32, arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, packed_cursor.read_varint()? as u32, arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, cursor.read_varint()? as u32, arena);
+                            }
                         }
                         FieldKind::RepeatedVarint64Zigzag => {
-                            if tag & 7 != 0 {
+                            if tag & 7 == 0 {
+                                // Unpacked
+                                ctx.add(entry, zigzag_decode(cursor.read_varint()?), arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, zigzag_decode(packed_cursor.read_varint()?), arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, zigzag_decode(cursor.read_varint()?), arena);
+                            }
                         }
                         FieldKind::RepeatedVarint32Zigzag => {
-                            if tag & 7 != 0 {
+                            if tag & 7 == 0 {
+                                // Unpacked
+                                ctx.add(entry, zigzag_decode(cursor.read_varint()?) as i32, arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, zigzag_decode(packed_cursor.read_varint()?) as i32, arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, zigzag_decode(cursor.read_varint()?) as i32, arena);
+                            }
                         }
                         FieldKind::RepeatedBool => {
-                            if tag & 7 != 0 {
+                            if tag & 7 == 0 {
+                                // Unpacked
+                                let val = cursor.read_varint()?;
+                                ctx.add(entry, val != 0, arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    let val = packed_cursor.read_varint()?;
+                                    ctx.add(entry, val != 0, arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            let val = cursor.read_varint()?;
-                            ctx.add(entry, val != 0, arena);
+                            }
                         }
                         FieldKind::RepeatedFixed64 => {
-                            if tag & 7 != 1 {
+                            if tag & 7 == 1 {
+                                // Unpacked
+                                ctx.add(entry, cursor.read_unaligned::<u64>(), arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, packed_cursor.read_unaligned::<u64>(), arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, cursor.read_unaligned::<u64>(), arena);
+                            }
                         }
                         FieldKind::RepeatedFixed32 => {
-                            if tag & 7 != 5 {
+                            if tag & 7 == 5 {
+                                // Unpacked
+                                ctx.add(entry, cursor.read_unaligned::<u32>(), arena);
+                            } else if tag & 7 == 2 {
+                                // Packed
+                                let len = cursor.read_size()?;
+                                let slice = cursor.read_slice(len);
+                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
+                                while packed_cursor < packed_end {
+                                    ctx.add(entry, packed_cursor.read_unaligned::<u32>(), arena);
+                                }
+                            } else {
                                 break 'unknown;
-                            };
-                            ctx.add(entry, cursor.read_unaligned::<u32>(), arena);
+                            }
                         }
                         FieldKind::RepeatedBytes => {
                             if tag & 7 != 2 {

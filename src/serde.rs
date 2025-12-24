@@ -1,6 +1,6 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
 
-use crate::Protobuf;
+use crate::{Protobuf};
 use crate::base::Object;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
 use crate::reflection::{DynamicMessage, DynamicMessageArray, Value};
@@ -17,7 +17,7 @@ impl<'msg> serde::Serialize for DynamicMessage<'static, 'msg> {
             let Some(v) = self.get_field(field) else {
                 continue;
             };
-            fields.push((field.name(), v));
+            fields.push((field.json_name(), v));
         }
         let mut struct_serializer = serializer.serialize_struct(descriptor.name(), fields.len())?;
         for (name, value) in fields {
@@ -45,17 +45,22 @@ impl<'msg> serde::Serialize for Value<'static, 'msg> {
     where
         S: serde::Serializer,
     {
-        match self {
-            Value::Bool(v) => serializer.serialize_bool(*v),
-            Value::Int32(v) => serializer.serialize_i32(*v),
-            Value::Int64(v) => serializer.serialize_i64(*v),
-            Value::UInt32(v) => serializer.serialize_u32(*v),
-            Value::UInt64(v) => serializer.serialize_u64(*v),
-            Value::Float(v) => serializer.serialize_f32(*v),
-            Value::Double(v) => serializer.serialize_f64(*v),
-            Value::String(v) => serializer.serialize_str(v.as_ref()),
-            Value::Bytes(v) => serializer.serialize_bytes(v.as_ref()),
-            Value::Message(msg) => msg.serialize(serializer),
+        match *self {
+            Value::Bool(v) => serializer.serialize_bool(v),
+            Value::Int32(v) => serializer.serialize_i32(v),
+            Value::Int64(v) => serializer.serialize_i64(v),
+            Value::UInt32(v) => serializer.serialize_u32(v),
+            Value::UInt64(v) => serializer.serialize_u64(v),
+            Value::Float(v) => serializer.serialize_f32(v),
+            Value::Double(v) => serializer.serialize_f64(v),
+            Value::String(v) => serializer.serialize_str(v),
+            Value::Bytes(v) => if serializer.is_human_readable() {
+                use base64::Engine;
+                serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(v))
+            } else {
+                serializer.serialize_bytes(v)
+            },
+            Value::Message(ref msg) => msg.serialize(serializer),
             Value::RepeatedBool(list) => list.serialize(serializer),
             Value::RepeatedInt32(list) => list.serialize(serializer),
             Value::RepeatedInt64(list) => list.serialize(serializer),
@@ -65,7 +70,7 @@ impl<'msg> serde::Serialize for Value<'static, 'msg> {
             Value::RepeatedDouble(list) => list.serialize(serializer),
             Value::RepeatedString(list) => list.serialize(serializer),
             Value::RepeatedBytes(list) => list.serialize(serializer),
-            Value::RepeatedMessage(list) => list.serialize(serializer),
+            Value::RepeatedMessage(ref list) => list.serialize(serializer),
         }
     }
 }
@@ -75,7 +80,12 @@ impl serde::Serialize for crate::containers::Bytes {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_bytes(self.as_ref())
+        if serializer.is_human_readable() {
+            use base64::Engine;
+            serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(self.as_ref()))
+        } else {
+            serializer.serialize_bytes(self.as_ref())
+        }
     }
 }
 
@@ -131,14 +141,53 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::DeserializeSeed<'de>
     where
         D: serde::Deserializer<'de>,
     {
-        // Deserialization logic to be implemented
         let ProtobufVisitor { obj, table, arena } = self;
         serde_deserialize_struct(obj, table, arena, deserializer)?;
         Ok(())
     }
 }
 
-fn serde_deserialize_struct<'arena, 'alloc, 'b, 'de, D>(
+pub struct Optional<T>(T);
+
+impl<'de, T> serde::de::DeserializeSeed<'de> for Optional<T>
+    where T: serde::de::DeserializeSeed<'de>
+{
+    type Value = Option<T::Value>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_option(self)
+    }
+}
+
+impl<'de, T> serde::de::Visitor<'de> for Optional<T>
+    where T: serde::de::DeserializeSeed<'de>
+{
+    type Value = Option<T::Value>;
+
+    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        formatter.write_str("optional value")
+    }
+
+    fn visit_none<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(None)
+    }
+
+    fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Some(self.0.deserialize(deserializer)?))
+    }
+}
+
+
+pub fn serde_deserialize_struct<'arena, 'alloc, 'b, 'de, D>(
     obj: &'b mut Object,
     table: &'static Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
@@ -219,9 +268,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
         A: serde::de::SeqAccess<'de>,
     {
         let ProtobufArrayfVisitor { rf, table, arena } = self;
-        // Loop while there are elements
         loop {
-            // Create object for next element
             let msg_obj = Object::create(table.size as u32, arena);
 
             let seed = ProtobufVisitor {
@@ -230,14 +277,12 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
                 arena,
             };
 
-            // Try to get next element
             match seq.next_element_seed(seed)? {
                 Some(()) => {
-                    // Got an element - push it
                     rf.push(crate::base::Message(msg_obj as *mut Object), arena);
                 }
                 None => {
-                    return Ok(()); // No more elements
+                    return Ok(());
                 }
             }
         }
@@ -259,7 +304,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
 
         let mut field_map = std::collections::HashMap::new();
         for (field_index, field) in table.descriptor.field().iter().enumerate() {
-            let field_name = field.name();
+            let field_name = field.json_name();
             field_map.insert(field_name, field_index);
         }
         while let Some(idx) = map.next_key_seed(StructKeyVisitor(&field_map))? {
@@ -268,25 +313,33 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
             match field.label().unwrap() {
                 Label::LABEL_REPEATED => match field.r#type().unwrap() {
                     Type::TYPE_BOOL => {
-                        let slice: Vec<bool> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<bool>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<bool>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_FIXED64 | Type::TYPE_UINT64 => {
-                        let slice: Vec<u64> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<u64>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<u64>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_FIXED32 | Type::TYPE_UINT32 => {
-                        let slice: Vec<u32> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<u32>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<u32>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_SFIXED64 | Type::TYPE_INT64 | Type::TYPE_SINT64 => {
-                        let slice: Vec<i64> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<i64>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<i64>(entry.offset(), v, arena);
                         }
@@ -295,34 +348,44 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                     | Type::TYPE_INT32
                     | Type::TYPE_SINT32
                     | Type::TYPE_ENUM => {
-                        let slice: Vec<i32> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<i32>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<i32>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_FLOAT => {
-                        let slice: Vec<f32> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<f32>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<f32>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_DOUBLE => {
-                        let slice: Vec<f64> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<f64>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             obj.add::<f64>(entry.offset(), v, arena);
                         }
                     }
                     Type::TYPE_STRING => {
-                        let slice: Vec<String> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<String>>>()? else {
+                            continue;
+                        };
                         for v in slice {
                             let s = crate::containers::String::from_str(&v, arena);
                             obj.add::<crate::containers::String>(entry.offset(), s, arena);
                         }
                     }
                     Type::TYPE_BYTES => {
-                        let slice: Vec<Vec<u8>> = map.next_value()?;
+                        let Some(slice) = map.next_value::<Option<Vec<BytesOrBase64>>>()? else {
+                            continue;
+                        };
                         for v in slice {
-                            let b = crate::containers::Bytes::from_slice(&v, arena);
+                            let b = crate::containers::Bytes::from_slice(&v.0, arena);
                             obj.add::<crate::containers::Bytes>(entry.offset(), b, arena);
                         }
                     }
@@ -336,11 +399,11 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                             .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(
                                 offset,
                             );
-                        let seed = ProtobufArrayfVisitor {
+                        let seed = Optional(ProtobufArrayfVisitor {
                             rf,
                             table: child_table,
                             arena,
-                        };
+                        });
                         map.next_value_seed(seed)?;
                     }
                 },
@@ -402,10 +465,10 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                         );
                     }
                     Type::TYPE_BYTES => {
-                        let Some(v) = map.next_value::<Option<Vec<u8>>>()? else {
+                        let Some(v) = map.next_value::<Option<BytesOrBase64>>()? else {
                             continue;
                         };
-                        let b = crate::containers::Bytes::from_slice(&v, arena);
+                        let b = crate::containers::Bytes::from_slice(&v.0, arena);
                         obj.set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
@@ -416,22 +479,67 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                         } = table.aux_entry_decode(entry);
                         let child_table = unsafe { &*child_table };
                         let child_obj = Object::create(child_table.size as u32, arena);
-                        obj.set::<crate::base::Message>(
-                            offset,
-                            entry.has_bit_idx(),
-                            crate::base::Message(child_obj),
-                        );
-                        let seed = ProtobufVisitor {
+                        let seed = Optional(ProtobufVisitor {
                             obj: child_obj,
                             table: child_table,
                             arena,
+                        });
+                        if map.next_value_seed(seed)?.is_none() {
+                            continue;
                         };
-                        map.next_value_seed(seed)?;
+                        *obj.ref_mut::<crate::base::Message>(offset) = crate::base::Message(child_obj);
                     }
                 },
             }
-            // Process each field in the map
         }
         Ok(())
+    }
+}
+
+struct BytesOrBase64(Vec<u8>);
+
+impl<'de> serde::de::Deserialize<'de> for BytesOrBase64 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct BytesOrStringVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for BytesOrStringVisitor {
+            type Value = BytesOrBase64;
+
+            fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+                formatter.write_str("bytes or string")
+            }
+
+            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                Ok(BytesOrBase64(v.to_vec()))
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                use base64::Engine;
+                base64::engine::general_purpose::STANDARD
+                    .decode(v)
+                    .map(|bytes| BytesOrBase64(bytes))
+                    .map_err(|err| {
+                        serde::de::Error::custom(format!("Invalid base64 string: {}", err))
+                    })
+            }
+
+            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
+                where
+                    A: serde::de::SeqAccess<'de>, {
+                let bytes: Vec<u8> = serde::de::Deserialize::deserialize(serde::de::value::SeqAccessDeserializer::new(seq))?;
+                Ok(BytesOrBase64(bytes))
+            }
+        }
+
+        deserializer.deserialize_any(BytesOrStringVisitor)
     }
 }

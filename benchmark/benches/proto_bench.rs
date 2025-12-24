@@ -1,7 +1,5 @@
 #![feature(allocator_api)]
 
-use std::default;
-
 use criterion::{
     BenchmarkGroup, Criterion, Throughput, black_box, criterion_group, criterion_main,
     measurement::Measurement,

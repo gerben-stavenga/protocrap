@@ -19,6 +19,8 @@ include!("descriptor.pc.rs");
 #[cfg(feature = "serde_support")]
 pub mod serde;
 
+// One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
+// but that is not allowed because Default and Debug are not local to this crate.
 pub trait Protobuf: Default + core::fmt::Debug {
     fn table() -> &'static tables::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
@@ -209,6 +211,18 @@ pub trait ProtobufExt: Protobuf {
             buffer.extend_from_slice(&old_buffer);
         }
         Ok(buffer)
+    }
+
+    #[cfg(feature = "serde_support")]
+    fn serde_deserialize<'arena, 'alloc, 'de, D>(
+        &'de mut self,
+        arena: &'arena mut crate::arena::Arena<'alloc>,
+        deserializer: D,
+    ) -> Result<(), D::Error> 
+    where
+        D: ::serde::Deserializer<'de>,
+    {
+        serde::serde_deserialize_struct(self.as_object_mut(), Self::table(), arena, deserializer)
     }
 }
 

@@ -155,6 +155,36 @@ fn write_repeated<T>(
     }
 }
 
+fn write_repeated_packed<T>(
+    obj_state: &mut ObjectEncodeState,
+    cursor: &mut WriteCursor,
+    begin: NonNull<u8>,
+    tag: u32,
+    slice: &[T],
+    write: impl Fn(&mut WriteCursor, &T),
+) {
+    if obj_state.rep_field_idx == 0 {
+        obj_state.rep_field_idx = slice.len();
+    }
+
+    // Write all values backwards without tags
+    let start_ptr = cursor.0;
+    while obj_state.rep_field_idx > 0 {
+        if *cursor <= begin {
+            break;
+        }
+        obj_state.rep_field_idx -= 1;
+        write(cursor, &slice[obj_state.rep_field_idx]);
+    }
+
+    // Only write tag + length if we wrote all values
+    if obj_state.rep_field_idx == 0 && slice.len() > 0 {
+        let packed_len = unsafe { start_ptr.as_ptr().offset_from(cursor.0.as_ptr()) as u64 };
+        cursor.write_varint(packed_len);
+        cursor.write_tag(tag); // Tag already has wire type 2
+    }
+}
+
 fn encode_loop<'a>(
     mut obj_state: ObjectEncodeState<'a>,
     mut cursor: WriteCursor,
@@ -256,7 +286,8 @@ fn encode_loop<'a>(
                     if cursor <= begin {
                         break;
                     }
-                    cursor.write_varint(zigzag_encode(obj_state.get::<i32>(offset) as i64));
+                    let encoded = zigzag_encode(obj_state.get::<i32>(offset) as i64) as u32;
+                    cursor.write_varint(encoded as u64);
                     cursor.write_tag(tag);
                 }
             }
@@ -345,94 +376,185 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedVarint64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_varint(val);
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val);
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val);
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedVarint32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_varint(val as u64);
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val as u64);
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val as u64);
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedVarint64Zigzag => {
                 let slice = obj_state.get_slice::<i64>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_varint(zigzag_encode(val));
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(zigzag_encode(val));
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(zigzag_encode(val));
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedVarint32Zigzag => {
                 let slice = obj_state.get_slice::<i32>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_varint(zigzag_encode(val as i64));
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(zigzag_encode(val as i64));
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(zigzag_encode(val as i64));
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedBool => {
                 let slice = obj_state.get_slice::<bool>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_varint(if val { 1 } else { 0 });
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(if val { 1 } else { 0 });
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(if val { 1 } else { 0 });
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedFixed64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_unaligned(val);
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_unaligned(val);
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_unaligned(val);
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedFixed32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
-                write_repeated(
-                    &mut obj_state,
-                    &mut cursor,
-                    begin,
-                    tag,
-                    slice,
-                    |cursor, &val| {
-                        cursor.write_unaligned(val);
-                    },
-                );
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_unaligned(val);
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_unaligned(val);
+                        },
+                    );
+                }
             }
             FieldKind::RepeatedBytes => {
                 let slice = obj_state.get_slice::<Bytes>(offset);
