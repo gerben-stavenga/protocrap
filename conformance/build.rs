@@ -1,5 +1,5 @@
-use std::process::Command;
 use std::path::PathBuf;
+use std::process::Command;
 
 fn main() {
     println!("cargo:rerun-if-changed=conformance_all.proto");
@@ -40,11 +40,16 @@ fn main() {
         } else if debug_bin.exists() {
             debug_bin
         } else {
-            panic!("protocrap-codegen binary not found. Please build it first with: cargo build -p protocrap-codegen");
+            panic!(
+                "protocrap-codegen binary not found. Please build it first with: cargo build -p protocrap-codegen"
+            );
         }
     };
 
-    println!("cargo:warning=Using codegen binary: {}", codegen_bin.display());
+    println!(
+        "cargo:warning=Using codegen binary: {}",
+        codegen_bin.display()
+    );
 
     // Generate Rust code
     let out_file = format!("{}/conformance_all.pc.rs", out_dir);

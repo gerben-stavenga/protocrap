@@ -1,6 +1,6 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
 
-use crate::{Protobuf};
+use crate::Protobuf;
 use crate::base::Object;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
 use crate::reflection::{DynamicMessage, DynamicMessageArray, Value};
@@ -54,12 +54,14 @@ impl<'msg> serde::Serialize for Value<'static, 'msg> {
             Value::Float(v) => serializer.serialize_f32(v),
             Value::Double(v) => serializer.serialize_f64(v),
             Value::String(v) => serializer.serialize_str(v),
-            Value::Bytes(v) => if serializer.is_human_readable() {
-                use base64::Engine;
-                serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(v))
-            } else {
-                serializer.serialize_bytes(v)
-            },
+            Value::Bytes(v) => {
+                if serializer.is_human_readable() {
+                    use base64::Engine;
+                    serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(v))
+                } else {
+                    serializer.serialize_bytes(v)
+                }
+            }
             Value::Message(ref msg) => msg.serialize(serializer),
             Value::RepeatedBool(list) => list.serialize(serializer),
             Value::RepeatedInt32(list) => list.serialize(serializer),
@@ -82,7 +84,8 @@ impl serde::Serialize for crate::containers::Bytes {
     {
         if serializer.is_human_readable() {
             use base64::Engine;
-            serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(self.as_ref()))
+            serializer
+                .serialize_str(&base64::engine::general_purpose::STANDARD.encode(self.as_ref()))
         } else {
             serializer.serialize_bytes(self.as_ref())
         }
@@ -150,7 +153,8 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::DeserializeSeed<'de>
 pub struct Optional<T>(T);
 
 impl<'de, T> serde::de::DeserializeSeed<'de> for Optional<T>
-    where T: serde::de::DeserializeSeed<'de>
+where
+    T: serde::de::DeserializeSeed<'de>,
 {
     type Value = Option<T::Value>;
 
@@ -163,7 +167,8 @@ impl<'de, T> serde::de::DeserializeSeed<'de> for Optional<T>
 }
 
 impl<'de, T> serde::de::Visitor<'de> for Optional<T>
-    where T: serde::de::DeserializeSeed<'de>
+where
+    T: serde::de::DeserializeSeed<'de>,
 {
     type Value = Option<T::Value>;
 
@@ -186,7 +191,6 @@ impl<'de, T> serde::de::Visitor<'de> for Optional<T>
     }
 }
 
-
 pub fn serde_deserialize_struct<'arena, 'alloc, 'b, 'de, D>(
     obj: &'b mut Object,
     table: &'static Table,
@@ -200,7 +204,9 @@ where
     let fields = table.descriptor.field();
     let field_names: Vec<&str> = fields.iter().map(|f| f.name()).collect();
     let field_names_slice = field_names.as_slice();
-    let field_names_static = unsafe { std::mem::transmute::<&[&'static str], &'static [&'static str]>(field_names_slice) };
+    let field_names_static = unsafe {
+        std::mem::transmute::<&[&'static str], &'static [&'static str]>(field_names_slice)
+    };
     deserializer.deserialize_struct(table.descriptor.name(), field_names_static, visitor)
 }
 
@@ -487,7 +493,8 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
                         if map.next_value_seed(seed)?.is_none() {
                             continue;
                         };
-                        *obj.ref_mut::<crate::base::Message>(offset) = crate::base::Message(child_obj);
+                        *obj.ref_mut::<crate::base::Message>(offset) =
+                            crate::base::Message(child_obj);
                     }
                 },
             }
@@ -533,9 +540,12 @@ impl<'de> serde::de::Deserialize<'de> for BytesOrBase64 {
             }
 
             fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
-                where
-                    A: serde::de::SeqAccess<'de>, {
-                let bytes: Vec<u8> = serde::de::Deserialize::deserialize(serde::de::value::SeqAccessDeserializer::new(seq))?;
+            where
+                A: serde::de::SeqAccess<'de>,
+            {
+                let bytes: Vec<u8> = serde::de::Deserialize::deserialize(
+                    serde::de::value::SeqAccessDeserializer::new(seq),
+                )?;
                 Ok(BytesOrBase64(bytes))
             }
         }

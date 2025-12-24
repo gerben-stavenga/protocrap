@@ -462,7 +462,7 @@ fn encode_loop<'a>(
                         tag,
                         slice,
                         |cursor, &val| {
-                            cursor.write_varint(zigzag_encode(val as i64));
+                            cursor.write_varint(zigzag_encode(val as i64) as u32 as u64);
                         },
                     );
                 } else {
@@ -473,7 +473,7 @@ fn encode_loop<'a>(
                         tag,
                         slice,
                         |cursor, &val| {
-                            cursor.write_varint(zigzag_encode(val as i64));
+                            cursor.write_varint(zigzag_encode(val as i64) as u32 as u64);
                         },
                     );
                 }

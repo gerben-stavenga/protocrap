@@ -1,0 +1,9 @@
+Required.Proto2.ProtobufInput.MessageSetEncoding.UnknownExtension.ProtobufOutput # Output was not equivalent to reference message: deleted: message_set_correct.4135300[0]: "\000c"
+Required.Proto2.ProtobufInput.UnknownOrdering.ProtobufOutput # Unknown field mismatch
+Required.Proto2.ProtobufInput.UnknownVarint.ProtobufOutput # Output was not equivalent to reference message: Expect: \250\037\001, but got: 
+Required.Proto2.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.ProtobufOutput # Output was not equivalent to reference message: deleted: oneof_uint32: 1added: oneof_nested_message: { }
+Required.Proto2.ProtobufInput.ValidMessageSetEncoding.OutOfOrderGroupsEntries.ProtobufOutput # Output was not equivalent to reference message: deleted: message_set_correct.(protobuf_test_messages.proto2.TestAllTypesProto2.M
+Required.Proto2.ProtobufInput.ValidMessageSetEncoding.ProtobufOutput # Output was not equivalent to reference message: deleted: message_set_correct.(protobuf_test_messages.proto2.TestAllTypesProto2.M
+Required.Proto3.ProtobufInput.UnknownOrdering.ProtobufOutput # Unknown field mismatch
+Required.Proto3.ProtobufInput.UnknownVarint.ProtobufOutput # Output was not equivalent to reference message: Expect: \250\037\001, but got: 
+Required.Proto3.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.ProtobufOutput # Output was not equivalent to reference message: deleted: oneof_uint32: 1added: oneof_nested_message: { }

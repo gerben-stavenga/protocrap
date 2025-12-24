@@ -1,12 +1,12 @@
 #![feature(allocator_api)]
 
-use std::io::{self, Read, Write};
 use anyhow::{Context, Result, bail};
 use protocrap::ProtobufExt;
 use protocrap::reflection::DynamicMessage;
 use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
 use protocrap_conformance::protobuf_test_messages::proto2::TestAllTypesProto2;
 use protocrap_conformance::protobuf_test_messages::proto3::TestAllTypesProto3;
+use std::io::{self, Read, Write};
 
 const TEST_JSON: bool = false;
 
@@ -27,7 +27,8 @@ fn roundtrip_proto<T: protocrap::ProtobufExt>(
             response.set_skipped("Json format input not supported", arena);
             return response;
         }
-        if let Err(e) = msg.serde_deserialize(arena, &mut serde_json::Deserializer::from_str(data)) {
+        if let Err(e) = msg.serde_deserialize(arena, &mut serde_json::Deserializer::from_str(data))
+        {
             response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena);
             return response;
         }
@@ -43,16 +44,14 @@ fn roundtrip_proto<T: protocrap::ProtobufExt>(
     };
     // Encode output
     match request.requested_output_format() {
-        Some(WireFormat::PROTOBUF) => {
-            match msg.encode_vec::<32>() {
-                Ok(bytes) => {
-                    response.set_protobuf_payload(&bytes, arena);
-                }
-                Err(e) => {
-                    response.set_serialize_error(&format!("Encode error: {:?}", e), arena);
-                }
+        Some(WireFormat::PROTOBUF) => match msg.encode_vec::<32>() {
+            Ok(bytes) => {
+                response.set_protobuf_payload(&bytes, arena);
             }
-        }
+            Err(e) => {
+                response.set_serialize_error(&format!("Encode error: {:?}", e), arena);
+            }
+        },
         Some(WireFormat::JSON) => {
             if !TEST_JSON {
                 response.set_skipped("Json format output not supported", arena);
@@ -85,7 +84,10 @@ fn roundtrip_proto<T: protocrap::ProtobufExt>(
     response
 }
 
-fn do_test(request: &ConformanceRequest::ProtoType, arena: &mut protocrap::arena::Arena) -> ConformanceResponse::ProtoType {
+fn do_test(
+    request: &ConformanceRequest::ProtoType,
+    arena: &mut protocrap::arena::Arena,
+) -> ConformanceResponse::ProtoType {
     let mut response = ConformanceResponse::ProtoType::default();
 
     let message_type = request.message_type();
@@ -95,7 +97,10 @@ fn do_test(request: &ConformanceRequest::ProtoType, arena: &mut protocrap::arena
         roundtrip_proto::<TestAllTypesProto3::ProtoType>(arena, request)
     } else {
         if message_type != "protobuf_test_messages.proto2.TestAllTypesProto2" {
-            response.set_skipped(&format!("Message type {} not supported", message_type), arena);
+            response.set_skipped(
+                &format!("Message type {} not supported", message_type),
+                arena,
+            );
             return response;
         }
         roundtrip_proto::<TestAllTypesProto2::ProtoType>(arena, request)
@@ -114,14 +119,18 @@ fn main() -> Result<()> {
         let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
         // Read message length
         use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-        let Ok(len) = stdin.read_u32::<byteorder::LittleEndian>().context("Failed to read message length") else {
+        let Ok(len) = stdin
+            .read_u32::<byteorder::LittleEndian>()
+            .context("Failed to read message length")
+        else {
             break;
         };
         // eprintln!("Processing test #{} ({} bytes)", test_count + 1, len);
 
         // Read request message
         let mut request_bytes = vec![0u8; len as usize];
-        stdin.read_exact(&mut request_bytes)
+        stdin
+            .read_exact(&mut request_bytes)
             .context("Failed to read request")?;
 
         // Parse ConformanceRequest
@@ -132,7 +141,8 @@ fn main() -> Result<()> {
         let response = do_test(&request, &mut arena);
 
         // Serialize ConformanceResponse
-        let response_bytes = response.encode_vec::<32>()
+        let response_bytes = response
+            .encode_vec::<32>()
             .context("Failed to encode response")?;
 
         // eprintln!("Response {:?} finished test #{}", response, test_count + 1);

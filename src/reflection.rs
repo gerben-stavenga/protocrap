@@ -51,7 +51,7 @@ pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
 }
 
 pub fn calculate_tag(field: &FieldDescriptorProto) -> u32 {
-    let is_repeated = field.label().unwrap() == Label::LABEL_REPEATED;
+    let is_packed = field.options().map(|opts| opts.packed()).unwrap_or(false);
 
     let wire_type = match field.r#type().unwrap() {
         Type::TYPE_INT32
@@ -62,15 +62,15 @@ pub fn calculate_tag(field: &FieldDescriptorProto) -> u32 {
         | Type::TYPE_SINT64
         | Type::TYPE_BOOL
         | Type::TYPE_ENUM => {
-            if is_repeated { 2 } else { 0 }  // Packed encoding for repeated primitives
+            if is_packed { 2 } else { 0 } // Packed encoding for repeated primitives
         }
         Type::TYPE_FIXED64 | Type::TYPE_SFIXED64 | Type::TYPE_DOUBLE => {
-            if is_repeated { 2 } else { 1 }  // Packed encoding for repeated fixed64
+            if is_packed { 2 } else { 1 } // Packed encoding for repeated fixed64
         }
         Type::TYPE_STRING | Type::TYPE_BYTES | Type::TYPE_MESSAGE => 2,
         Type::TYPE_GROUP => 3,
         Type::TYPE_FIXED32 | Type::TYPE_SFIXED32 | Type::TYPE_FLOAT => {
-            if is_repeated { 2 } else { 5 }  // Packed encoding for repeated fixed32
+            if is_packed { 2 } else { 5 } // Packed encoding for repeated fixed32
         }
     };
 

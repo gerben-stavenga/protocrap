@@ -87,6 +87,13 @@ enum DecodeObject<'a> {
     Bytes(&'a mut Bytes),
     SkipLengthDelimited,
     SkipGroup,
+    PackedU64(&'a mut RepeatedField<u64>),
+    PackedU32(&'a mut RepeatedField<u32>),
+    PackedI64Zigzag(&'a mut RepeatedField<i64>),
+    PackedI32Zigzag(&'a mut RepeatedField<i32>),
+    PackedBool(&'a mut RepeatedField<bool>),
+    PackedFixed64(&'a mut RepeatedField<u64>),
+    PackedFixed32(&'a mut RepeatedField<u32>),
 }
 
 #[repr(C)]
@@ -335,6 +342,76 @@ fn skip_group<'a>(
     Some((cursor, limit, DecodeObject::SkipGroup))
 }
 
+#[inline(always)]
+fn unpack_varint<T>(
+    field: &mut RepeatedField<T>,
+    mut cursor: ReadCursor,
+    limited_end: NonNull<u8>,
+    arena: &mut crate::arena::Arena,
+    decode_fn: impl Fn(u64) -> T,
+) -> Option<ReadCursor> {
+    while cursor < limited_end {
+        let val = cursor.read_varint()?;
+        field.push(decode_fn(val), arena);
+    }
+    Some(cursor)
+}
+
+#[inline(always)]
+fn unpack_fixed<T>(
+    field: &mut RepeatedField<T>,
+    mut cursor: ReadCursor,
+    limited_end: NonNull<u8>,
+    arena: &mut crate::arena::Arena,
+) -> ReadCursor {
+    while cursor < limited_end {
+        let val = cursor.read_unaligned::<T>();
+        field.push(val, arena);
+    }
+    cursor
+}
+
+#[inline(never)]
+fn decode_packed<'a, T>(
+    limit: isize,
+    field: &'a mut RepeatedField<T>,
+    cursor: ReadCursor,
+    end: NonNull<u8>,
+    stack: &mut Stack<StackEntry>,
+    arena: &mut crate::arena::Arena,
+    decode_fn: impl Fn(u64) -> T,
+    decode_obj: impl Fn(&'a mut RepeatedField<T>) -> DecodeObject<'a>,
+) -> DecodeLoopResult<'a> {
+    if limit > 0 {
+        let cursor = unpack_varint(field, cursor, end, arena, decode_fn)?;
+        return Some((cursor, limit, decode_obj(field)));
+    }
+    let limited_end = unsafe { end.offset(limit) };
+    let cursor = unpack_varint(field, cursor, limited_end, arena, decode_fn)?;
+    let ctx = stack.pop()?.into_context(limit, None)?;
+    decode_loop(ctx, cursor, end, stack, arena)
+}
+
+#[inline(never)]
+fn decode_fixed<'a, T>(
+    limit: isize,
+    field: &'a mut RepeatedField<T>,
+    cursor: ReadCursor,
+    end: NonNull<u8>,
+    stack: &mut Stack<StackEntry>,
+    arena: &mut crate::arena::Arena,
+    decode_obj: impl Fn(&'a mut RepeatedField<T>) -> DecodeObject<'a>,
+) -> DecodeLoopResult<'a> {
+    if limit > 0 {
+        let cursor = unpack_fixed(field, cursor, end, arena);
+        return Some((cursor, limit, decode_obj(field)));
+    }
+    let limited_end = unsafe { end.offset(limit) };
+    let cursor = unpack_fixed(field, cursor, limited_end, arena);
+    let ctx = stack.pop()?.into_context(limit, None)?;
+    decode_loop(ctx, cursor, end, stack, arena)
+}
+
 #[inline(never)]
 fn decode_string<'a>(
     limit: isize,
@@ -418,7 +495,10 @@ fn decode_loop<'a>(
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, zigzag_decode(cursor.read_varint()?) as i32);
+                            ctx.set(
+                                entry,
+                                zigzag_decode(cursor.read_varint()? as u32 as u64) as i32,
+                            );
                         }
                         FieldKind::Bool => {
                             if tag & 7 != 0 {
@@ -478,10 +558,27 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, packed_cursor.read_varint()?, arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= 0 {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| v)?;
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| v)?;
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedU64(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -494,10 +591,29 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, packed_cursor.read_varint()? as u32, arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= SLOP_SIZE as isize {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor =
+                                        unpack_varint(field, cursor, end, arena, |v| v as u32)?;
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    cursor =
+                                        unpack_varint(field, cursor, end, arena, |v| v as u32)?;
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedU32(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -510,10 +626,31 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, zigzag_decode(packed_cursor.read_varint()?), arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= SLOP_SIZE as isize {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<i64>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| {
+                                        zigzag_decode(v) as i64
+                                    })?;
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<i64>>(entry.offset());
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| {
+                                        zigzag_decode(v) as i64
+                                    })?;
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedI64Zigzag(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -522,14 +659,39 @@ fn decode_loop<'a>(
                         FieldKind::RepeatedVarint32Zigzag => {
                             if tag & 7 == 0 {
                                 // Unpacked
-                                ctx.add(entry, zigzag_decode(cursor.read_varint()?) as i32, arena);
+                                ctx.add(
+                                    entry,
+                                    zigzag_decode(cursor.read_varint()? as u32 as u64) as i32,
+                                    arena,
+                                );
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, zigzag_decode(packed_cursor.read_varint()?) as i32, arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= 0 {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<i32>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| {
+                                        zigzag_decode(v as u32 as u64) as i32
+                                    })?;
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<i32>>(entry.offset());
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| {
+                                        zigzag_decode(v as u32 as u64) as i32
+                                    })?;
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedI32Zigzag(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -543,11 +705,27 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    let val = packed_cursor.read_varint()?;
-                                    ctx.add(entry, val != 0, arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= SLOP_SIZE as isize {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<bool>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| v != 0)?;
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<bool>>(entry.offset());
+                                    cursor = unpack_varint(field, cursor, end, arena, |v| v != 0)?;
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedBool(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -560,10 +738,27 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, packed_cursor.read_unaligned::<u64>(), arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= 0 {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_fixed(field, cursor, end, arena);
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    cursor = unpack_fixed(field, cursor, end, arena);
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedFixed64(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -576,10 +771,27 @@ fn decode_loop<'a>(
                             } else if tag & 7 == 2 {
                                 // Packed
                                 let len = cursor.read_size()?;
-                                let slice = cursor.read_slice(len);
-                                let (mut packed_cursor, packed_end) = ReadCursor::new(slice);
-                                while packed_cursor < packed_end {
-                                    ctx.add(entry, packed_cursor.read_unaligned::<u32>(), arena);
+
+                                // Fast path: entire packed field fits in buffer
+                                if cursor - limited_end + len <= SLOP_SIZE as isize {
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let end = (cursor + len).0;
+                                    cursor = unpack_fixed(field, cursor, end, arena);
+                                    if cursor != end {
+                                        return None;
+                                    }
+                                } else {
+                                    // Slow path: field spans buffers - transition to resumable parsing
+                                    ctx.push_limit(len, cursor, end, stack)?;
+                                    let field =
+                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    cursor = unpack_fixed(field, cursor, end, arena);
+                                    return Some((
+                                        cursor,
+                                        ctx.limit,
+                                        DecodeObject::PackedFixed32(field),
+                                    ));
                                 }
                             } else {
                                 break 'unknown;
@@ -728,6 +940,66 @@ impl<'a> ResumeableState<'a> {
                 skip_length_delimited(self.limit, cursor, end, stack, arena)?
             }
             DecodeObject::SkipGroup => skip_group(self.limit, cursor, end, stack, arena)?,
+            DecodeObject::PackedU64(field) => decode_packed(
+                self.limit,
+                field,
+                cursor,
+                end,
+                stack,
+                arena,
+                |v| v,
+                |f| DecodeObject::PackedU64(f),
+            )?,
+            DecodeObject::PackedU32(field) => decode_packed(
+                self.limit,
+                field,
+                cursor,
+                end,
+                stack,
+                arena,
+                |v| v as u32,
+                |f| DecodeObject::PackedU32(f),
+            )?,
+            DecodeObject::PackedI64Zigzag(field) => decode_packed(
+                self.limit,
+                field,
+                cursor,
+                end,
+                stack,
+                arena,
+                |v| zigzag_decode(v as u64) as i64,
+                |f| DecodeObject::PackedI64Zigzag(f),
+            )?,
+            DecodeObject::PackedI32Zigzag(field) => decode_packed(
+                self.limit,
+                field,
+                cursor,
+                end,
+                stack,
+                arena,
+                |v| zigzag_decode(v as u32 as u64) as i32,
+                |f| DecodeObject::PackedI32Zigzag(f),
+            )?,
+            DecodeObject::PackedBool(field) => decode_packed(
+                self.limit,
+                field,
+                cursor,
+                end,
+                stack,
+                arena,
+                |v| v != 0,
+                |f| DecodeObject::PackedBool(f),
+            )?,
+            DecodeObject::PackedFixed64(field) => {
+                decode_fixed(self.limit, field, cursor, end, stack, arena, |f| {
+                    DecodeObject::PackedFixed64(f)
+                })?
+            }
+            DecodeObject::PackedFixed32(field) => {
+                decode_fixed(self.limit, field, cursor, end, stack, arena, |f| {
+                    DecodeObject::PackedFixed32(f)
+                })?
+            }
             DecodeObject::None => unreachable!(),
         };
         self.limit = new_limit;

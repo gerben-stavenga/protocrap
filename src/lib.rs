@@ -218,7 +218,7 @@ pub trait ProtobufExt: Protobuf {
         &'de mut self,
         arena: &'arena mut crate::arena::Arena<'alloc>,
         deserializer: D,
-    ) -> Result<(), D::Error> 
+    ) -> Result<(), D::Error>
     where
         D: ::serde::Deserializer<'de>,
     {
