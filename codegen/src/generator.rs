@@ -103,8 +103,9 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         let mut pool = protocrap::reflection::DescriptorPool::new(&std::alloc::Global);
         pool.add_file(file);
         let serialized = file.encode_vec::<100>()?;
+        let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
         let dyn_file_descriptor =
-            pool.decode_message("google.protobuf.FileDescriptorProto", &serialized)?;
+            pool.decode_message("google.protobuf.FileDescriptorProto", &serialized, &mut arena)?;
         crate::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
     } else {
         let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
@@ -267,7 +268,7 @@ fn generate_message_impl(
     // Protobuf trait impl
     let protobuf_impl = generate_protobuf_impl();
 
-    let table = tables::generate_table(message, &has_bit_map)?;
+    let table = tables::generate_table(message, &has_bit_map, Some(file.syntax()))?;
 
     // Build path to FILE_DESCRIPTOR_PROTO in the file-specific module
     let filename = std::path::Path::new(file.name())

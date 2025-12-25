@@ -5,7 +5,7 @@ use proc_macro2::TokenStream;
 use protocrap::google::protobuf::DescriptorProto::ProtoType as DescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::ProtoType as FieldDescriptorProto;
 
-use protocrap::reflection::{calculate_tag, is_message};
+use protocrap::reflection::{calculate_tag_with_syntax, is_message};
 use quote::{format_ident, quote};
 
 fn generate_aux_entries(
@@ -36,6 +36,7 @@ fn generate_encoding_entries(
     message: &DescriptorProto,
     has_bit_map: &std::collections::HashMap<i32, usize>,
     aux_index_map: &std::collections::HashMap<i32, usize>,
+    syntax: Option<&str>,
 ) -> Result<Vec<TokenStream>> {
     let num_encode_entries = message.field().len();
     let num_aux_entries = aux_index_map.len();
@@ -57,7 +58,7 @@ fn generate_encoding_entries(
         let field_name = format_ident!("{}", sanitize_field_name(field.name()));
         let has_bit = has_bit_map.get(&field.number()).copied().unwrap_or(0) as u8;
         let kind = field_kind_tokens(field);
-        let encoded_tag = calculate_tag(field);
+        let encoded_tag = calculate_tag_with_syntax(field, syntax);
 
         if is_message(field) {
             let aux_index = *aux_index_map.get(&field.number()).unwrap();
@@ -151,11 +152,12 @@ fn generate_decoding_table(
 pub(crate) fn generate_table(
     message: &DescriptorProto,
     has_bit_map: &std::collections::HashMap<i32, usize>,
+    syntax: Option<&str>,
 ) -> Result<TokenStream> {
     let mut aux_index_map = std::collections::HashMap::<i32, usize>::new();
     let aux_entries = generate_aux_entries(message, &mut aux_index_map)?;
 
-    let encoding_entries = generate_encoding_entries(message, has_bit_map, &aux_index_map)?;
+    let encoding_entries = generate_encoding_entries(message, has_bit_map, &aux_index_map, syntax)?;
     let decoding_entries = generate_decoding_table(message, has_bit_map, &aux_index_map)?;
 
     let num_encode_entries = encoding_entries.len();

@@ -1,12 +1,7 @@
 use core::{mem::MaybeUninit, ptr::NonNull};
 
 use crate::{
-    Protobuf,
-    base::Object,
-    containers::Bytes,
-    tables::{AuxTableEntry, Table},
-    utils::{Stack, StackWithStorage},
-    wire::{FieldKind, SLOP_SIZE, WriteCursor, zigzag_encode},
+    Protobuf, ProtobufExt, base::Object, containers::Bytes, tables::{AuxTableEntry, Table}, utils::{Stack, StackWithStorage}, wire::{FieldKind, SLOP_SIZE, WriteCursor, zigzag_encode}
 };
 
 #[repr(C)]
@@ -689,8 +684,8 @@ pub(crate) enum ResumeResult<'a> {
 }
 
 impl<'a, const STACK_DEPTH: usize> ResumeableEncode<'a, STACK_DEPTH> {
-    pub(crate) fn new<T: Protobuf>(obj: &'a T) -> Self {
-        let table = T::table();
+    pub(crate) fn new<T: ProtobufExt + ?Sized>(obj: &'a T) -> Self {
+        let table = obj.table();
         let encode_ctx = ObjectEncodeState::new(obj.as_object(), table);
         Self {
             state: MaybeUninit::new(ResumableState {

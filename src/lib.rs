@@ -36,7 +36,17 @@ pub trait Protobuf: Default + core::fmt::Debug {
     }
 }
 
-pub trait ProtobufExt: Protobuf {
+pub trait ProtobufExt {
+    fn table(&self) -> &'static tables::Table;
+
+    fn descriptor(&self) -> &'static google::protobuf::DescriptorProto::ProtoType {
+        self.table().descriptor
+    }
+
+    fn as_object(&self) -> &base::Object;
+
+    fn as_object_mut(&mut self) -> &mut base::Object;
+
     #[must_use]
     fn decode_flat<const STACK_DEPTH: usize>(
         &mut self,
@@ -222,11 +232,24 @@ pub trait ProtobufExt: Protobuf {
     where
         D: ::serde::Deserializer<'de>,
     {
-        serde::serde_deserialize_struct(self.as_object_mut(), Self::table(), arena, deserializer)
+        let table = self.table();
+        serde::serde_deserialize_struct(self.as_object_mut(), table, arena, deserializer)
     }
 }
 
-impl<T: Protobuf> ProtobufExt for T {}
+impl<T: Protobuf> ProtobufExt for T {
+    fn table(&self) -> &'static tables::Table {
+        T::table()
+    }
+
+    fn as_object(&self) -> &base::Object {
+        <Self as Protobuf>::as_object(self)
+    }
+
+    fn as_object_mut(&mut self) -> &mut base::Object {
+        <Self as Protobuf>::as_object_mut(self)
+    }
+}
 
 pub mod tests {
     use crate::{Protobuf, ProtobufExt};

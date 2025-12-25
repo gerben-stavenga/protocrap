@@ -1,15 +1,9 @@
 use crate::{
-    Protobuf,
-    arena::Arena,
-    base::{Message, Object},
-    containers::{Bytes, String},
-    google::protobuf::{
+    Protobuf, ProtobufExt, arena::Arena, base::{Message, Object}, containers::{Bytes, String}, google::protobuf::{
         DescriptorProto::ProtoType as DescriptorProto,
         FieldDescriptorProto::{Label, ProtoType as FieldDescriptorProto, Type},
         FileDescriptorProto::ProtoType as FileDescriptorProto,
-    },
-    tables::Table,
-    wire,
+    }, tables::Table, wire
 };
 
 pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
@@ -50,8 +44,24 @@ pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
     }
 }
 
-pub fn calculate_tag(field: &FieldDescriptorProto) -> u32 {
-    let is_packed = field.options().map(|opts| opts.packed()).unwrap_or(false);
+pub fn calculate_tag_with_syntax(field: &FieldDescriptorProto, syntax: Option<&str>) -> u32 {
+    let is_repeated = field.label().unwrap() == Label::LABEL_REPEATED;
+
+    // Determine if packed encoding should be used (only for repeated primitive fields)
+    let is_packed = is_repeated && if let Some(opts) = field.options() {
+        if opts.has_packed() {
+            // Explicit packed option takes precedence
+            opts.packed()
+        } else {
+            // No explicit option - use default based on syntax
+            // Proto3 defaults to packed for repeated primitive fields
+            // Proto2 defaults to unpacked
+            syntax == Some("proto3")
+        }
+    } else {
+        // No options at all - use syntax-based default
+        syntax == Some("proto3")
+    };
 
     let wire_type = match field.r#type().unwrap() {
         Type::TYPE_INT32
@@ -148,7 +158,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             } else {
                 format!("{}.{}", package, message.name())
             };
-            self.add_message(message, &full_name);
+            self.add_message(message, &full_name, file.get_syntax());
         }
 
         // Second pass: patch aux entries with correct child table pointers
@@ -162,15 +172,15 @@ impl<'alloc> DescriptorPool<'alloc> {
         }
     }
 
-    fn add_message(&mut self, message: &'alloc DescriptorProto, full_name: &str) {
+    fn add_message(&mut self, message: &'alloc DescriptorProto, full_name: &str, syntax: Option<&str>) {
         // Build table from descriptor
-        let table = self.build_table_from_descriptor(message);
+        let table = self.build_table_from_descriptor(message, syntax);
         self.tables.insert(full_name.to_string(), table);
 
         // Add nested types
         for nested in message.nested_type() {
             let nested_full_name = format!("{}.{}", full_name, nested.name());
-            self.add_message(nested, &nested_full_name);
+            self.add_message(nested, &nested_full_name, syntax);
         }
     }
 
@@ -235,11 +245,17 @@ impl<'alloc> DescriptorPool<'alloc> {
         }
     }
 
+    /// Get a table by message type name
+    pub fn get_table(&self, message_type: &str) -> Option<&Table> {
+        self.tables.get(message_type).copied()
+    }
+
     /// Create a DynamicMessage by decoding bytes with the given message type
     pub fn decode_message<'msg>(
-        &'msg mut self,
+        &'msg self,
         message_type: &str,
         bytes: &[u8],
+        arena: &mut Arena,
     ) -> anyhow::Result<DynamicMessage<'alloc, 'msg>> {
         let table = *self
             .tables
@@ -249,7 +265,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Allocate object with proper alignment (8 bytes for all protobuf types)
         let layout = std::alloc::Layout::from_size_align(table.size as usize, 8)
             .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
-        let ptr = self.arena.alloc_raw(layout).as_ptr() as *mut Object;
+        let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
         let object = unsafe {
             // Zero-initialize the object
             core::ptr::write_bytes(ptr, 0, table.size as usize);
@@ -257,7 +273,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         };
 
         // Decode
-        self.decode_into(object, table, bytes)?;
+        self.decode_into(object, table, bytes, arena)?;
 
         Ok(DynamicMessage { object, table })
     }
@@ -265,6 +281,7 @@ impl<'alloc> DescriptorPool<'alloc> {
     fn build_table_from_descriptor(
         &mut self,
         descriptor: &'alloc DescriptorProto,
+        syntax: Option<&str>,
     ) -> &'alloc Table {
         use crate::{decoding, encoding, tables::AuxTableEntry};
 
@@ -381,7 +398,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     has_bit,
                     kind: field_kind_tokens(&field),
                     offset: entry_offset,
-                    encoded_tag: calculate_tag(field),
+                    encoded_tag: calculate_tag_with_syntax(field, syntax),
                 });
             }
 
@@ -491,18 +508,19 @@ impl<'alloc> DescriptorPool<'alloc> {
     }
 
     fn decode_into(
-        &mut self,
+        &self,
         object: &mut Object,
         table: &Table,
         bytes: &[u8],
+        arena: &mut Arena,
     ) -> anyhow::Result<()> {
         use crate::decoding::ResumeableDecode;
 
         let mut decoder = ResumeableDecode::<32>::new_from_table(object, table, isize::MAX);
-        if !decoder.resume(bytes, &mut self.arena) {
+        if !decoder.resume(bytes, arena) {
             return Err(anyhow::anyhow!("Decode failed"));
         }
-        if !decoder.finish(&mut self.arena) {
+        if !decoder.finish(arena) {
             return Err(anyhow::anyhow!("Decode finish failed"));
         }
         Ok(())
@@ -512,6 +530,25 @@ impl<'alloc> DescriptorPool<'alloc> {
 pub struct DynamicMessage<'pool, 'msg> {
     pub object: &'msg Object,
     pub table: &'pool Table,
+}
+
+impl<'pool, 'msg> ProtobufExt for DynamicMessage<'pool, 'msg> {
+    fn table(&self) -> &'static Table {
+        // SAFETY: table lives in 'pool which outlives 'static usage here
+        unsafe { std::mem::transmute(self.table) }
+    }
+
+    fn descriptor(&self) -> &'static DescriptorProto {
+        self.table.descriptor
+    }
+
+    fn as_object(&self) -> &Object {
+        self.object
+    }
+
+    fn as_object_mut(&mut self) -> &mut Object {
+        panic!("DynamicMessage is immutable");
+    }
 }
 
 impl<'pool, 'msg> core::fmt::Debug for DynamicMessage<'pool, 'msg> {

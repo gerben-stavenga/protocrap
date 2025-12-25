@@ -563,6 +563,12 @@ where
     D: serde::Deserializer<'de>,
 {
     let visitor = ProtobufVisitor { obj, table, arena };
+
+    // For well-known types, use deserialize_any to accept primitive JSON values
+    if detect_well_known_type(table.descriptor) != WellKnownType::None {
+        return deserializer.deserialize_any(visitor);
+    }
+
     let fields = table.descriptor.field();
     let field_names: Vec<&str> = fields.iter().map(|f| f.name()).collect();
     let field_names_slice = field_names.as_slice();
@@ -1130,6 +1136,150 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufVisitor<'arena
 
     fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
         formatter.write_str(self.table.descriptor.name())
+    }
+
+    // Handle unwrapped wrapper types from JSON
+    fn visit_bool<E>(self, v: bool) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::BoolValue => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("BoolValue missing field 1"))?;
+                self.obj.set::<bool>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Bool(v), &self)),
+        }
+    }
+
+    fn visit_i32<E>(self, v: i32) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::Int32Value => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("Int32Value missing field 1"))?;
+                self.obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Signed(v as i64), &self)),
+        }
+    }
+
+    fn visit_i64<E>(self, v: i64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::Int64Value => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("Int64Value missing field 1"))?;
+                self.obj.set::<i64>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            WellKnownType::Int32Value => self.visit_i32(v as i32),
+            _ => Err(E::invalid_type(serde::de::Unexpected::Signed(v), &self)),
+        }
+    }
+
+    fn visit_u32<E>(self, v: u32) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::UInt32Value => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("UInt32Value missing field 1"))?;
+                self.obj.set::<u32>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Unsigned(v as u64), &self)),
+        }
+    }
+
+    fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::UInt64Value => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("UInt64Value missing field 1"))?;
+                self.obj.set::<u64>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            WellKnownType::UInt32Value => self.visit_u32(v as u32),
+            _ => Err(E::invalid_type(serde::de::Unexpected::Unsigned(v), &self)),
+        }
+    }
+
+    fn visit_f32<E>(self, v: f32) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::FloatValue => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("FloatValue missing field 1"))?;
+                self.obj.set::<f32>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Float(v as f64), &self)),
+        }
+    }
+
+    fn visit_f64<E>(self, v: f64) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::DoubleValue => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("DoubleValue missing field 1"))?;
+                self.obj.set::<f64>(entry.offset(), entry.has_bit_idx(), v);
+                Ok(())
+            }
+            WellKnownType::FloatValue => self.visit_f32(v as f32),
+            _ => Err(E::invalid_type(serde::de::Unexpected::Float(v), &self)),
+        }
+    }
+
+    fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::StringValue => {
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("StringValue missing field 1"))?;
+                let s = crate::containers::String::from_str(v, self.arena);
+                self.obj.set::<crate::containers::String>(entry.offset(), entry.has_bit_idx(), s);
+                Ok(())
+            }
+            WellKnownType::Timestamp => {
+                let (seconds, nanos) = parse_timestamp(v).map_err(E::custom)?;
+                let seconds_entry = self.table.entry(1).ok_or_else(|| E::custom("Timestamp missing field 1"))?;
+                let nanos_entry = self.table.entry(2).ok_or_else(|| E::custom("Timestamp missing field 2"))?;
+                self.obj.set::<i64>(seconds_entry.offset(), seconds_entry.has_bit_idx(), seconds);
+                self.obj.set::<i32>(nanos_entry.offset(), nanos_entry.has_bit_idx(), nanos);
+                Ok(())
+            }
+            WellKnownType::Duration => {
+                let (seconds, nanos) = parse_duration(v).map_err(E::custom)?;
+                let seconds_entry = self.table.entry(1).ok_or_else(|| E::custom("Duration missing field 1"))?;
+                let nanos_entry = self.table.entry(2).ok_or_else(|| E::custom("Duration missing field 2"))?;
+                self.obj.set::<i64>(seconds_entry.offset(), seconds_entry.has_bit_idx(), seconds);
+                self.obj.set::<i32>(nanos_entry.offset(), nanos_entry.has_bit_idx(), nanos);
+                Ok(())
+            }
+            WellKnownType::BytesValue => {
+                // Base64 decode the string
+                use base64::Engine;
+                let bytes = base64::engine::general_purpose::STANDARD
+                    .decode(v)
+                    .map_err(|e| E::custom(format!("Base64 decode error: {}", e)))?;
+                let entry = self.table.entry(1).ok_or_else(|| E::custom("BytesValue missing field 1"))?;
+                let b = crate::containers::Bytes::from_slice(&bytes, self.arena);
+                self.obj.set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Str(v), &self)),
+        }
     }
 
     fn visit_map<A>(self, mut map: A) -> Result<Self::Value, A::Error>
