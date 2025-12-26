@@ -48,7 +48,9 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
 
 #[cfg(test)]
 fn assert_json_roundtrip<T: Protobuf>(msg: &T) {
-    let serialized = serde_json::to_string(&protocrap::reflection::DynamicMessage::new(msg))
+    #[allow(mutable_transmutes)]
+    let mut_msg:  &mut T = unsafe { std::mem::transmute(msg) };
+    let serialized = serde_json::to_string(&protocrap::reflection::DynamicMessage::new(mut_msg))
         .expect("should serialize");
 
     println!("Serialized JSON: {}", serialized);
@@ -105,7 +107,7 @@ fn test_large_serde_serialization() {
 
 #[test]
 fn test_file_descriptor_serde_serialization() {
-    assert_json_roundtrip(&protocrap::google::protobuf::FILE_DESCRIPTOR_PROTO);
+    assert_json_roundtrip(protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor());
 }
 
 #[test]

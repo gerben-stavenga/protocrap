@@ -134,7 +134,7 @@ name = "codegen-tests"
 version = "0.1.0"
 dependencies = [
  "criterion",
- "protocrap 0.1.14",
+ "protocrap 0.1.15",
  "protocrap-codegen",
  "serde",
  "serde_json",
@@ -621,16 +621,18 @@ dependencies = [
 
 [[package]]
 name = "protocrap"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "anyhow",
+ "base64",
  "futures",
  "serde",
+ "time",
 ]
 
 [[package]]
 name = "protocrap"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "anyhow",
  "base64",
@@ -647,7 +649,7 @@ dependencies = [
  "criterion",
  "prost",
  "prost-build",
- "protocrap 0.1.14",
+ "protocrap 0.1.15",
 ]
 
 [[package]]
@@ -657,8 +659,8 @@ dependencies = [
  "anyhow",
  "prettyplease",
  "proc-macro2",
- "protocrap 0.1.13",
  "protocrap 0.1.14",
+ "protocrap 0.1.15",
  "quote",
  "syn",
 ]
@@ -669,7 +671,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "byteorder",
- "protocrap 0.1.14",
+ "protocrap 0.1.15",
  "serde",
  "serde_json",
 ]

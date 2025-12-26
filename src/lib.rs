@@ -290,7 +290,7 @@ pub mod tests {
 
     #[test]
     fn file_descriptor_roundtrip() {
-        assert_roundtrip(&crate::google::protobuf::FILE_DESCRIPTOR_PROTO);
+        assert_roundtrip(crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor());
     }
 
     #[test]
