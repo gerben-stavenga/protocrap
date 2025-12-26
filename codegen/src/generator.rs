@@ -111,7 +111,10 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         )?;
         crate::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
     } else {
-        let dynamic_file = protocrap::reflection::DynamicMessage::new(file);
+        #[allow(mutable_transmutes, invalid_reference_casting)]
+        let dynamic_file = protocrap::reflection::DynamicMessage::new(unsafe {
+            std::mem::transmute::<&FileDescriptorProto, &mut FileDescriptorProto>(file)
+        });
         crate::static_gen::generate_static_dynamic(&dynamic_file)?
     };
 
@@ -125,6 +128,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     items.push(quote! {
         #[doc(hidden)]
         pub mod #mod_name {
+            use super::protocrap;
             pub static FILE_DESCRIPTOR_PROTO: protocrap::google::protobuf::FileDescriptorProto::ProtoType = #file_descriptor;
         }
     });

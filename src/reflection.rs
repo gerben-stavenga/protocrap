@@ -15,7 +15,8 @@ use crate::{
 pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
     if field.label().unwrap() == Label::LABEL_REPEATED {
         match field.r#type().unwrap() {
-            Type::TYPE_INT32 | Type::TYPE_UINT32 => wire::FieldKind::RepeatedVarint32,
+            Type::TYPE_INT32 => wire::FieldKind::RepeatedInt32,
+            Type::TYPE_UINT32 => wire::FieldKind::RepeatedVarint32,
             Type::TYPE_INT64 | Type::TYPE_UINT64 => wire::FieldKind::RepeatedVarint64,
             Type::TYPE_SINT32 => wire::FieldKind::RepeatedVarint32Zigzag,
             Type::TYPE_SINT64 => wire::FieldKind::RepeatedVarint64Zigzag,
@@ -33,7 +34,8 @@ pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
         }
     } else {
         match field.r#type().unwrap() {
-            Type::TYPE_INT32 | Type::TYPE_UINT32 => wire::FieldKind::Varint32,
+            Type::TYPE_INT32 => wire::FieldKind::Int32,
+            Type::TYPE_UINT32 => wire::FieldKind::Varint32,
             Type::TYPE_INT64 | Type::TYPE_UINT64 => wire::FieldKind::Varint64,
             Type::TYPE_SINT32 => wire::FieldKind::Varint32Zigzag,
             Type::TYPE_SINT64 => wire::FieldKind::Varint64Zigzag,

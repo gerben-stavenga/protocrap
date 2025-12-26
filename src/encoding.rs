@@ -272,6 +272,16 @@ fn encode_loop<'a>(
                     cursor.write_tag(tag);
                 }
             }
+            FieldKind::Int32 => {
+                if obj_state.has_bit(has_bit) {
+                    if cursor <= begin {
+                        break;
+                    }
+
+                    cursor.write_varint(obj_state.get::<i32>(offset) as i64 as u64);
+                    cursor.write_tag(tag);
+                }
+            }
             FieldKind::Varint64Zigzag => {
                 if obj_state.has_bit(has_bit) {
                     if cursor <= begin {
@@ -422,6 +432,32 @@ fn encode_loop<'a>(
                         slice,
                         |cursor, &val| {
                             cursor.write_varint(val as u64);
+                        },
+                    );
+                }
+            }
+            FieldKind::RepeatedInt32 => {
+                let slice = obj_state.get_slice::<i32>(offset);
+                if tag & 7 == 2 {
+                    write_repeated_packed(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val as i64 as u64);
+                        },
+                    );
+                } else {
+                    write_repeated(
+                        &mut obj_state,
+                        &mut cursor,
+                        begin,
+                        tag,
+                        slice,
+                        |cursor, &val| {
+                            cursor.write_varint(val as i64 as u64);
                         },
                     );
                 }

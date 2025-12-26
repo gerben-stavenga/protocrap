@@ -480,7 +480,7 @@ fn decode_loop<'a>(
                             };
                             ctx.set(entry, cursor.read_varint()?);
                         }
-                        FieldKind::Varint32 => {
+                        FieldKind::Varint32 | FieldKind::Int32 => {
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
@@ -585,7 +585,7 @@ fn decode_loop<'a>(
                                 break 'unknown;
                             }
                         }
-                        FieldKind::RepeatedVarint32 => {
+                        FieldKind::RepeatedVarint32 | FieldKind::RepeatedInt32 => {
                             if tag & 7 == 0 {
                                 // Unpacked
                                 ctx.add(entry, cursor.read_varint()? as u32, arena);
