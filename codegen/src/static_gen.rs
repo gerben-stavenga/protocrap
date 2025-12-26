@@ -26,6 +26,9 @@ fn full_name(name: &str) -> Vec<proc_macro2::Ident> {
     if name == "EditionDefault" {
         path_parts.push(format_ident!("FieldOptions"));
     }
+    if name == "FeatureSupport" {
+        path_parts.push(format_ident!("FieldOptions"));
+    }
     if name == "Declaration" {
         path_parts.push(format_ident!("ExtensionRangeOptions"));
     }
