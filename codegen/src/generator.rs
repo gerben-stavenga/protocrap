@@ -86,7 +86,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
 
     // Generate enums
     for enum_type in file.enum_type() {
-        items.push(generate_enum(enum_type)?);
+        items.push(generate_enum(enum_type.as_ref())?);
     }
 
     // Generate messages
@@ -133,7 +133,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     Ok(quote! { #(#items)* })
 }
 
-fn generate_enum(enum_desc: &&EnumDescriptorProto) -> Result<TokenStream> {
+fn generate_enum(enum_desc: &EnumDescriptorProto) -> Result<TokenStream> {
     let name = format_ident!("{}", enum_desc.name());
 
     // Deduplicate enum values - Rust doesn't support aliased enum variants
@@ -224,7 +224,7 @@ fn generate_message_impl(
     let nested_enums: Vec<_> = message
         .enum_type()
         .iter()
-        .map(generate_enum)
+        .map(|e| generate_enum(e.as_ref()))
         .collect::<Result<Vec<_>, _>>()?;
 
     // Calculate has bits
@@ -241,7 +241,7 @@ fn generate_message_impl(
     let struct_fields: Vec<_> = message
         .field()
         .iter()
-        .map(|&field| {
+        .map(|field| {
             let field_name = format_ident!("{}", sanitize_field_name(field.name()));
             let field_type = rust_field_type_tokens(field);
             (
@@ -508,7 +508,7 @@ fn generate_accessors(
 ) -> Result<TokenStream> {
     let mut methods = Vec::new();
 
-    for &field in message.field() {
+    for field in message.field() {
         let field_name = format_ident!("{}", sanitize_field_name(field.name()));
 
         if is_repeated(field) {
@@ -521,23 +521,18 @@ fn generate_accessors(
                 let field_name_mut = format_ident!("{}_mut", field_name);
                 let add_field_name = format_ident!("add_{}", field_name);
                 methods.push(quote! {
-                    pub const fn #field_name(&self) -> &[&#msg_type::ProtoType] {
-                        unsafe { core::mem::transmute(self.#field_name.slice()) }
+                    pub const fn #field_name(&self) -> &[protocrap::base::TypedMessage<#msg_type::ProtoType>] {
+                        self.#field_name.slice()
                     }
 
-                    pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<&mut #msg_type::ProtoType> {
-                        unsafe { core::mem::transmute(&mut self.#field_name) }
+                    pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<protocrap::base::TypedMessage<#msg_type::ProtoType>> {
+                        &mut self.#field_name
                     }
 
                     pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                        let elem = arena.alloc::<#msg_type::ProtoType>();
-                        let msg = protocrap::base::Message(elem as *mut protocrap::base::Object);
-                        let value = unsafe { 
-                            elem.write(#msg_type::ProtoType::default());
-                            &mut *elem
-                        };
+                        let msg = protocrap::base::TypedMessage::<#msg_type::ProtoType>::new_in(arena);
                         self.#field_name.push(msg, arena);
-                        value
+                        self.#field_name.last_mut().unwrap()
                     }
                 });
                 continue;
@@ -668,31 +663,19 @@ fn generate_accessors(
                     let field_name_mut = format_ident!("{}_mut", field_name);
                     methods.push(quote! {
                         pub const fn #has_name(&self) -> bool {
-                            !self.#field_name.0.is_null()
+                            self.#field_name.is_some()
                         }
-                        
+
                         pub const fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
-                            if self.#has_name() {
-                                Some(unsafe { &*(self.#field_name.0 as *const #msg_type::ProtoType) })
-                            } else {
-                                None
-                            }
+                            self.#field_name.get()
                         }
 
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                            let object = self.#field_name;
-                            if object.0.is_null() {
-                                let new_object = protocrap::base::Object::create(
-                                    core::mem::size_of::<#msg_type::ProtoType>() as u32,
-                                    arena
-                                );
-                                self.#field_name = protocrap::base::Message(new_object);
-                            }
-                            unsafe { &mut *(self.#field_name.0 as *mut #msg_type::ProtoType) }
+                            self.#field_name.get_or_init(arena)
                         }
 
                         pub fn #clear_name(&mut self) {
-                            self.#field_name = protocrap::base::Message(core::ptr::null_mut());
+                            self.#field_name.clear();
                         }
                     });
                 }
@@ -792,12 +775,12 @@ fn build_descriptor_accessor(path: &[usize]) -> TokenStream {
         if level == 0 {
             // First level: file's message_type array
             accessor = quote! {
-                #accessor.message_type()[#index_lit]
+                #accessor.message_type()[#index_lit].as_ref()
             };
         } else {
-            // Nested levels: nested_type array
+            // Nested levels: need as_ref() to access nested_type on &T
             accessor = quote! {
-                #accessor.nested_type()[#index_lit]
+                #accessor.nested_type()[#index_lit].as_ref()
             };
         }
     }

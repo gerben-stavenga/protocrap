@@ -35,17 +35,27 @@ pub fn sanitize_module_name(name: &str) -> String {
 pub fn rust_field_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     use protocrap::google::protobuf::FieldDescriptorProto::Label;
 
-    let element = rust_element_type_tokens(field);
-    if field.label().unwrap() == Label::LABEL_REPEATED {
+    let is_repeated = field.label().unwrap() == Label::LABEL_REPEATED;
+    let is_message = matches!(field.r#type(), Some(Type::TYPE_MESSAGE) | Some(Type::TYPE_GROUP));
+
+    if is_repeated {
+        let element = rust_element_type_tokens(field);
         quote! { protocrap::containers::RepeatedField<#element> }
+    } else if is_message {
+        // Singular message field uses typed OptionalMessage<T>
+        let msg_type = rust_type_tokens(field);
+        quote! { protocrap::base::OptionalMessage<#msg_type::ProtoType> }
     } else {
-        element
+        rust_element_type_tokens(field)
     }
 }
 
 pub fn rust_element_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     match field.r#type().unwrap() {
-        Type::TYPE_MESSAGE | Type::TYPE_GROUP => quote! { protocrap::base::Message },
+        Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
+            let msg_type = rust_type_tokens(field);
+            quote! { protocrap::base::TypedMessage<#msg_type::ProtoType> }
+        }
         Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 => quote! { i32 },
         Type::TYPE_INT64 | Type::TYPE_SINT64 | Type::TYPE_SFIXED64 => quote! { i64 },
         Type::TYPE_UINT32 | Type::TYPE_FIXED32 => quote! { u32 },

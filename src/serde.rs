@@ -307,8 +307,8 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
             WellKnownType::None => {
                 // Regular message serialization
                 let mut fields = Vec::new();
-                for &field in descriptor.field() {
-                    let Some(v) = self.get_field(field) else {
+                for field in descriptor.field() {
+                    let Some(v) = self.get_field(field.as_ref()) else {
                         continue;
                     };
                     fields.push((field.json_name(), v));

@@ -155,7 +155,7 @@ name = "codegen-tests"
 version = "0.1.0"
 dependencies = [
  "criterion",
- "protocrap 0.1.15",
+ "protocrap 0.1.16",
  "rand",
  "serde",
  "serde_json",
@@ -699,7 +699,7 @@ dependencies = [
 
 [[package]]
 name = "protocrap"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "anyhow",
  "base64",
@@ -710,7 +710,7 @@ dependencies = [
 
 [[package]]
 name = "protocrap"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "anyhow",
  "base64",
@@ -727,7 +727,7 @@ dependencies = [
  "criterion",
  "prost",
  "prost-build",
- "protocrap 0.1.15",
+ "protocrap 0.1.16",
 ]
 
 [[package]]
@@ -737,8 +737,8 @@ dependencies = [
  "anyhow",
  "prettyplease",
  "proc-macro2",
- "protocrap 0.1.14",
  "protocrap 0.1.15",
+ "protocrap 0.1.16",
  "quote",
  "syn",
 ]
@@ -749,7 +749,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "byteorder",
- "protocrap 0.1.15",
+ "protocrap 0.1.16",
  "serde",
  "serde_json",
 ]
@@ -760,7 +760,7 @@ version = "0.0.0"
 dependencies = [
  "arbitrary",
  "libfuzzer-sys",
- "protocrap 0.1.15",
+ "protocrap 0.1.16",
 ]
 
 [[package]]

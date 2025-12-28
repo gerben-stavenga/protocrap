@@ -12,7 +12,7 @@ use crate::{
     wire,
 };
 
-pub fn field_kind_tokens(field: &&FieldDescriptorProto) -> wire::FieldKind {
+pub fn field_kind_tokens(field: &FieldDescriptorProto) -> wire::FieldKind {
     if field.label().unwrap() == Label::LABEL_REPEATED {
         match field.r#type().unwrap() {
             Type::TYPE_INT32 => wire::FieldKind::RepeatedInt32,
@@ -356,7 +356,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         let mut layout = std::alloc::Layout::from_size_align(has_bits_size as usize, 4).unwrap();
         let mut field_offsets = std::vec::Vec::new();
 
-        for &field in descriptor.field() {
+        for field in descriptor.field() {
             let field_size = self.field_size(field);
             let field_align = self.field_align(field);
             let field_layout =
@@ -364,7 +364,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     .unwrap();
 
             let (new_layout, offset) = layout.extend(field_layout).unwrap();
-            field_offsets.push((field, offset as u32));
+            field_offsets.push((*field, offset as u32));
             layout = new_layout;
         }
 
@@ -373,7 +373,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         let total_size = layout.size() as u32;
 
         // Count message fields for aux entries
-        let num_aux_entries = descriptor.field().iter().filter(|f| is_message(f)).count();
+        let num_aux_entries = descriptor.field().iter().filter(|f| is_message(&**f)).count();
 
         // Allocate table with entries - use Layout::extend to handle padding correctly
         let encode_layout = std::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
@@ -409,7 +409,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             let mut has_bit_index_map = std::collections::HashMap::<i32, u32>::new();
             let mut aux_idx = 0;
             let mut has_bit_idx = 0u32;
-            for &field in descriptor.field() {
+            for field in descriptor.field() {
                 if is_message(field) {
                     aux_index_map.insert(field.number(), aux_idx);
                     aux_idx += 1;
@@ -423,7 +423,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             // Build encode entries
             let mut has_bit_idx = 0u8;
             for (i, &(field, offset)) in field_offsets.iter().enumerate() {
-                let has_bit = if needs_has_bit(field) {
+                let has_bit = if needs_has_bit(&field) {
                     let bit = has_bit_idx;
                     has_bit_idx += 1;
                     bit
@@ -431,7 +431,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     0
                 };
 
-                let entry_offset = if is_message(field) {
+                let entry_offset = if is_message(&field) {
                     // For message fields, offset points to aux entry
                     let aux_index = aux_index_map[&field.number()];
                     let aux_offset =
@@ -446,7 +446,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     has_bit,
                     kind: field_kind_tokens(&field),
                     offset: entry_offset,
-                    encoded_tag: calculate_tag_with_syntax(field, syntax),
+                    encoded_tag: calculate_tag_with_syntax(&field, syntax),
                 });
             }
 
@@ -457,7 +457,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     .iter()
                     .find(|f| f.number() == field_number)
                 {
-                    let entry = if is_message(field) {
+                    let entry = if is_message(&**field) {
                         // For message fields, offset points to aux entry
                         let aux_index = aux_index_map[&field_number];
                         let aux_offset =
@@ -474,7 +474,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                             .find(|(f, _)| f.number() == field_number)
                             .map(|(_, o)| *o)
                             .unwrap_or(0);
-                        let has_bit = if needs_has_bit(field) {
+                        let has_bit = if needs_has_bit(&**field) {
                             has_bit_index_map[&field_number]
                         } else {
                             0
@@ -497,7 +497,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             // Build aux entries for message fields
             for (aux_index, &(field, offset)) in field_offsets
                 .iter()
-                .filter(|(f, _)| is_message(f))
+                .filter(|(f, _)| is_message(&**f))
                 .enumerate()
             {
                 let child_type_name = Self::normalize_type_name(field.type_name());
@@ -643,8 +643,8 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
             .descriptor
             .field()
             .iter()
-            .find(|&&field| field.name() == field_name)
-            .copied()
+            .find(|f| f.name() == field_name)
+            .map(|f| &**f)
     }
 
     pub fn find_field_descriptor_by_number(
@@ -655,8 +655,8 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
             .descriptor
             .field()
             .iter()
-            .find(|&&field| field.number() == field_number)
-            .copied()
+            .find(|f| f.number() == field_number)
+            .map(|f| &**f)
     }
 
     pub fn get_field(&self, field: &'pool FieldDescriptorProto) -> Option<Value<'pool, 'msg>> {

@@ -1,10 +1,15 @@
 use core::alloc::Layout;
+use core::marker::PhantomData;
+use core::ops::{Deref, DerefMut};
 
 use crate::{
     arena::Arena,
     containers::{Bytes, RepeatedField},
+    Protobuf,
 };
 
+/// Type-erased message pointer for table-driven code.
+/// Used internally by the codec; prefer `OptionalMessage<T>` in generated code.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
 pub struct Message(pub *mut Object);
@@ -15,6 +20,186 @@ unsafe impl Sync for Message {}
 impl Message {
     pub const fn new<T>(msg: &T) -> Self {
         Message(msg as *const T as *mut T as *mut Object)
+    }
+}
+
+/// A typed non-null message pointer for repeated fields.
+/// Implements `Deref<Target=T>` so `&[TypedMessage<T>]` can be used like `&[&T]`.
+///
+/// This is `#[repr(transparent)]` over `*mut T`, making it compatible with
+/// table-driven codec that treats it as `*mut Object`.
+#[repr(transparent)]
+pub struct TypedMessage<T: Protobuf> {
+    ptr: *mut Object,
+    _marker: PhantomData<T>,
+}
+
+// Safety: TypedMessage is just a pointer, safe to send/sync like Message
+unsafe impl<T: Protobuf> Send for TypedMessage<T> {}
+unsafe impl<T: Protobuf> Sync for TypedMessage<T> {}
+
+impl<T: Protobuf> Clone for TypedMessage<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T: Protobuf> Copy for TypedMessage<T> {}
+
+// Note: No Default impl - TypedMessage must always point to a valid message
+
+impl<T: Protobuf> core::fmt::Debug for TypedMessage<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "TypedMessage({:?})", self.deref())
+    }
+}
+
+impl<T: Protobuf> Deref for TypedMessage<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        // Safety: TypedMessage invariant - ptr is always valid and non-null
+        unsafe { &*(self.ptr as *const T) }
+    }
+}
+
+impl<T: Protobuf> DerefMut for TypedMessage<T> {
+    fn deref_mut(&mut self) -> &mut T {
+        // Safety: TypedMessage invariant - ptr is always valid and non-null
+        unsafe { &mut *(self.ptr as *mut T) }
+    }
+}
+
+impl<T: Protobuf> TypedMessage<T> {
+    /// Create a new message allocated in the arena, initialized to default.
+    pub fn new_in(arena: &mut Arena) -> Self {
+        let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
+        Self {
+            ptr: obj,
+            _marker: PhantomData,
+        }
+    }
+
+    /// Create from a static reference (for static initializers).
+    pub const fn from_static(msg: &'static T) -> Self {
+        Self {
+            ptr: msg as *const T as *mut T as *mut Object,
+            _marker: PhantomData,
+        }
+    }
+
+    /// Convert to type-erased Message for table-driven code.
+    pub const fn as_message(&self) -> Message {
+        Message(self.ptr as *mut Object)
+    }
+
+    /// Get a reference to the underlying message (const-compatible).
+    pub const fn as_ref(&self) -> &T {
+        unsafe { &*(self.ptr as *const T) }
+    }
+}
+
+/// A typed optional message field. Wraps a nullable pointer to T.
+///
+/// This is `#[repr(transparent)]` over `*mut Object`, making it compatible with
+/// table-driven codec that treats it as `*mut Object`.
+#[repr(transparent)]
+pub struct OptionalMessage<T: Protobuf> {
+    ptr: *mut Object,
+    _marker: PhantomData<T>,
+}
+
+// Safety: OptionalMessage is just a pointer, safe to send/sync like Message
+unsafe impl<T: Protobuf> Send for OptionalMessage<T> {}
+unsafe impl<T: Protobuf> Sync for OptionalMessage<T> {}
+
+impl<T: Protobuf> Clone for OptionalMessage<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<T: Protobuf> Copy for OptionalMessage<T> {}
+
+impl<T: Protobuf> Default for OptionalMessage<T> {
+    fn default() -> Self {
+        Self::none()
+    }
+}
+
+impl<T: Protobuf> core::fmt::Debug for OptionalMessage<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self.get() {
+            Some(msg) => write!(f, "Some({:?})", msg),
+            None => write!(f, "None"),
+        }
+    }
+}
+
+impl<T: Protobuf> OptionalMessage<T> {
+    /// Create an empty (None) optional message.
+    pub const fn none() -> Self {
+        Self {
+            ptr: core::ptr::null_mut(),
+            _marker: PhantomData,
+        }
+    }
+
+    /// Create from a static reference (for static initializers).
+    pub const fn from_static(msg: &'static T) -> Self {
+        Self {
+            ptr: msg as *const T as *mut T as *mut Object,
+            _marker: PhantomData,
+        }
+    }
+
+    /// Check if the message is present.
+    pub const fn is_some(&self) -> bool {
+        !self.ptr.is_null()
+    }
+
+    /// Check if the message is absent.
+    pub const fn is_none(&self) -> bool {
+        self.ptr.is_null()
+    }
+
+    /// Get a reference to the message if present.
+    pub const fn get(&self) -> Option<&T> {
+        if self.ptr.is_null() {
+            None
+        } else {
+            // Safety: ptr is non-null and points to a valid T allocated in arena
+            Some(unsafe { &*(self.ptr as *const T) } )
+        }
+    }
+
+    /// Get a mutable reference to the message if present.
+    pub fn get_mut(&mut self) -> Option<&mut T> {
+        if self.ptr.is_null() {
+            None
+        } else {
+            // Safety: ptr is non-null and points to a valid T allocated in arena
+            Some(unsafe { &mut *(self.ptr as *mut T) })
+        }
+    }
+
+    pub fn get_or_init(&mut self, arena: &mut Arena) -> &mut T {
+        if self.ptr.is_null() {
+            let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
+            self.ptr = obj;
+        }
+        // Safety: ptr is now non-null and points to a valid T allocated in arena
+        unsafe { &mut *(self.ptr as *mut T) }
+    }
+
+    /// Clear the message (set to None).
+    pub fn clear(&mut self) {
+        self.ptr = core::ptr::null_mut();
+    }
+
+    /// Convert to type-erased Message for table-driven code.
+    pub const fn as_message(&self) -> Message {
+        Message(self.ptr as *mut Object)
     }
 }
 

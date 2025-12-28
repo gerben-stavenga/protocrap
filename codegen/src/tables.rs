@@ -189,7 +189,7 @@ pub(crate) fn generate_table(
     })
 }
 
-fn field_kind_tokens(field: &&FieldDescriptorProto) -> TokenStream {
+fn field_kind_tokens(field: &FieldDescriptorProto) -> TokenStream {
     let kind = protocrap::reflection::field_kind_tokens(field);
     let ident = format_ident!("{kind:?}");
     quote! { protocrap::wire::FieldKind::#ident }

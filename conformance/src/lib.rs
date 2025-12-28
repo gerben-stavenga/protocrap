@@ -31,8 +31,8 @@ pub fn load_descriptor_pool() -> Result<DescriptorPool<'static>> {
     let fds = pool.arena.place(fds);
 
     // Build pool
-    for &file in fds.file() {
-        pool.add_file(file);
+    for file in fds.file() {
+        pool.add_file(file.as_ref());
     }
 
     Ok(pool)

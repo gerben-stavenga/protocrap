@@ -72,11 +72,11 @@ fn calculate_has_bits(value: &DynamicMessageRef) -> Vec<u32> {
     let mut has_bits = vec![0u32; word_count];
 
     let mut has_bit_idx = 0;
-    for &field in descriptor.field() {
+    for field in descriptor.field() {
         if !needs_has_bit(field) {
             continue;
         }
-        if let Some(_) = value.get_field(field) {
+        if let Some(_) = value.get_field(field.as_ref()) {
             let word_idx = has_bit_idx / 32;
             let bit_idx = has_bit_idx % 32;
             has_bits[word_idx] |= 1u32 << bit_idx;
@@ -102,11 +102,11 @@ fn generate_field_initializers(value: &DynamicMessageRef) -> Result<Vec<TokenStr
     fields.sort_by_key(|f| f.number());
 
     for field in fields {
-        let value = value.get_field(field);
+        let value = value.get_field(field.as_ref());
         let init = if let Some(field_value) = value {
             generate_field_value(field_value)?.0
         } else {
-            generate_default_value(&field)
+            generate_default_value(field.as_ref())
         };
 
         inits.push(init);
@@ -185,9 +185,11 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
             ))
         }
         Value::Message(msg) => {
-            // Recursively generate nested message
-            let init = generate_nested_message(&msg)?;
-            Ok((init, quote! { protocrap::base::Message }))
+            let static_ref = generate_nested_message(&msg)?;
+            Ok((
+                quote! { protocrap::base::OptionalMessage::from_static(#static_ref) },
+                quote! { protocrap::base::OptionalMessage },
+            ))
         }
         Value::RepeatedBool(list) => generate_repeated_scalar(list),
         Value::RepeatedInt32(list) => generate_repeated_scalar(list),
@@ -242,21 +244,25 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
         }
         Value::RepeatedMessage(list) => {
             let mut elements = Vec::new();
+            let mut path_parts = Vec::new();
             for msg in list.iter() {
-                let elem_init = generate_nested_message(&msg)?;
-                elements.push(elem_init);
+                if path_parts.is_empty() {
+                    path_parts = full_name(msg.descriptor().name());
+                }
+                let static_ref = generate_nested_message(&msg)?;
+                elements.push(quote! { protocrap::base::TypedMessage::from_static(#static_ref) });
             }
             let len = elements.len();
             Ok((
                 quote! {
                     {
-                        static ELEMENTS: [protocrap::base::Message; #len] = [
+                        static ELEMENTS: [protocrap::base::TypedMessage<protocrap::#(#path_parts)::* ::ProtoType>; #len] = [
                             #(#elements),*
                         ];
                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                     }
                 },
-                quote! { protocrap::containers::RepeatedField<protocrap::base::Message> },
+                quote! { protocrap::containers::RepeatedField<protocrap::base::TypedMessage<protocrap::#(#path_parts)::* ::ProtoType>> },
             ))
         }
     }
@@ -264,13 +270,12 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
 
 fn generate_nested_message(msg: &DynamicMessageRef) -> Result<TokenStream> {
     let nested_initializer = generate_static_dynamic(msg)?;
-    // Parse type path
     let path_parts: Vec<_> = full_name(msg.descriptor().name());
 
     Ok(quote! {
         {
             static PROTO_TYPE: protocrap::#(#path_parts)::* ::ProtoType = #nested_initializer;
-            protocrap::base::Message::new(&PROTO_TYPE)
+            &PROTO_TYPE
         }
     })
 }
@@ -284,7 +289,7 @@ fn generate_default_value(field: &FieldDescriptorProto) -> TokenStream {
         Type::TYPE_STRING => quote! { protocrap::containers::String::new() },
         Type::TYPE_BYTES => quote! { protocrap::containers::Bytes::new() },
         Type::TYPE_MESSAGE | Type::TYPE_GROUP => quote! {
-            protocrap::base::Message(core::ptr::null_mut())
+            protocrap::base::OptionalMessage::none()
         },
         Type::TYPE_BOOL => quote! { false },
         Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 | Type::TYPE_ENUM => {
