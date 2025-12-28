@@ -1,14 +1,50 @@
+//! Arena allocator for protobuf message data.
+//!
+//! The [`Arena`] provides fast bump allocation for protobuf messages and their
+//! contents (strings, bytes, repeated fields, sub-messages). All allocations are
+//! freed together when the arena is dropped.
+//!
+//! # Example
+//!
+//! ```ignore
+//! use protocrap::arena::Arena;
+//!
+//! let mut arena = Arena::new(&std::alloc::Global);
+//!
+//! // Allocate raw memory
+//! let ptr: *mut u64 = arena.alloc();
+//! unsafe { *ptr = 42; }
+//!
+//! // Or place a value directly
+//! let value = arena.place(String::from("hello"));
+//! assert_eq!(value, "hello");
+//!
+//! // All memory freed when arena drops
+//! ```
+//!
+//! # Custom Allocators
+//!
+//! The arena accepts any `&dyn Allocator`, allowing custom memory placement:
+//!
+//! ```ignore
+//! let mut arena = Arena::new(&my_custom_allocator);
+//! ```
+//!
+//! Since the arena batches small allocations into large blocks, the overhead of
+//! dynamic dispatch on the allocator is negligible.
+
 use core::alloc::{Allocator, Layout};
 use core::ptr;
 use core::ptr::NonNull;
 
-// Arena allocates memory for protobuf objects. Which can be freed all at once.
-// This is useful for short lived objects that are created and destroyed together.
-// We need arena to be a non-generic type to avoid code bloat, but at the same time
-// we want users to have full control over the allocator used by the arena. Because
-// arena is batching small allocations into sporadic large allocations, we can
-// allocate large blocks using the dyn Allocator trait object without too much
-// overhead.
+/// Arena allocator for protobuf message data.
+///
+/// Provides fast bump-pointer allocation with bulk deallocation. All memory
+/// allocated from an arena is freed when the arena is dropped.
+///
+/// The arena grows automatically, starting with 8KB blocks and doubling up to
+/// 1MB. Large allocations (those that would waste significant space in the
+/// current block) get their own dedicated blocks.
 pub struct Arena<'a> {
     current: *mut MemBlock,
     cursor: *mut u8,

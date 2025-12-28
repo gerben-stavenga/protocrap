@@ -7,6 +7,14 @@ resolver = "2"
 name = "protocrap"
 version = "0.1.17"
 edition = "2024"
+rust-version = "1.85"
+description = "A small, efficient, and flexible protobuf implementation"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/priv-gerben/protocrap"
+documentation = "https://docs.rs/protocrap"
+keywords = ["protobuf", "serialization", "encoding", "no-std", "arena"]
+categories = ["encoding", "parser-implementations", "no-std"]
+readme = "README.md"
 
 [dependencies]
 anyhow = "1.0.100"

@@ -1,3 +1,179 @@
+//! # Protocrap
+//!
+//! A small, efficient, and flexible protobuf implementation for Rust.
+//!
+//! ## Overview
+//!
+//! Protocrap takes a different approach than other protobuf libraries. Instead of
+//! generating parsing and serialization code for each message type, it uses a single
+//! table-driven implementation. Code generation produces only struct definitions with
+//! accessors and static lookup tables.
+//!
+//! This design yields:
+//! - **Small binaries**: No code duplication across message types
+//! - **Fast compilation**: No macro expansion or monomorphization explosion
+//! - **Flexible memory**: Arena allocation with custom allocator support
+//! - **Universal streaming**: Push-based API works with sync and async
+//!
+//! ## Quick Start
+//!
+//! ### Code Generation
+//!
+//! Generate Rust code from `.proto` files using `protocrap-codegen`:
+//!
+//! ```bash
+//! # Create descriptor set with protoc
+//! protoc --include_imports --descriptor_set_out=types.bin my_types.proto
+//!
+//! # Generate Rust code
+//! protocrap-codegen types.bin src/types.pc.rs
+//! ```
+//!
+//! Include the generated code in your crate:
+//!
+//! ```ignore
+//! use protocrap;
+//! include!("types.pc.rs");
+//! ```
+//!
+//! ### Encoding Messages
+//!
+//! ```ignore
+//! use protocrap::{ProtobufRef, arena::Arena};
+//!
+//! let mut arena = Arena::new(&std::alloc::Global);
+//! let mut msg = MyMessage::default();
+//! msg.set_name("example", &mut arena);
+//! msg.set_id(42);
+//!
+//! // Encode to a Vec<u8>
+//! let bytes = msg.encode_vec::<32>()?;
+//!
+//! // Or encode to a fixed buffer
+//! let mut buffer = [0u8; 1024];
+//! let encoded = msg.encode_flat::<32>(&mut buffer)?;
+//! ```
+//!
+//! The const generic (`::<32>`) specifies the maximum message nesting depth.
+//!
+//! ### Decoding Messages
+//!
+//! ```ignore
+//! use protocrap::{ProtobufMut, arena::Arena};
+//!
+//! let mut arena = Arena::new(&std::alloc::Global);
+//! let mut msg = MyMessage::default();
+//!
+//! // Decode from a byte slice
+//! msg.decode_flat::<32>(&mut arena, &bytes);
+//!
+//! // Or from a BufRead
+//! msg.decode_from_bufread::<32>(&mut arena, &mut reader)?;
+//!
+//! // Or async
+//! msg.decode_from_async_bufread::<32>(&mut arena, &mut async_reader).await?;
+//! ```
+//!
+//! ### Runtime Reflection
+//!
+//! Inspect messages dynamically without compile-time knowledge of the schema:
+//!
+//! ```ignore
+//! use protocrap::reflection::{DescriptorPool, Value};
+//!
+//! let mut pool = DescriptorPool::new(&std::alloc::Global);
+//! pool.add_file(MyMessage::file_descriptor());
+//!
+//! // Decode any registered message type
+//! let msg = pool.decode_message("my.package.MyMessage", &bytes, &mut arena)?;
+//!
+//! // Access fields by name
+//! for field in msg.descriptor().field() {
+//!     if let Some(value) = msg.get_field(&field) {
+//!         println!("{}: {:?}", field.name(), value);
+//!     }
+//! }
+//! ```
+//!
+//! ## Architecture
+//!
+//! ### Arena Allocation
+//!
+//! All variable-sized data (strings, bytes, repeated fields, sub-messages) is allocated
+//! in an [`arena::Arena`]. This provides:
+//!
+//! - **Speed**: Allocation is a pointer bump in the common case
+//! - **Bulk deallocation**: Drop the arena to free all messages at once
+//! - **Custom allocators**: Pass any `&dyn Allocator` to control memory placement
+//!
+//! ```ignore
+//! use protocrap::arena::Arena;
+//!
+//! let mut arena = Arena::new(&std::alloc::Global);
+//! // All allocations during decode/set operations use this arena
+//! // When arena drops, all memory is freed
+//! ```
+//!
+//! ### Push-Based Streaming
+//!
+//! The parser uses a push model: you provide data chunks, it returns updated state.
+//! This signature `(state, buffer) -> updated_state` enables:
+//!
+//! - Single implementation for sync and async
+//! - No callback traits or complex lifetime requirements
+//! - Works in embedded, WASM, and any async runtime
+//!
+//! ## Generated Code Structure
+//!
+//! For each protobuf message, the codegen produces a module containing:
+//!
+//! - `ProtoType`: The message struct with `#[repr(C)]` layout
+//! - Accessor methods following protobuf conventions
+//!
+//! Field accessors follow this pattern:
+//!
+//! | Proto Type | Getter | Setter | Other |
+//! |------------|--------|--------|-------|
+//! | Scalar | `field() -> T` | `set_field(T)` | `has_field()`, `clear_field()` |
+//! | String/Bytes | `field() -> &str`/`&[u8]` | `set_field(&str, &mut Arena)` | `has_field()`, `clear_field()` |
+//! | Message | `field() -> Option<&M>` | `field_mut() -> &mut M` | `has_field()`, `clear_field()` |
+//! | Repeated | `field() -> &[T]` | `field_mut() -> &mut RepeatedField<T>` | `add_field(...)` |
+//!
+//! ## Modules
+//!
+//! - [`arena`]: Arena allocator for message data
+//! - [`base`]: Core message wrapper types ([`base::TypedMessage`], [`base::OptionalMessage`])
+//! - [`containers`]: Collection types ([`containers::RepeatedField`], [`containers::String`], [`containers::Bytes`])
+//! - [`reflection`]: Runtime message inspection and dynamic decoding
+//!
+//! ## Feature Flags
+//!
+//! - `std` (default): Enables `std::io` integration, `Vec`-based encoding
+//! - `serde_support` (default): Enables serde serialization via reflection
+//!
+//! For `no_std` environments, disable default features:
+//!
+//! ```toml
+//! [dependencies]
+//! protocrap = { version = "0.1", default-features = false }
+//! ```
+//!
+//! ## Restrictions
+//!
+//! Protocrap is designed for "sane" schemas:
+//!
+//! - Up to 256 optional fields per message
+//! - Struct sizes up to 64KB
+//! - Field numbers 1-2047 (1 or 2 byte wire tags)
+//! - Field numbers should be mostly consecutive
+//!
+//! The following are intentionally unsupported:
+//!
+//! - **Unknown fields**: Discarded during decoding (no round-trip preservation)
+//! - **Extensions**: Proto2 extensions are silently dropped
+//! - **Maps**: Decoded as repeated key-value pairs
+//! - **Proto3 zero-value omission**: All set fields are serialized
+
 #![feature(likely_unlikely, allocator_api, const_trait_impl)]
 #![cfg_attr(not(feature = "std"), no_std)]
 

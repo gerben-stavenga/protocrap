@@ -1,3 +1,32 @@
+//! Collection types for protobuf messages.
+//!
+//! This module provides arena-allocated containers used by generated protobuf code:
+//!
+//! - [`RepeatedField<T>`]: A growable array for repeated fields
+//! - [`String`]: UTF-8 string (equivalent to protobuf `string`)
+//! - [`Bytes`]: Byte array (equivalent to protobuf `bytes`)
+//!
+//! These types are designed for arena allocation and do not implement `Drop`.
+//! Memory is freed when the arena is dropped.
+//!
+//! # Example
+//!
+//! ```ignore
+//! use protocrap::{arena::Arena, containers::{RepeatedField, String}};
+//!
+//! let mut arena = Arena::new(&std::alloc::Global);
+//!
+//! // RepeatedField for integers
+//! let mut numbers = RepeatedField::<i32>::new();
+//! numbers.push(1, &mut arena);
+//! numbers.push(2, &mut arena);
+//! assert_eq!(&numbers[..], &[1, 2]);
+//!
+//! // String from a str
+//! let mut s = String::from_str("hello", &mut arena);
+//! assert_eq!(s.as_str(), "hello");
+//! ```
+
 use core::alloc::Layout;
 use core::fmt::Debug;
 use core::marker::PhantomData;

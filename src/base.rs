@@ -1,3 +1,39 @@
+//! Core message wrapper types.
+//!
+//! This module provides typed wrappers for message fields in generated code:
+//!
+//! - [`TypedMessage<T>`]: Non-null pointer to a message, used in repeated message fields
+//! - [`OptionalMessage<T>`]: Nullable pointer to a message, used for singular message fields
+//!
+//! These wrappers provide type safety while maintaining `#[repr(transparent)]` layout
+//! compatible with the table-driven codec.
+//!
+//! # Example
+//!
+//! ```ignore
+//! // Generated code uses these types:
+//! pub struct Parent {
+//!     // Singular message field - may or may not be present
+//!     child: OptionalMessage<Child>,
+//!     // Repeated message field - each element is always present
+//!     children: RepeatedField<TypedMessage<Child>>,
+//! }
+//!
+//! // Access singular message
+//! if let Some(child) = parent.child() {
+//!     println!("Child name: {}", child.name());
+//! }
+//!
+//! // Or get/initialize it
+//! let child = parent.child_mut(&mut arena);
+//! child.set_name("New child", &mut arena);
+//!
+//! // Iterate repeated messages
+//! for child in parent.children() {
+//!     println!("Child: {}", child.name());
+//! }
+//! ```
+
 use core::alloc::Layout;
 use core::marker::PhantomData;
 use core::ops::{Deref, DerefMut};
