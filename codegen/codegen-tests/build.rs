@@ -1,62 +1,63 @@
 // build.rs
 
 use std::io::Result;
-use std::path::Path;
+use std::path::PathBuf;
 
 fn main() -> Result<()> {
     let out_dir = std::env::var("OUT_DIR").unwrap();
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    let workspace_root = PathBuf::from(&manifest_dir)
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
 
-    println!("cargo:rerun-if-changed=proto/test.proto");
+    // Find descriptor set - either from env var or default bazel-bin location
+    let desc_file = if let Ok(path) = std::env::var("PROTOCRAP_DESCRIPTOR_SET") {
+        println!("cargo:rerun-if-env-changed=PROTOCRAP_DESCRIPTOR_SET");
+        PathBuf::from(path)
+    } else {
+        let default_path = workspace_root.join("bazel-bin/codegen/codegen-tests/test_descriptor_set.bin");
+        println!("cargo:rerun-if-changed={}", default_path.display());
+        default_path
+    };
 
-    // Generate protocrap version with Rust codegen
-    println!("cargo:warning=Generating protocrap version with Rust codegen...");
-
-    // Generate test.proto (includes Test and DefaultsTest messages)
-    generate_proto(&out_dir, "proto/test.proto", "test.pc.rs")?;
-
-    Ok(())
-}
-
-fn generate_proto(out_dir: &str, proto_file: &str, output_name: &str) -> Result<()> {
-    let desc_file = format!("{}/temp.desc", out_dir);
-    let output_file = format!("{}/{}", out_dir, output_name);
-
-    // Determine proto path (directory containing the proto file)
-    let proto_path = Path::new(proto_file).parent().unwrap_or(Path::new("."));
-
-    // Generate descriptor set with protoc
-    let status = std::process::Command::new("protoc")
-        .args(&[
-            "--descriptor_set_out",
-            &desc_file,
-            "--include_imports",
-            &format!("--proto_path={}", proto_path.display()),
-            proto_file,
-        ])
-        .status()?;
-
-    if !status.success() {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("protoc failed for {}", proto_file),
-        ));
+    if !desc_file.exists() {
+        panic!(
+            "Descriptor set not found at {}. Build it first with: bazel build //codegen/codegen-tests:test_descriptor_set",
+            desc_file.display()
+        );
     }
 
-    // Read descriptor bytes
-    let descriptor_bytes = std::fs::read(&desc_file)?;
+    // Find the codegen binary
+    let codegen_bin = if let Ok(path) = std::env::var("PROTOCRAP_CODEGEN") {
+        PathBuf::from(path)
+    } else {
+        let debug_bin = workspace_root.join("target/debug/protocrap-codegen");
+        let release_bin = workspace_root.join("target/release/protocrap-codegen");
 
-    // Generate Rust code with protocrap-codegen
-    let code = protocrap_codegen::generate(&descriptor_bytes).map_err(|e| {
-        std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Code generation failed: {}", e),
-        )
-    })?;
+        if release_bin.exists() {
+            release_bin
+        } else if debug_bin.exists() {
+            debug_bin
+        } else {
+            panic!(
+                "protocrap-codegen binary not found. Build it first with: cargo build -p protocrap-codegen"
+            );
+        }
+    };
 
-    // Write output
-    std::fs::write(&output_file, code)?;
+    // Generate Rust code
+    let out_file = format!("{}/test.pc.rs", out_dir);
+    let status = std::process::Command::new(&codegen_bin)
+        .args([desc_file.to_str().unwrap(), &out_file])
+        .status()
+        .expect("Failed to run protocrap-codegen");
 
-    println!("cargo:warning=✅ Generated {}", output_file);
+    if !status.success() {
+        panic!("protocrap-codegen failed");
+    }
 
     Ok(())
 }

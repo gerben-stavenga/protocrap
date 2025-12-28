@@ -1,0 +1,12 @@
+load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
+
+proto_library(
+    name = "test_proto",
+    srcs = ["proto/test.proto"],
+)
+
+proto_descriptor_set(
+    name = "test_descriptor_set",
+    deps = [":test_proto"],
+    visibility = ["//visibility:public"],
+)
