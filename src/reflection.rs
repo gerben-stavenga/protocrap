@@ -142,7 +142,7 @@ pub struct DescriptorPool<'alloc> {
 }
 
 impl<'alloc> DescriptorPool<'alloc> {
-    pub fn new(alloc: &'alloc dyn core::alloc::Allocator) -> Self {
+    pub fn new(alloc: &'alloc dyn crate::Allocator) -> Self {
         DescriptorPool {
             arena: Arena::new(alloc),
             tables: std::collections::HashMap::new(),

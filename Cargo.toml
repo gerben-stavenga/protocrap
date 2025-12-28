@@ -17,6 +17,7 @@ categories = ["encoding", "parser-implementations", "no-std"]
 readme = "README.md"
 
 [dependencies]
+allocator-api2 = "0.2"
 anyhow = "1.0.100"
 base64 = "0.22.1"
 futures = "0.3.31"
@@ -27,6 +28,7 @@ time = { version = "0.3", features = ["formatting", "parsing", "macros"] }
 default = ["std", "serde_support"]
 serde_support = ["serde"]
 std = []
+nightly = []
 
 [profile.dev]
 panic = 'abort'

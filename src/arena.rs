@@ -6,10 +6,11 @@
 //!
 //! # Example
 //!
-//! ```ignore
+//! ```
 //! use protocrap::arena::Arena;
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut arena = Arena::new(&std::alloc::Global);
+//! let mut arena = Arena::new(&Global);
 //!
 //! // Allocate raw memory
 //! let ptr: *mut u64 = arena.alloc();
@@ -33,7 +34,8 @@
 //! Since the arena batches small allocations into large blocks, the overhead of
 //! dynamic dispatch on the allocator is negligible.
 
-use core::alloc::{Allocator, Layout};
+use crate::Allocator;
+use core::alloc::Layout;
 use core::ptr;
 use core::ptr::NonNull;
 
@@ -49,7 +51,7 @@ pub struct Arena<'a> {
     current: *mut MemBlock,
     cursor: *mut u8,
     end: *mut u8,
-    allocator: &'a dyn core::alloc::Allocator,
+    allocator: &'a dyn Allocator,
 }
 
 // Mem block is a block of contiguous memory allocated from the allocator
@@ -108,7 +110,7 @@ impl<'a> Arena<'a> {
 
         // Check if we have enough space: end - aligned_cursor >= size
         let available = self.end as isize - aligned_cursor as isize;
-        if core::hint::likely(available >= size as isize) {
+        if crate::utils::likely(available >= size as isize) {
             // Fits in current block - use it regardless of size
             self.cursor = unsafe { aligned_cursor.add(size) };
             return unsafe { NonNull::new_unchecked(aligned_cursor) };
@@ -249,7 +251,11 @@ unsafe impl<'a> Send for Arena<'a> where &'a dyn Allocator: Send {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(feature = "nightly")]
     use std::alloc::Global;
+    #[cfg(not(feature = "nightly"))]
+    use allocator_api2::alloc::Global;
 
     #[test]
     fn test_basic_allocation() {

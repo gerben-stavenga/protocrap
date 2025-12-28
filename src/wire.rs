@@ -83,7 +83,7 @@ impl ReadCursor {
     #[inline(always)]
     pub fn read_varint(&mut self) -> Option<u64> {
         let res = self[0] as u64;
-        if core::hint::likely(res < 0x80) {
+        if crate::utils::likely(res < 0x80) {
             *self += 1;
             Some(res)
         } else {
@@ -99,7 +99,7 @@ impl ReadCursor {
     #[inline(always)]
     pub fn read_tag(&mut self) -> Option<u32> {
         let res = self[0] as u32;
-        if core::hint::likely(res < 0x80) {
+        if crate::utils::likely(res < 0x80) {
             *self += 1;
             Some(res)
         } else {
@@ -116,7 +116,7 @@ impl ReadCursor {
     #[inline(always)]
     pub fn read_size(&mut self) -> Option<isize> {
         let res = self[0] as isize;
-        if core::hint::likely(res < 0x80) {
+        if crate::utils::likely(res < 0x80) {
             *self += 1;
             Some(res)
         } else {

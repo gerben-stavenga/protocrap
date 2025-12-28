@@ -38,58 +38,75 @@
 //!
 //! ### Encoding Messages
 //!
-//! ```ignore
-//! use protocrap::{ProtobufRef, arena::Arena};
+//! ```
+//! use protocrap::{ProtobufRef, ProtobufMut, arena::Arena};
+//! use protocrap::google::protobuf::FileDescriptorProto;
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut arena = Arena::new(&std::alloc::Global);
-//! let mut msg = MyMessage::default();
-//! msg.set_name("example", &mut arena);
-//! msg.set_id(42);
+//! let mut arena = Arena::new(&Global);
+//! let mut msg = FileDescriptorProto::ProtoType::default();
+//! msg.set_name("example.proto", &mut arena);
+//! msg.set_package("my.package", &mut arena);
 //!
 //! // Encode to a Vec<u8>
-//! let bytes = msg.encode_vec::<32>()?;
+//! let bytes = msg.encode_vec::<32>().unwrap();
 //!
 //! // Or encode to a fixed buffer
 //! let mut buffer = [0u8; 1024];
-//! let encoded = msg.encode_flat::<32>(&mut buffer)?;
+//! let encoded = msg.encode_flat::<32>(&mut buffer).unwrap();
 //! ```
 //!
 //! The const generic (`::<32>`) specifies the maximum message nesting depth.
 //!
 //! ### Decoding Messages
 //!
-//! ```ignore
-//! use protocrap::{ProtobufMut, arena::Arena};
+//! ```
+//! use protocrap::{ProtobufRef, ProtobufMut, arena::Arena};
+//! use protocrap::google::protobuf::FileDescriptorProto;
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut arena = Arena::new(&std::alloc::Global);
-//! let mut msg = MyMessage::default();
+//! // First encode a message to get some bytes
+//! let mut arena = Arena::new(&Global);
+//! let mut original = FileDescriptorProto::ProtoType::default();
+//! original.set_name("example.proto", &mut arena);
+//! let bytes = original.encode_vec::<32>().unwrap();
 //!
 //! // Decode from a byte slice
-//! msg.decode_flat::<32>(&mut arena, &bytes);
-//!
-//! // Or from a BufRead
-//! msg.decode_from_bufread::<32>(&mut arena, &mut reader)?;
-//!
-//! // Or async
-//! msg.decode_from_async_bufread::<32>(&mut arena, &mut async_reader).await?;
+//! let mut decoded = FileDescriptorProto::ProtoType::default();
+//! decoded.decode_flat::<32>(&mut arena, &bytes);
+//! assert_eq!(decoded.name(), "example.proto");
 //! ```
 //!
 //! ### Runtime Reflection
 //!
 //! Inspect messages dynamically without compile-time knowledge of the schema:
 //!
-//! ```ignore
-//! use protocrap::reflection::{DescriptorPool, Value};
+//! ```
+//! use protocrap::{Protobuf, ProtobufRef, arena::Arena};
+//! use protocrap::google::protobuf::{FileDescriptorProto, DescriptorProto};
+//! use protocrap::reflection::DescriptorPool;
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut pool = DescriptorPool::new(&std::alloc::Global);
-//! pool.add_file(MyMessage::file_descriptor());
+//! // Build descriptor pool from the library's own file descriptor
+//! let mut pool = DescriptorPool::new(&Global);
+//! let file_desc = FileDescriptorProto::ProtoType::file_descriptor();
+//! pool.add_file(file_desc);
 //!
-//! // Decode any registered message type
-//! let msg = pool.decode_message("my.package.MyMessage", &bytes, &mut arena)?;
+//! // Encode a real DescriptorProto (the descriptor for DescriptorProto itself)
+//! let descriptor = DescriptorProto::ProtoType::descriptor_proto();
+//! let bytes = descriptor.encode_vec::<32>().unwrap();
 //!
-//! // Access fields by name
+//! // Decode dynamically using the pool
+//! let mut arena = Arena::new(&Global);
+//! let msg = pool.decode_message(
+//!     "google.protobuf.DescriptorProto",
+//!     &bytes,
+//!     &mut arena,
+//! ).unwrap();
+//!
+//! // Access fields dynamically
 //! for field in msg.descriptor().field() {
-//!     if let Some(value) = msg.get_field(&field) {
+//!     if let Some(value) = msg.get_field(field.as_ref()) {
 //!         println!("{}: {:?}", field.name(), value);
 //!     }
 //! }
@@ -106,10 +123,11 @@
 //! - **Bulk deallocation**: Drop the arena to free all messages at once
 //! - **Custom allocators**: Pass any `&dyn Allocator` to control memory placement
 //!
-//! ```ignore
+//! ```
 //! use protocrap::arena::Arena;
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut arena = Arena::new(&std::alloc::Global);
+//! let mut arena = Arena::new(&Global);
 //! // All allocations during decode/set operations use this arena
 //! // When arena drops, all memory is freed
 //! ```
@@ -150,6 +168,7 @@
 //!
 //! - `std` (default): Enables `std::io` integration, `Vec`-based encoding
 //! - `serde_support` (default): Enables serde serialization via reflection
+//! - `nightly`: Use nightly Rust features for slightly better codegen (branch hints)
 //!
 //! For `no_std` environments, disable default features:
 //!
@@ -174,7 +193,7 @@
 //! - **Maps**: Decoded as repeated key-value pairs
 //! - **Proto3 zero-value omission**: All set fields are serialized
 
-#![feature(likely_unlikely, allocator_api, const_trait_impl)]
+#![cfg_attr(feature = "nightly", feature(likely_unlikely, allocator_api))]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub mod arena;
@@ -183,6 +202,12 @@ pub mod containers;
 pub mod wire;
 
 pub mod utils;
+
+// Re-export Allocator trait - use core on nightly, polyfill on stable
+#[cfg(feature = "nightly")]
+pub use core::alloc::Allocator;
+#[cfg(not(feature = "nightly"))]
+pub use allocator_api2::alloc::Allocator;
 
 pub mod decoding;
 pub mod encoding;
@@ -197,7 +222,7 @@ pub mod serde;
 
 // One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
 // but that is not allowed because Default and Debug are not local to this crate.
-pub const trait Protobuf: Default + core::fmt::Debug {
+pub trait Protobuf: Default + core::fmt::Debug {
     fn table() -> &'static tables::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
         Self::table().descriptor
@@ -443,10 +468,15 @@ impl<T: Protobuf> ProtobufMut<'static> for T {
 pub mod tests {
     use crate::{Protobuf, ProtobufMut, ProtobufRef};
 
+    #[cfg(feature = "nightly")]
+    use std::alloc::Global;
+    #[cfg(not(feature = "nightly"))]
+    use allocator_api2::alloc::Global;
+
     pub fn assert_roundtrip<T: Protobuf>(msg: &T) {
         let data = msg.encode_vec::<32>().expect("msg should encode");
 
-        let mut arena = crate::arena::Arena::new(&std::alloc::Global);
+        let mut arena = crate::arena::Arena::new(&Global);
         let mut roundtrip_msg = T::default();
         assert!(roundtrip_msg.decode_flat::<32>(&mut arena, &data));
 
@@ -487,13 +517,13 @@ pub mod tests {
 
     #[test]
     fn dynamic_file_descriptor_roundtrip() {
-        let mut pool = crate::reflection::DescriptorPool::new(&std::alloc::Global);
+        let mut pool = crate::reflection::DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
         pool.add_file(&file_descriptor);
 
         let bytes = file_descriptor.encode_vec::<32>().expect("should encode");
-        let mut arena = crate::arena::Arena::new(&std::alloc::Global);
+        let mut arena = crate::arena::Arena::new(&Global);
         let dynamic_file_descriptor = pool
             .decode_message("google.protobuf.FileDescriptorProto", &bytes, &mut arena)
             .expect("should decode");

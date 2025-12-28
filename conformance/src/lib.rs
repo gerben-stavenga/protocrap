@@ -1,5 +1,4 @@
-#![feature(allocator_api)]
-
+use allocator_api2::alloc::Global;
 use anyhow::{Result, bail};
 use protocrap; // Keep this for generated code
 use protocrap::ProtobufMut;
@@ -13,7 +12,7 @@ include!(concat!(env!("OUT_DIR"), "/conformance_all.pc.rs"));
 pub const CONFORMANCE_DESCRIPTOR_BYTES: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/conformance_all.bin"));
 
-pub static GLOBAL_ALLOC: std::alloc::Global = std::alloc::Global;
+pub static GLOBAL_ALLOC: Global = Global;
 
 pub fn load_descriptor_pool() -> Result<DescriptorPool<'static>> {
     use protocrap::google::protobuf::FileDescriptorSet;

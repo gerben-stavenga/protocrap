@@ -11,10 +11,11 @@
 //!
 //! # Example
 //!
-//! ```ignore
+//! ```
 //! use protocrap::{arena::Arena, containers::{RepeatedField, String}};
+//! use allocator_api2::alloc::Global;
 //!
-//! let mut arena = Arena::new(&std::alloc::Global);
+//! let mut arena = Arena::new(&Global);
 //!
 //! // RepeatedField for integers
 //! let mut numbers = RepeatedField::<i32>::new();
@@ -23,7 +24,7 @@
 //! assert_eq!(&numbers[..], &[1, 2]);
 //!
 //! // String from a str
-//! let mut s = String::from_str("hello", &mut arena);
+//! let s = String::from_str("hello", &mut arena);
 //! assert_eq!(s.as_str(), "hello");
 //! ```
 

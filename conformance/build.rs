@@ -14,12 +14,28 @@ fn main() {
         let default_path =
             workspace_root.join("bazel-bin/conformance/conformance_descriptor_set.bin");
         println!("cargo:rerun-if-changed={}", default_path.display());
+
+        // Build descriptor set with bazelisk if missing
+        if !default_path.exists() {
+            eprintln!("Building conformance descriptor set with bazelisk...");
+            let bazelisk = workspace_root.join("bazelisk.sh");
+            let status = Command::new(&bazelisk)
+                .current_dir(&workspace_root)
+                .args(["build", "//conformance:conformance_descriptor_set"])
+                .status()
+                .expect("Failed to run bazelisk.sh");
+
+            if !status.success() {
+                panic!("bazelisk build failed");
+            }
+        }
+
         default_path
     };
 
     if !desc_file.exists() {
         panic!(
-            "Descriptor set not found at {}. Build it first with: bazel build //conformance:conformance_descriptor_set",
+            "Descriptor set not found at {}",
             desc_file.display()
         );
     }

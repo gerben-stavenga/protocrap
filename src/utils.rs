@@ -3,6 +3,21 @@ use core::{
     ops::{Deref, DerefMut},
 };
 
+// Branch prediction hints - use core::hint on nightly, no-op on stable
+#[cfg(feature = "nightly")]
+pub use core::hint::likely;
+
+#[cfg(not(feature = "nightly"))]
+#[inline(always)]
+pub const fn likely(b: bool) -> bool { b }
+
+#[cfg(feature = "nightly")]
+pub use core::hint::unlikely;
+
+#[cfg(not(feature = "nightly"))]
+#[inline(always)]
+pub const fn unlikely(b: bool) -> bool { b }
+
 #[repr(C)]
 pub(crate) struct Stack<T> {
     pub sp: usize,
