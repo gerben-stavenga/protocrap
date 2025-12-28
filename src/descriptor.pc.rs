@@ -622,19 +622,19 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 1u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, package) as u16,
                         encoded_tag: 18u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedBytes,
+                        kind: protocrap::wire::FieldKind::RepeatedString,
                         offset: core::mem::offset_of!(ProtoType, dependency) as u16,
                         encoded_tag: 26u32,
                     },
@@ -653,7 +653,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedBytes,
+                        kind: protocrap::wire::FieldKind::RepeatedString,
                         offset: core::mem::offset_of!(ProtoType, option_dependency)
                             as u16,
                         encoded_tag: 122u32,
@@ -750,7 +750,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 2u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, syntax) as u16,
                         encoded_tag: 98u32,
                     },
@@ -770,17 +770,17 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         1u32,
                         core::mem::offset_of!(ProtoType, package),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::RepeatedBytes,
+                        protocrap::wire::FieldKind::RepeatedString,
                         0u32,
                         core::mem::offset_of!(ProtoType, dependency),
                     ),
@@ -879,7 +879,7 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, weak_dependency),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         2u32,
                         core::mem::offset_of!(ProtoType, syntax),
                     ),
@@ -890,7 +890,7 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, edition),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::RepeatedBytes,
+                        protocrap::wire::FieldKind::RepeatedString,
                         0u32,
                         core::mem::offset_of!(ProtoType, option_dependency),
                     ),
@@ -1679,7 +1679,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -1805,7 +1805,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedBytes,
+                        kind: protocrap::wire::FieldKind::RepeatedString,
                         offset: core::mem::offset_of!(ProtoType, reserved_name) as u16,
                         encoded_tag: 82u32,
                     },
@@ -1825,7 +1825,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
@@ -1942,7 +1942,7 @@ pub mod google {
                             ),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::RepeatedBytes,
+                        protocrap::wire::FieldKind::RepeatedString,
                         0u32,
                         core::mem::offset_of!(ProtoType, reserved_name),
                     ),
@@ -2212,13 +2212,13 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 1u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, full_name) as u16,
                             encoded_tag: 18u32,
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 2u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, r#type) as u16,
                             encoded_tag: 26u32,
                         },
@@ -2249,12 +2249,12 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, number),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             1u32,
                             core::mem::offset_of!(ProtoType, full_name),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             2u32,
                             core::mem::offset_of!(ProtoType, r#type),
                         ),
@@ -4064,7 +4064,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -4088,19 +4088,19 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 4u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, type_name) as u16,
                         encoded_tag: 50u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 5u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, extendee) as u16,
                         encoded_tag: 18u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 6u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, default_value) as u16,
                         encoded_tag: 58u32,
                     },
@@ -4112,7 +4112,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 8u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, json_name) as u16,
                         encoded_tag: 82u32,
                     },
@@ -4147,12 +4147,12 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         5u32,
                         core::mem::offset_of!(ProtoType, extendee),
                     ),
@@ -4172,12 +4172,12 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, r#type),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         4u32,
                         core::mem::offset_of!(ProtoType, type_name),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         6u32,
                         core::mem::offset_of!(ProtoType, default_value),
                     ),
@@ -4201,7 +4201,7 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, oneof_index),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         8u32,
                         core::mem::offset_of!(ProtoType, json_name),
                     ),
@@ -4327,7 +4327,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -4356,7 +4356,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
@@ -4747,7 +4747,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -4798,7 +4798,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::RepeatedBytes,
+                        kind: protocrap::wire::FieldKind::RepeatedString,
                         offset: core::mem::offset_of!(ProtoType, reserved_name) as u16,
                         encoded_tag: 42u32,
                     },
@@ -4818,7 +4818,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
@@ -4865,7 +4865,7 @@ pub mod google {
                             ),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::RepeatedBytes,
+                        protocrap::wire::FieldKind::RepeatedString,
                         0u32,
                         core::mem::offset_of!(ProtoType, reserved_name),
                     ),
@@ -5025,7 +5025,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -5060,7 +5060,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
@@ -5236,7 +5236,7 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
@@ -5280,7 +5280,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
@@ -5577,19 +5577,19 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, name) as u16,
                         encoded_tag: 10u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 1u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, input_type) as u16,
                         encoded_tag: 18u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 2u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, output_type) as u16,
                         encoded_tag: 26u32,
                     },
@@ -5632,17 +5632,17 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, name),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         1u32,
                         core::mem::offset_of!(ProtoType, input_type),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         2u32,
                         core::mem::offset_of!(ProtoType, output_type),
                     ),
@@ -6491,13 +6491,13 @@ pub mod google {
                 encode_entries: [
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, java_package) as u16,
                         encoded_tag: 10u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 1u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, java_outer_classname)
                             as u16,
                         encoded_tag: 66u32,
@@ -6532,7 +6532,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 6u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, go_package) as u16,
                         encoded_tag: 90u32,
                     },
@@ -6572,47 +6572,47 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 12u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, objc_class_prefix)
                             as u16,
                         encoded_tag: 290u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 13u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, csharp_namespace)
                             as u16,
                         encoded_tag: 298u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 14u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, swift_prefix) as u16,
                         encoded_tag: 314u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 15u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, php_class_prefix)
                             as u16,
                         encoded_tag: 322u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 16u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, php_namespace) as u16,
                         encoded_tag: 330u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 17u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, php_metadata_namespace)
                             as u16,
                         encoded_tag: 354u32,
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 18u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, ruby_package) as u16,
                         encoded_tag: 362u32,
                     },
@@ -6656,7 +6656,7 @@ pub mod google {
                 decode_entries: [
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, java_package),
                     ),
@@ -6667,7 +6667,7 @@ pub mod google {
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         1u32,
                         core::mem::offset_of!(ProtoType, java_outer_classname),
                     ),
@@ -6682,7 +6682,7 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, java_multiple_files),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         6u32,
                         core::mem::offset_of!(ProtoType, go_package),
                     ),
@@ -6739,40 +6739,40 @@ pub mod google {
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         12u32,
                         core::mem::offset_of!(ProtoType, objc_class_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         13u32,
                         core::mem::offset_of!(ProtoType, csharp_namespace),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         14u32,
                         core::mem::offset_of!(ProtoType, swift_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         15u32,
                         core::mem::offset_of!(ProtoType, php_class_prefix),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         16u32,
                         core::mem::offset_of!(ProtoType, php_namespace),
                     ),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry(0),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         17u32,
                         core::mem::offset_of!(ProtoType, php_metadata_namespace),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         18u32,
                         core::mem::offset_of!(ProtoType, ruby_package),
                     ),
@@ -9305,7 +9305,7 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 1u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, value) as u16,
                             encoded_tag: 18u32,
                         },
@@ -9320,7 +9320,7 @@ pub mod google {
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             1u32,
                             core::mem::offset_of!(ProtoType, value),
                         ),
@@ -9575,7 +9575,7 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 2u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, deprecation_warning)
                                 as u16,
                             encoded_tag: 26u32,
@@ -9589,7 +9589,7 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 4u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, removal_error)
                                 as u16,
                             encoded_tag: 42u32,
@@ -9614,7 +9614,7 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, edition_deprecated),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             2u32,
                             core::mem::offset_of!(ProtoType, deprecation_warning),
                         ),
@@ -9624,7 +9624,7 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, edition_removed),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             4u32,
                             core::mem::offset_of!(ProtoType, removal_error),
                         ),
@@ -17859,7 +17859,7 @@ pub mod google {
                     encode_entries: [
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, name_part) as u16,
                             encoded_tag: 10u32,
                         },
@@ -17880,7 +17880,7 @@ pub mod google {
                     decode_entries: [
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             0u32,
                             core::mem::offset_of!(ProtoType, name_part),
                         ),
@@ -18188,7 +18188,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 0u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, identifier_value)
                             as u16,
                         encoded_tag: 26u32,
@@ -18221,7 +18221,7 @@ pub mod google {
                     },
                     protocrap::encoding::TableEntry {
                         has_bit: 5u8,
-                        kind: protocrap::wire::FieldKind::Bytes,
+                        kind: protocrap::wire::FieldKind::String,
                         offset: core::mem::offset_of!(ProtoType, aggregate_value) as u16,
                         encoded_tag: 66u32,
                     },
@@ -18250,7 +18250,7 @@ pub mod google {
                             ),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         0u32,
                         core::mem::offset_of!(ProtoType, identifier_value),
                     ),
@@ -18275,7 +18275,7 @@ pub mod google {
                         core::mem::offset_of!(ProtoType, string_value),
                     ),
                     protocrap::decoding::TableEntry::new(
-                        protocrap::wire::FieldKind::Bytes,
+                        protocrap::wire::FieldKind::String,
                         5u32,
                         core::mem::offset_of!(ProtoType, aggregate_value),
                     ),
@@ -19582,21 +19582,21 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, leading_comments)
                                 as u16,
                             encoded_tag: 26u32,
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 1u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, trailing_comments)
                                 as u16,
                             encoded_tag: 34u32,
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
-                            kind: protocrap::wire::FieldKind::RepeatedBytes,
+                            kind: protocrap::wire::FieldKind::RepeatedString,
                             offset: core::mem::offset_of!(
                                 ProtoType, leading_detached_comments
                             ) as u16,
@@ -19622,18 +19622,18 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, span),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             0u32,
                             core::mem::offset_of!(ProtoType, leading_comments),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             1u32,
                             core::mem::offset_of!(ProtoType, trailing_comments),
                         ),
                         protocrap::decoding::TableEntry(0),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::RepeatedBytes,
+                            protocrap::wire::FieldKind::RepeatedString,
                             0u32,
                             core::mem::offset_of!(ProtoType, leading_detached_comments),
                         ),
@@ -19989,7 +19989,7 @@ pub mod google {
                         },
                         protocrap::encoding::TableEntry {
                             has_bit: 0u8,
-                            kind: protocrap::wire::FieldKind::Bytes,
+                            kind: protocrap::wire::FieldKind::String,
                             offset: core::mem::offset_of!(ProtoType, source_file) as u16,
                             encoded_tag: 18u32,
                         },
@@ -20026,7 +20026,7 @@ pub mod google {
                             core::mem::offset_of!(ProtoType, path),
                         ),
                         protocrap::decoding::TableEntry::new(
-                            protocrap::wire::FieldKind::Bytes,
+                            protocrap::wire::FieldKind::String,
                             0u32,
                             core::mem::offset_of!(ProtoType, source_file),
                         ),
@@ -20179,7 +20179,7 @@ pub mod google {
                 protocrap::google::protobuf::FileDescriptorProto::ProtoType::from_static(
                     [3],
                     protocrap::containers::String::from_static(
-                        "external/protobuf~/src/google/protobuf/descriptor.proto",
+                        "google/protobuf/descriptor.proto",
                     ),
                     protocrap::containers::String::from_static("google.protobuf"),
                     protocrap::containers::RepeatedField::new(),
@@ -20234,18 +20234,7 @@ pub mod google {
                                                             [3],
                                                             536000000,
                                                             536000001,
-                                                            protocrap::base::OptionalMessage::from_static({
-                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
-                                                                    protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
-                                                                        [0],
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                        0i32,
-                                                                        protocrap::base::OptionalMessage::none(),
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                    )
-                                                                };
-                                                                &PROTO_TYPE
-                                                            }),
+                                                            protocrap::base::OptionalMessage::none(),
                                                         )
                                                     };
                                                     &PROTO_TYPE
@@ -26643,18 +26632,7 @@ pub mod google {
                                                             [3],
                                                             1000,
                                                             9995,
-                                                            protocrap::base::OptionalMessage::from_static({
-                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
-                                                                    protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
-                                                                        [0],
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                        0i32,
-                                                                        protocrap::base::OptionalMessage::none(),
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                    )
-                                                                };
-                                                                &PROTO_TYPE
-                                                            }),
+                                                            protocrap::base::OptionalMessage::none(),
                                                         )
                                                     };
                                                     &PROTO_TYPE
@@ -27168,18 +27146,7 @@ pub mod google {
                                                             [3],
                                                             536000000,
                                                             536000001,
-                                                            protocrap::base::OptionalMessage::from_static({
-                                                                static PROTO_TYPE: protocrap::google::protobuf::ExtensionRangeOptions::ProtoType = {
-                                                                    protocrap::google::protobuf::ExtensionRangeOptions::ProtoType::from_static(
-                                                                        [0],
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                        0i32,
-                                                                        protocrap::base::OptionalMessage::none(),
-                                                                        protocrap::containers::RepeatedField::new(),
-                                                                    )
-                                                                };
-                                                                &PROTO_TYPE
-                                                            }),
+                                                            protocrap::base::OptionalMessage::none(),
                                                         )
                                                     };
                                                     &PROTO_TYPE

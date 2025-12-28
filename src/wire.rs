@@ -301,6 +301,7 @@ pub enum FieldKind {
     Fixed64,
     Fixed32,
     Bytes,
+    String,
     Message,
     Group,
     RepeatedVarint64,
@@ -312,6 +313,7 @@ pub enum FieldKind {
     RepeatedFixed64,
     RepeatedFixed32,
     RepeatedBytes,
+    RepeatedString,
     RepeatedMessage,
     RepeatedGroup,
 }

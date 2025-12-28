@@ -27,7 +27,8 @@ pub fn field_kind_tokens(field: &FieldDescriptorProto) -> wire::FieldKind {
                 wire::FieldKind::RepeatedFixed64
             }
             Type::TYPE_BOOL => wire::FieldKind::RepeatedBool,
-            Type::TYPE_STRING | Type::TYPE_BYTES => wire::FieldKind::RepeatedBytes,
+            Type::TYPE_STRING => wire::FieldKind::RepeatedString,
+            Type::TYPE_BYTES => wire::FieldKind::RepeatedBytes,
             Type::TYPE_MESSAGE => wire::FieldKind::RepeatedMessage,
             Type::TYPE_GROUP => wire::FieldKind::RepeatedGroup,
             Type::TYPE_ENUM => wire::FieldKind::RepeatedInt32,
@@ -44,7 +45,8 @@ pub fn field_kind_tokens(field: &FieldDescriptorProto) -> wire::FieldKind {
                 wire::FieldKind::Fixed64
             }
             Type::TYPE_BOOL => wire::FieldKind::Bool,
-            Type::TYPE_STRING | Type::TYPE_BYTES => wire::FieldKind::Bytes,
+            Type::TYPE_STRING => wire::FieldKind::String,
+            Type::TYPE_BYTES => wire::FieldKind::Bytes,
             Type::TYPE_MESSAGE => wire::FieldKind::Message,
             Type::TYPE_GROUP => wire::FieldKind::Group,
             Type::TYPE_ENUM => wire::FieldKind::Int32,
@@ -219,17 +221,17 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Get aux entry pointer - must use same Layout::extend logic as build_table_from_descriptor
         unsafe {
             // Recalculate aux offset using Layout::extend (accounts for padding)
-            let table_layout = std::alloc::Layout::new::<Table>();
+            let table_layout = core::alloc::Layout::new::<Table>();
             let (_, aux_offset_from_table) = table_layout
                 .extend(
-                    std::alloc::Layout::array::<crate::decoding::TableEntry>(
+                    core::alloc::Layout::array::<crate::decoding::TableEntry>(
                         table.num_decode_entries as usize,
                     )
                     .unwrap(),
                 )
                 .unwrap()
                 .0
-                .extend(std::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
+                .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
                 .unwrap();
 
             let aux_ptr =
@@ -277,7 +279,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             .ok_or_else(|| anyhow::anyhow!("Message type '{}' not found in pool", message_type))?;
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = std::alloc::Layout::from_size_align(table.size as usize, 8)
+        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8)
             .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
         let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
@@ -303,7 +305,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             .ok_or_else(|| anyhow::anyhow!("Message type '{}' not found in pool", message_type))?;
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = std::alloc::Layout::from_size_align(table.size as usize, 8)
+        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8)
             .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
         let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
@@ -353,14 +355,14 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         // Calculate field offsets and total size using Layout::extend for proper padding
         // Start with has_bits layout (always u32 array, so alignment is 4)
-        let mut layout = std::alloc::Layout::from_size_align(has_bits_size as usize, 4).unwrap();
+        let mut layout = core::alloc::Layout::from_size_align(has_bits_size as usize, 4).unwrap();
         let mut field_offsets = std::vec::Vec::new();
 
         for field in descriptor.field() {
             let field_size = self.field_size(field);
             let field_align = self.field_align(field);
             let field_layout =
-                std::alloc::Layout::from_size_align(field_size as usize, field_align as usize)
+                core::alloc::Layout::from_size_align(field_size as usize, field_align as usize)
                     .unwrap();
 
             let (new_layout, offset) = layout.extend(field_layout).unwrap();
@@ -380,15 +382,15 @@ impl<'alloc> DescriptorPool<'alloc> {
             .count();
 
         // Allocate table with entries - use Layout::extend to handle padding correctly
-        let encode_layout = std::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
+        let encode_layout = core::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
         let (layout, table_offset) = encode_layout
-            .extend(std::alloc::Layout::new::<Table>())
+            .extend(core::alloc::Layout::new::<Table>())
             .unwrap();
         let (layout, decode_offset) = layout
-            .extend(std::alloc::Layout::array::<decoding::TableEntry>(num_decode_entries).unwrap())
+            .extend(core::alloc::Layout::array::<decoding::TableEntry>(num_decode_entries).unwrap())
             .unwrap();
         let (layout, aux_offset) = layout
-            .extend(std::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
+            .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
             .unwrap();
 
         let base_ptr = self.arena.alloc_raw(layout).as_ptr();

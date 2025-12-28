@@ -329,7 +329,7 @@ fn encode_loop<'a>(
                     cursor.write_tag(tag);
                 }
             }
-            FieldKind::Bytes => {
+            FieldKind::Bytes | FieldKind::String => {
                 if obj_state.has_bit(has_bit) {
                     if cursor <= begin {
                         break;
@@ -592,7 +592,7 @@ fn encode_loop<'a>(
                     );
                 }
             }
-            FieldKind::RepeatedBytes => {
+            FieldKind::RepeatedBytes | FieldKind::RepeatedString => {
                 let slice = obj_state.get_slice::<Bytes>(offset);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();

@@ -27,13 +27,11 @@ rust_library(
     ],
 )
 
-# Merged descriptor set using protos from @protobuf
+# Descriptor proto for codegen bootstrap
 proto_descriptor_set(
     name = "descriptor_set",
     deps = [
-        "@protobuf//conformance:conformance_proto",
-        "@protobuf//conformance/test_protos:test_messages_proto2_proto",
-        "@protobuf//conformance/test_protos:test_messages_proto3_proto",
+        "@protobuf//:descriptor_proto",
     ],
     visibility = ["//visibility:public"],
 )

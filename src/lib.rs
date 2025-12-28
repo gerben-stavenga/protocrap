@@ -534,4 +534,18 @@ pub mod tests {
 
         assert_eq!(bytes, roundtrip);
     }
+
+    #[test]
+    fn invalid_utf8_string_rejected() {
+        // FileDescriptorProto field 1 is "name" (string type)
+        // Wire format: tag (field 1, wire type 2) = 0x0a, then length, then bytes
+        // 0xFF is invalid UTF-8
+        let invalid_utf8_name: &[u8] = &[0x0a, 0x03, 0x61, 0xFF, 0x62]; // "a<invalid>b"
+
+        let mut arena = crate::arena::Arena::new(&Global);
+        let mut msg = crate::google::protobuf::FileDescriptorProto::ProtoType::default();
+        let result = msg.decode_flat::<32>(&mut arena, invalid_utf8_name);
+
+        assert!(!result, "decoding invalid UTF-8 in string field should fail");
+    }
 }

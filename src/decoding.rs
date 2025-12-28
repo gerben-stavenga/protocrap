@@ -86,7 +86,8 @@ impl StackEntry {
 enum DecodeObject<'a> {
     None,
     Message(&'a mut Object, &'a Table),
-    Bytes(&'a mut Bytes),
+    /// Bytes field with optional UTF-8 validation flag (true = validate as string)
+    Bytes(&'a mut Bytes, bool),
     SkipLengthDelimited,
     SkipGroup,
     PackedU64(&'a mut RepeatedField<u64>),
@@ -449,6 +450,7 @@ fn decode_fixed<'a, T>(
 fn decode_string<'a>(
     limit: isize,
     bytes: &'a mut Bytes,
+    validate_utf8: bool,
     mut cursor: ReadCursor,
     end: NonNull<u8>,
     stack: &mut Stack<StackEntry>,
@@ -459,9 +461,13 @@ fn decode_string<'a>(
             cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
             arena,
         );
-        return Some((cursor, limit, DecodeObject::Bytes(bytes)));
+        return Some((cursor, limit, DecodeObject::Bytes(bytes, validate_utf8)));
     }
     bytes.append(cursor.read_slice(limit - (cursor - end)), arena);
+    // Validate UTF-8 for string fields
+    if validate_utf8 && core::str::from_utf8(bytes.slice()).is_err() {
+        return None;
+    }
     let ctx = stack.pop()?.into_context(limit, None)?;
     decode_loop(ctx, cursor, end, stack, arena)
 }
@@ -554,13 +560,18 @@ fn decode_loop<'a>(
                             };
                             ctx.set(entry, cursor.read_unaligned::<u32>());
                         }
-                        FieldKind::Bytes => {
+                        FieldKind::Bytes | FieldKind::String => {
                             if tag & 7 != 2 {
                                 break 'unknown;
                             };
+                            let validate_utf8 = entry.kind() == FieldKind::String;
                             let len = cursor.read_size()?;
                             if cursor - limited_end + len <= SLOP_SIZE as isize {
-                                ctx.set_bytes(entry, cursor.read_slice(len), arena);
+                                let slice = cursor.read_slice(len);
+                                if validate_utf8 && core::str::from_utf8(slice).is_err() {
+                                    return None;
+                                }
+                                ctx.set_bytes(entry, slice, arena);
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
                                 let bytes = ctx.set_bytes(
@@ -568,7 +579,7 @@ fn decode_loop<'a>(
                                     cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
                                     arena,
                                 );
-                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes)));
+                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes, validate_utf8)));
                             }
                         }
                         FieldKind::Message => {
@@ -832,13 +843,18 @@ fn decode_loop<'a>(
                                 break 'unknown;
                             }
                         }
-                        FieldKind::RepeatedBytes => {
+                        FieldKind::RepeatedBytes | FieldKind::RepeatedString => {
                             if tag & 7 != 2 {
                                 break 'unknown;
                             };
+                            let validate_utf8 = entry.kind() == FieldKind::RepeatedString;
                             let len = cursor.read_size()?;
                             if cursor - limited_end + len <= SLOP_SIZE as isize {
-                                ctx.add_bytes(entry, cursor.read_slice(len), arena);
+                                let slice = cursor.read_slice(len);
+                                if validate_utf8 && core::str::from_utf8(slice).is_err() {
+                                    return None;
+                                }
+                                ctx.add_bytes(entry, slice, arena);
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
                                 let bytes = ctx.add_bytes(
@@ -846,7 +862,7 @@ fn decode_loop<'a>(
                                     cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
                                     arena,
                                 );
-                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes)));
+                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes, validate_utf8)));
                             }
                         }
                         FieldKind::RepeatedMessage => {
@@ -968,8 +984,8 @@ impl<'a> ResumeableState<'a> {
                 };
                 decode_loop(ctx, cursor, end, stack, arena)?
             }
-            DecodeObject::Bytes(bytes) => {
-                decode_string(self.limit, bytes, cursor, end, stack, arena)?
+            DecodeObject::Bytes(bytes, validate_utf8) => {
+                decode_string(self.limit, bytes, validate_utf8, cursor, end, stack, arena)?
             }
             DecodeObject::SkipLengthDelimited => {
                 skip_length_delimited(self.limit, cursor, end, stack, arena)?
