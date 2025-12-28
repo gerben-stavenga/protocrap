@@ -6,11 +6,18 @@ use protocrap::reflection::DescriptorPool;
 
 // Include all generated code from conformance_all.proto
 // This includes conformance.proto, test_messages_proto2.proto, and test_messages_proto3.proto
+#[cfg(not(bazel))]
 include!(concat!(env!("OUT_DIR"), "/conformance_all.pc.rs"));
+#[cfg(bazel)]
+include!("conformance_all.pc.rs");
 
 // Include descriptor bytes for reuse in main.rs and tests
+#[cfg(not(bazel))]
 pub const CONFORMANCE_DESCRIPTOR_BYTES: &[u8] =
     include_bytes!(concat!(env!("OUT_DIR"), "/conformance_all.bin"));
+#[cfg(bazel)]
+pub const CONFORMANCE_DESCRIPTOR_BYTES: &[u8] =
+    include_bytes!(env!("CONFORMANCE_DESCRIPTOR_SET"));
 
 pub static GLOBAL_ALLOC: Global = Global;
 
@@ -224,7 +231,7 @@ mod tests {
             &"protobuf_test_messages.proto3.TestAllTypesProto3",
         ),
         1,
-        protocrap::base::Message(std::ptr::null_mut()),
+        protocrap::base::OptionalMessage::none(),
         protocrap::containers::String::new(),
         protocrap::containers::String::new(),
         false,

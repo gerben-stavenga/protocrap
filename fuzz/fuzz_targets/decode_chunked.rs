@@ -1,5 +1,5 @@
-#![no_main]
 #![feature(allocator_api)]
+#![no_main]
 
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;

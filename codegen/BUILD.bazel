@@ -1,0 +1,34 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+
+exports_files(["Cargo.toml"])
+
+rust_library(
+    name = "protocrap-codegen-lib",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/main.rs"],
+    ),
+    crate_name = "protocrap_codegen",
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:protocrap",
+        "@crates//:allocator-api2",
+        "@crates//:anyhow",
+        "@crates//:prettyplease",
+        "@crates//:proc-macro2",
+        "@crates//:quote",
+        "@crates//:syn",
+    ],
+)
+
+rust_binary(
+    name = "protocrap-codegen",
+    srcs = ["src/main.rs"],
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":protocrap-codegen-lib",
+        "@crates//:anyhow",
+    ],
+)

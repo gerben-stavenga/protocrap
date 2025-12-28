@@ -1,4 +1,8 @@
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
+
+exports_files(["Cargo.toml"])
 
 proto_library(
     name = "test_proto",
@@ -9,4 +13,43 @@ proto_descriptor_set(
     name = "test_descriptor_set",
     deps = [":test_proto"],
     visibility = ["//visibility:public"],
+)
+
+# Generate Rust code from descriptor set
+genrule(
+    name = "test_generated",
+    srcs = [":test_descriptor_set"],
+    outs = ["src/test.pc.rs"],
+    cmd = "$(execpath //codegen:protocrap-codegen) $(location :test_descriptor_set) $@",
+    tools = ["//codegen:protocrap-codegen"],
+)
+
+# Codegen tests library
+rust_library(
+    name = "codegen_tests_lib",
+    srcs = [
+        "src/lib.rs",
+        ":test_generated",
+    ],
+    crate_name = "codegen_tests",
+    edition = "2024",
+    rustc_flags = ["--cfg=bazel"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:protocrap",
+        "@crates//:allocator-api2",
+        "@crates//:serde",
+        "@crates//:serde_json",
+    ],
+)
+
+# Codegen tests
+rust_test(
+    name = "codegen_tests",
+    crate = ":codegen_tests_lib",
+    rustc_flags = ["--cfg=bazel"],
+    deps = [
+        "@crates//:criterion",
+        "@crates//:rand",
+    ],
 )

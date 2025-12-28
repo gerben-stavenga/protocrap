@@ -1,5 +1,3 @@
-#![feature(allocator_api)]
-
 use anyhow::{Context, Result, bail};
 use protocrap::reflection::{DescriptorPool, DynamicMessageRef};
 use protocrap::{ProtobufMut, ProtobufRef};
@@ -7,6 +5,7 @@ use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse
 use protocrap_conformance::protobuf_test_messages::proto2::TestAllTypesProto2;
 use protocrap_conformance::protobuf_test_messages::proto3::TestAllTypesProto3;
 use protocrap_conformance::{GLOBAL_ALLOC, load_descriptor_pool};
+use serde::Serialize;
 use std::io::{self, Read, Write};
 
 const TEST_JSON: bool = true;
@@ -67,7 +66,6 @@ fn roundtrip_proto<T: protocrap::Protobuf + 'static>(
             }
             let mut serializer = serde_json::Serializer::new(Vec::new());
             let dynamic_msg = DynamicMessageRef::new(msg);
-            use serde::ser::Serialize;
             match dynamic_msg.serialize(&mut serializer) {
                 Ok(()) => {
                     let vec = serializer.into_inner();
@@ -154,7 +152,6 @@ fn do_test_dynamic(
                 return response;
             }
             let mut serializer = serde_json::Serializer::new(Vec::new());
-            use serde::ser::Serialize;
             match msg.serialize(&mut serializer) {
                 Ok(()) => {
                     let vec = serializer.into_inner();

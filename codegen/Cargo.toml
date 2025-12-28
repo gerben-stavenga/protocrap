@@ -10,15 +10,14 @@ keywords = ["protobuf", "codegen"]
 categories = ["development-tools"]
 
 [dependencies]
+allocator-api2 = "0.2"
 anyhow = "1.0.100"
 quote = "1.0"
 syn = { version = "2.0", features = ["full", "parsing"] }
 proc-macro2 = "1.0"
 prettyplease = "0.2"
 
-protocrap_stable = { package = "protocrap", path = "../../protocrap_stable", optional = true }
-protocrap = { path = "../../protocrap", optional = true }
+protocrap = { path = ".." }
 
 [features]
-default = ["protocrap"]
-bootcrap = ["protocrap_stable"]
+default = []

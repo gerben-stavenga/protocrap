@@ -4,6 +4,7 @@ module(
 )
 
 bazel_dep(name = "protobuf", version = "30.0")
+bazel_dep(name = "rules_rust", version = "0.68.1")
 
 # Use main branch - it doesn't have the rules_ruby issue
 git_override(
@@ -13,3 +14,24 @@ git_override(
     patches = ["//patches:protobuf_test_messages_visibility.patch"],
     patch_strip = 1,
 )
+
+# Rust toolchain - need 1.85+ for edition 2024
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2024",
+    versions = ["1.91.1"],
+)
+use_repo(rust, "rust_toolchains")
+register_toolchains("@rust_toolchains//:all")
+
+# Crate universe for cargo dependencies
+crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    cargo_config = "//:.cargo/config.toml",
+    manifests = ["//:Cargo.toml"],
+    generate_binaries = False,
+    generate_build_scripts = True,
+)
+use_repo(crate, "crates")

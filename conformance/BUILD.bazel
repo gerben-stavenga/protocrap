@@ -1,12 +1,15 @@
 # Conformance Test Runner
 
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
+load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
+
+exports_files(["Cargo.toml"])
+
 alias(
     name = "conformance_test_runner",
     actual = "@protobuf//conformance:conformance_test_runner",
     visibility = ["//visibility:public"],
 )
-
-load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
 
 # Merged descriptor set using protos from @protobuf
 proto_descriptor_set(
@@ -19,26 +22,54 @@ proto_descriptor_set(
     visibility = ["//visibility:public"],
 )
 
-# Build the Rust conformance binary via cargo
+# Generate Rust code from descriptor set
 genrule(
-    name = "conformance_binary",
+    name = "conformance_generated",
+    srcs = [":conformance_descriptor_set"],
+    outs = ["src/conformance_all.pc.rs"],
+    cmd = "$(execpath //codegen:protocrap-codegen) $(location :conformance_descriptor_set) $@",
+    tools = ["//codegen:protocrap-codegen"],
+)
+
+# Conformance library with generated code
+rust_library(
+    name = "conformance_lib",
     srcs = [
-        ":conformance_descriptor_set",
-        "//:Cargo.toml",
-        "Cargo.toml",
-        "build.rs",
         "src/lib.rs",
-        "src/main.rs",
+        ":conformance_generated",
     ],
-    outs = ["conformance-protocrap"],
-    cmd = """
-        WORKSPACE=$$(dirname $$(realpath $(location //:Cargo.toml)))
-        cd $$WORKSPACE
-        cargo build -p protocrap-conformance
-        cp target/debug/conformance-protocrap $@
-    """,
-    local = True,
+    compile_data = [":conformance_descriptor_set"],
+    crate_name = "protocrap_conformance",
+    edition = "2024",
+    rustc_env = {
+        "CONFORMANCE_DESCRIPTOR_SET": "$(execpath :conformance_descriptor_set)",
+    },
+    rustc_flags = ["--cfg=bazel"],
     visibility = ["//visibility:public"],
+    deps = [
+        "//:protocrap",
+        "@crates//:allocator-api2",
+        "@crates//:anyhow",
+        "@crates//:serde",
+        "@crates//:serde_json",
+    ],
+)
+
+# Conformance binary
+rust_binary(
+    name = "conformance-protocrap",
+    srcs = ["src/main.rs"],
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":conformance_lib",
+        "//:protocrap",
+        "@crates//:allocator-api2",
+        "@crates//:anyhow",
+        "@crates//:byteorder",
+        "@crates//:serde",
+        "@crates//:serde_json",
+    ],
 )
 
 # Run conformance tests
@@ -49,10 +80,10 @@ sh_test(
         "--enforce_recommended",
         "--failure_list",
         "$(location failing_tests.txt)",
-        "$(location :conformance_binary)",
+        "$(location :conformance-protocrap)",
     ],
     data = [
         "failing_tests.txt",
-        ":conformance_binary",
+        ":conformance-protocrap",
     ],
 )

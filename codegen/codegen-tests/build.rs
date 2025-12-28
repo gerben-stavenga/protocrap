@@ -24,9 +24,24 @@ fn main() -> Result<()> {
         default_path
     };
 
+    // Build descriptor set with bazelisk if missing
+    if !desc_file.exists() {
+        eprintln!("Building test descriptor set with bazelisk...");
+        let bazelisk = workspace_root.join("bazelisk.sh");
+        let status = std::process::Command::new(&bazelisk)
+            .current_dir(&workspace_root)
+            .args(["build", "//codegen/codegen-tests:test_descriptor_set"])
+            .status()
+            .expect("Failed to run bazelisk.sh");
+
+        if !status.success() {
+            panic!("bazelisk build failed");
+        }
+    }
+
     if !desc_file.exists() {
         panic!(
-            "Descriptor set not found at {}. Build it first with: bazel build //codegen/codegen-tests:test_descriptor_set",
+            "Descriptor set not found at {}",
             desc_file.display()
         );
     }

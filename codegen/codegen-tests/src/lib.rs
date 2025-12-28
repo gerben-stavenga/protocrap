@@ -1,11 +1,15 @@
-#![feature(allocator_api)]
+use allocator_api2::alloc::Global;
 
 #[cfg(test)]
 use protocrap::tests::assert_roundtrip;
 use protocrap::{self, containers::Bytes};
 #[cfg(test)]
 use protocrap::{Protobuf, ProtobufRef};
+
+#[cfg(not(bazel))]
 include!(concat!(env!("OUT_DIR"), "/test.pc.rs"));
+#[cfg(bazel)]
+include!("test.pc.rs");
 
 use Test::ProtoType as TestProto;
 
@@ -55,7 +59,7 @@ fn assert_json_roundtrip<T: Protobuf>(msg: &T) {
 
     println!("Serialized JSON: {}", serialized);
 
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     let roundtrip_msg = {
         let mut deserializer = serde_json::Deserializer::from_str(&serialized);
         let seed = protocrap::serde::SerdeDeserialize::<T>::new(&mut arena);
@@ -78,13 +82,13 @@ fn test_small_roundtrips() {
 
 #[test]
 fn test_medium_roundtrips() {
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     assert_roundtrip(&make_medium(&mut arena));
 }
 
 #[test]
 fn test_large_roundtrips() {
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     assert_roundtrip(&make_large(&mut arena));
 }
 
@@ -95,13 +99,13 @@ fn test_small_serde_serialization() {
 
 #[test]
 fn test_medium_serde_serialization() {
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     assert_json_roundtrip(&make_medium(&mut arena));
 }
 
 #[test]
 fn test_large_serde_serialization() {
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     assert_json_roundtrip(&make_large(&mut arena));
 }
 
@@ -235,7 +239,7 @@ mod chunked_tests {
         let encoded = msg.encode_vec::<32>().expect("encode should succeed");
         let chunks = ChunkIter::new(&encoded, strategy, chunk_seed);
 
-        let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+        let mut arena = protocrap::arena::Arena::new(&Global);
         let mut decoded = TestProto::default();
         let mut decoder = ResumeableDecode::<32>::new(&mut decoded, isize::MAX);
 
@@ -274,7 +278,7 @@ mod chunked_tests {
             ChunkStrategy::Random,
         ];
 
-        let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+        let mut arena = protocrap::arena::Arena::new(&Global);
 
         for strategy in strategies {
             for seed in 0..10 {
@@ -296,7 +300,7 @@ mod chunked_tests {
 
         for strategy in strategies {
             for msg_seed in 0..50 {
-                let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+                let mut arena = protocrap::arena::Arena::new(&Global);
                 let mut rng = StdRng::seed_from_u64(msg_seed);
                 let msg = make_random(&mut arena, &mut rng, 3);
 

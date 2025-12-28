@@ -10,7 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 arbitrary = { version = "1", features = ["derive"] }
-protocrap = { path = ".." }
+protocrap = { path = "..", features = ["nightly"] }
 
 [[bin]]
 name = "decode_raw"

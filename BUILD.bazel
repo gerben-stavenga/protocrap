@@ -1,4 +1,31 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
+
+exports_files([
+    "Cargo.toml",
+    "Cargo.lock",
+    ".cargo/config.toml",
+])
+
+# Main protocrap library
+rust_library(
+    name = "protocrap",
+    srcs = glob(["src/**/*.rs"]),
+    crate_features = [
+        "std",
+        "serde_support",
+    ],
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crates//:allocator-api2",
+        "@crates//:anyhow",
+        "@crates//:base64",
+        "@crates//:futures",
+        "@crates//:serde",
+        "@crates//:time",
+    ],
+)
 
 # Merged descriptor set using protos from @protobuf
 proto_descriptor_set(
@@ -10,6 +37,4 @@ proto_descriptor_set(
     ],
     visibility = ["//visibility:public"],
 )
-
-exports_files(["Cargo.toml"])
 

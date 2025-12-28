@@ -2,6 +2,7 @@
 
 use std::panic;
 
+use allocator_api2::alloc::Global;
 use super::protocrap;
 use crate::names::*;
 use crate::tables;
@@ -100,10 +101,10 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     // when multiple files share the same package
     let file_descriptor = if file.name() == "proto/descriptor.proto" {
         // Special case: generate FileDescriptorProto static
-        let mut pool = protocrap::reflection::DescriptorPool::new(&std::alloc::Global);
+        let mut pool = protocrap::reflection::DescriptorPool::new(&Global);
         pool.add_file(file);
         let serialized = file.encode_vec::<100>()?;
-        let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+        let mut arena = protocrap::arena::Arena::new(&Global);
         let dyn_file_descriptor = pool.decode_message(
             "google.protobuf.FileDescriptorProto",
             &serialized,
