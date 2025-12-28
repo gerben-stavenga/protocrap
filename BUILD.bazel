@@ -11,3 +11,5 @@ proto_descriptor_set(
     visibility = ["//visibility:public"],
 )
 
+exports_files(["Cargo.toml"])
+

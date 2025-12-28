@@ -2,23 +2,41 @@
 
 This directory contains the conformance test setup for protocrap using Google's official protobuf conformance test suite.
 
-## Setup
-
-1. Build the conformance test binary:
-```bash
-cargo build -p protocrap-conformance
-```
-
 ## Running Tests
 
-Run all conformance tests:
+The simplest way to run the conformance tests:
+
 ```bash
-bazelisk run @protobuf//conformance:conformance_test_runner -- --enforce_recommended ../target/debug/conformance-protocrap
+bazel test //conformance:conformance_test
 ```
 
-Run with specific test suite:
+To see test output and force re-run (bypass cache):
+
 ```bash
-bazelisk run @protobuf//conformance:conformance_test_runner -- --failure_list failure_list.txt ../target/debug/conformance-protocrap
+bazel test //conformance:conformance_test --nocache_test_results --test_output=all
+```
+
+This will:
+1. Build the FileDescriptorSet from protobuf's conformance protos
+2. Build the Rust conformance binary via cargo
+3. Run the conformance test suite with the expected failure list
+
+## Manual Testing
+
+If you prefer to run steps manually:
+
+```bash
+# Build the descriptor set
+bazel build //conformance:conformance_descriptor_set
+
+# Build the conformance binary
+cargo build -p protocrap-conformance
+
+# Run tests with failure list
+bazel run @protobuf//conformance:conformance_test_runner -- \
+    --enforce_recommended \
+    --failure_list $PWD/conformance/failing_tests.txt \
+    $PWD/target/debug/conformance-protocrap
 ```
 
 ## Protocol
@@ -32,7 +50,7 @@ The conformance test protocol works as follows:
 
 ## Files
 
-- `conformance.proto` - Defines the test protocol messages
-- `test_messages_protoX.proto` - Defines test message schemas
-- `build.rs` - Generates Rust code from proto files
+- `failing_tests.txt` - Expected failures (by design or not yet implemented)
+- `build.rs` - Generates Rust code from the FileDescriptorSet
 - `src/main.rs` - Conformance test binary implementation
+- `BUILD.bazel` - Bazel rules for building and testing

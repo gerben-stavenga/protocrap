@@ -2,31 +2,28 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
-    // Protos come from @protobuf Bazel module now
-    println!("cargo:rerun-if-changed=BUILD.bazel");
-
     let out_dir = std::env::var("OUT_DIR").unwrap();
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let workspace_root = PathBuf::from(&manifest_dir).parent().unwrap().to_path_buf();
 
-    // Get bazelisk path
-    let bazelisk = protocrap_codegen::get_bazelisk_path(&workspace_root);
+    // Find descriptor set - either from env var or default bazel-bin location
+    let desc_file = if let Ok(path) = std::env::var("PROTOCRAP_DESCRIPTOR_SET") {
+        println!("cargo:rerun-if-env-changed=PROTOCRAP_DESCRIPTOR_SET");
+        PathBuf::from(path)
+    } else {
+        let default_path = workspace_root.join("bazel-bin/conformance/conformance_descriptor_set.bin");
+        println!("cargo:rerun-if-changed={}", default_path.display());
+        default_path
+    };
 
-    // Build descriptor set via Bazel
-    println!("cargo:warning=Building conformance protos via Bazel...");
-    let status = Command::new(&bazelisk)
-        .current_dir(&workspace_root)
-        .args(["build", "//conformance:conformance_descriptor_set"])
-        .status()
-        .expect("Failed to run bazelisk");
-
-    if !status.success() {
-        panic!("Bazel build failed for conformance_descriptor_set");
+    if !desc_file.exists() {
+        panic!(
+            "Descriptor set not found at {}. Build it first with: bazel build //conformance:conformance_descriptor_set",
+            desc_file.display()
+        );
     }
 
-    let desc_file = workspace_root.join("bazel-bin/conformance/conformance_descriptor_set.bin");
-
-    // Find the codegen binary - use the already-built one instead of cargo run
+    // Find the codegen binary
     let codegen_bin = if let Ok(path) = std::env::var("PROTOCRAP_CODEGEN") {
         PathBuf::from(path)
     } else {
@@ -39,15 +36,10 @@ fn main() {
             debug_bin
         } else {
             panic!(
-                "protocrap-codegen binary not found. Please build it first with: cargo build -p protocrap-codegen"
+                "protocrap-codegen binary not found. Build it first with: cargo build -p protocrap-codegen"
             );
         }
     };
-
-    println!(
-        "cargo:warning=Using codegen binary: {}",
-        codegen_bin.display()
-    );
 
     // Generate Rust code
     let out_file = format!("{}/conformance_all.pc.rs", out_dir);
@@ -60,10 +52,7 @@ fn main() {
         panic!("protocrap-codegen failed");
     }
 
-    println!("cargo:warning=Generated {}", out_file);
-
     // Copy descriptor set to OUT_DIR for include_bytes!
-    // Remove existing file first (may be read-only from previous copy)
     let out_bin = format!("{}/conformance_all.bin", out_dir);
     let _ = std::fs::remove_file(&out_bin);
     let data = std::fs::read(&desc_file).expect("Failed to read descriptor set");

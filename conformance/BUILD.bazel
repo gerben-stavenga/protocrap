@@ -18,3 +18,41 @@ proto_descriptor_set(
     ],
     visibility = ["//visibility:public"],
 )
+
+# Build the Rust conformance binary via cargo
+genrule(
+    name = "conformance_binary",
+    srcs = [
+        ":conformance_descriptor_set",
+        "//:Cargo.toml",
+        "Cargo.toml",
+        "build.rs",
+        "src/lib.rs",
+        "src/main.rs",
+    ],
+    outs = ["conformance-protocrap"],
+    cmd = """
+        WORKSPACE=$$(dirname $$(realpath $(location //:Cargo.toml)))
+        cd $$WORKSPACE
+        cargo build -p protocrap-conformance
+        cp target/debug/conformance-protocrap $@
+    """,
+    local = True,
+    visibility = ["//visibility:public"],
+)
+
+# Run conformance tests
+sh_test(
+    name = "conformance_test",
+    srcs = ["@protobuf//conformance:conformance_test_runner"],
+    args = [
+        "--enforce_recommended",
+        "--failure_list",
+        "$(location failing_tests.txt)",
+        "$(location :conformance_binary)",
+    ],
+    data = [
+        "failing_tests.txt",
+        ":conformance_binary",
+    ],
+)
