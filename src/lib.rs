@@ -1,4 +1,4 @@
-#![feature(likely_unlikely, allocator_api)]
+#![feature(likely_unlikely, allocator_api, const_trait_impl)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub mod arena;
@@ -21,7 +21,7 @@ pub mod serde;
 
 // One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
 // but that is not allowed because Default and Debug are not local to this crate.
-pub trait Protobuf: Default + core::fmt::Debug {
+pub const trait Protobuf: Default + core::fmt::Debug {
     fn table() -> &'static tables::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
         Self::table().descriptor
@@ -34,6 +34,10 @@ pub trait Protobuf: Default + core::fmt::Debug {
     fn as_object_mut(&mut self) -> &mut base::Object {
         unsafe { &mut *(self as *mut Self as *mut base::Object) }
     }
+}
+
+pub const fn as_object<T: Protobuf>(msg: &T) -> &base::Object {
+    unsafe { &*(msg as *const T as *const base::Object) }
 }
 
 /// Read-only protobuf operations (encode, serialize, inspect).
@@ -261,7 +265,7 @@ impl<T: Protobuf> ProtobufMut<'static> for T {
 }
 
 pub mod tests {
-    use crate::{Protobuf, ProtobufRef, ProtobufMut};
+    use crate::{Protobuf, ProtobufMut, ProtobufRef};
 
     pub fn assert_roundtrip<T: Protobuf>(msg: &T) {
         let data = msg.encode_vec::<32>().expect("msg should encode");

@@ -2,9 +2,9 @@
 
 #[cfg(test)]
 use protocrap::tests::assert_roundtrip;
+use protocrap::{self, containers::Bytes};
 #[cfg(test)]
 use protocrap::{Protobuf, ProtobufRef};
-use protocrap::{self, containers::Bytes};
 include!(concat!(env!("OUT_DIR"), "/test.pc.rs"));
 
 use Test::ProtoType as TestProto;

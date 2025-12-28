@@ -1,8 +1,8 @@
 #![feature(allocator_api)]
 
 use anyhow::{Context, Result, bail};
-use protocrap::{ProtobufRef, ProtobufMut};
 use protocrap::reflection::{DescriptorPool, DynamicMessageRef};
+use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
 use protocrap_conformance::protobuf_test_messages::proto2::TestAllTypesProto2;
 use protocrap_conformance::protobuf_test_messages::proto3::TestAllTypesProto3;

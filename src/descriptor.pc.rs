@@ -97,7 +97,7 @@ pub mod google {
                     Self { has_bits, file }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -307,7 +307,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -316,10 +316,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[1].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -350,10 +347,7 @@ pub mod google {
                     self.name.clear();
                 }
                 pub const fn has_package(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn package(&self) -> &str {
                     self.package.as_str()
@@ -560,10 +554,7 @@ pub mod google {
                     self.source_code_info.clear();
                 }
                 pub const fn has_syntax(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn syntax(&self) -> &str {
                     self.syntax.as_str()
@@ -594,10 +585,7 @@ pub mod google {
                     self.syntax.clear();
                 }
                 pub const fn has_edition(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn edition(&self) -> Option<crate::google::protobuf::Edition> {
                     crate::google::protobuf::Edition::from_i32(self.edition)
@@ -987,7 +975,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -1000,10 +988,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_start(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn start(&self) -> i32 {
                         self.start
@@ -1026,10 +1011,7 @@ pub mod google {
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
@@ -1183,7 +1165,7 @@ pub mod google {
                         Self { has_bits, start, end }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -1196,10 +1178,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_start(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn start(&self) -> i32 {
                         self.start
@@ -1222,10 +1201,7 @@ pub mod google {
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
@@ -1412,7 +1388,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -1421,10 +1397,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[2].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -1664,10 +1637,7 @@ pub mod google {
                     &mut self.reserved_name
                 }
                 pub const fn has_visibility(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn visibility(
                     &self,
@@ -2074,7 +2044,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -2087,10 +2057,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_number(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn number(&self) -> i32 {
                         self.number
@@ -2113,10 +2080,7 @@ pub mod google {
                         self.number = Default::default();
                     }
                     pub const fn has_full_name(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn full_name(&self) -> &str {
                         self.full_name.as_str()
@@ -2151,10 +2115,7 @@ pub mod google {
                         self.full_name.clear();
                     }
                     pub const fn has_type(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(2usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(2usize as u8)
                     }
                     pub const fn r#type(&self) -> &str {
                         self.r#type.as_str()
@@ -2185,10 +2146,7 @@ pub mod google {
                         self.r#type.clear();
                     }
                     pub const fn has_reserved(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(3usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(3usize as u8)
                     }
                     pub const fn reserved(&self) -> bool {
                         self.reserved
@@ -2211,10 +2169,7 @@ pub mod google {
                         self.reserved = Default::default();
                     }
                     pub const fn has_repeated(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(4usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(4usize as u8)
                     }
                     pub const fn repeated(&self) -> bool {
                         self.repeated
@@ -2389,7 +2344,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -2467,10 +2422,7 @@ pub mod google {
                     self.features.clear();
                 }
                 pub const fn has_verification(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn verification(
                     &self,
@@ -3772,7 +3724,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -3781,10 +3733,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[4].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -3815,10 +3764,7 @@ pub mod google {
                     self.name.clear();
                 }
                 pub const fn has_number(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn number(&self) -> i32 {
                     self.number
@@ -3841,10 +3787,7 @@ pub mod google {
                     self.number = Default::default();
                 }
                 pub const fn has_label(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn label(
                     &self,
@@ -3874,10 +3817,7 @@ pub mod google {
                     self.label = 0;
                 }
                 pub const fn has_type(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn r#type(
                     &self,
@@ -3907,10 +3847,7 @@ pub mod google {
                     self.r#type = 0;
                 }
                 pub const fn has_type_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn type_name(&self) -> &str {
                     self.type_name.as_str()
@@ -3945,10 +3882,7 @@ pub mod google {
                     self.type_name.clear();
                 }
                 pub const fn has_extendee(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(5usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(5usize as u8)
                 }
                 pub const fn extendee(&self) -> &str {
                     self.extendee.as_str()
@@ -3979,10 +3913,7 @@ pub mod google {
                     self.extendee.clear();
                 }
                 pub const fn has_default_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(6usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(6usize as u8)
                 }
                 pub const fn default_value(&self) -> &str {
                     self.default_value.as_str()
@@ -4017,10 +3948,7 @@ pub mod google {
                     self.default_value.clear();
                 }
                 pub const fn has_oneof_index(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(7usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(7usize as u8)
                 }
                 pub const fn oneof_index(&self) -> i32 {
                     self.oneof_index
@@ -4043,10 +3971,7 @@ pub mod google {
                     self.oneof_index = Default::default();
                 }
                 pub const fn has_json_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(8usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(8usize as u8)
                 }
                 pub const fn json_name(&self) -> &str {
                     self.json_name.as_str()
@@ -4098,10 +4023,7 @@ pub mod google {
                     self.options.clear();
                 }
                 pub const fn has_proto3_optional(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(9usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(9usize as u8)
                 }
                 pub const fn proto3_optional(&self) -> bool {
                     self.proto3_optional
@@ -4334,7 +4256,7 @@ pub mod google {
                     Self { has_bits, name, options }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -4343,10 +4265,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[5].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -4499,7 +4418,7 @@ pub mod google {
                         Self { has_bits, start, end }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -4512,10 +4431,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_start(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn start(&self) -> i32 {
                         self.start
@@ -4538,10 +4454,7 @@ pub mod google {
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
@@ -4673,7 +4586,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -4682,10 +4595,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[6].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -4795,10 +4705,7 @@ pub mod google {
                     &mut self.reserved_name
                 }
                 pub const fn has_visibility(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn visibility(
                     &self,
@@ -5024,7 +4931,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -5033,10 +4940,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[7].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -5067,10 +4971,7 @@ pub mod google {
                     self.name.clear();
                 }
                 pub const fn has_number(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn number(&self) -> i32 {
                     self.number
@@ -5238,7 +5139,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -5247,10 +5148,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[8].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -5476,7 +5374,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -5485,10 +5383,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[9].as_ref()
                 }
                 pub const fn has_name(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn name(&self) -> &str {
                     self.name.as_str()
@@ -5519,10 +5414,7 @@ pub mod google {
                     self.name.clear();
                 }
                 pub const fn has_input_type(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn input_type(&self) -> &str {
                     self.input_type.as_str()
@@ -5557,10 +5449,7 @@ pub mod google {
                     self.input_type.clear();
                 }
                 pub const fn has_output_type(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn output_type(&self) -> &str {
                     self.output_type.as_str()
@@ -5612,10 +5501,7 @@ pub mod google {
                     self.options.clear();
                 }
                 pub const fn has_client_streaming(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn client_streaming(&self) -> bool {
                     if self.has_client_streaming() {
@@ -5646,10 +5532,7 @@ pub mod google {
                     self.client_streaming = Default::default();
                 }
                 pub const fn has_server_streaming(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn server_streaming(&self) -> bool {
                     if self.has_server_streaming() {
@@ -5917,7 +5800,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -5926,10 +5809,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[10].as_ref()
                 }
                 pub const fn has_java_package(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn java_package(&self) -> &str {
                     self.java_package.as_str()
@@ -5964,10 +5844,7 @@ pub mod google {
                     self.java_package.clear();
                 }
                 pub const fn has_java_outer_classname(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn java_outer_classname(&self) -> &str {
                     self.java_outer_classname.as_str()
@@ -6002,10 +5879,7 @@ pub mod google {
                     self.java_outer_classname.clear();
                 }
                 pub const fn has_java_multiple_files(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn java_multiple_files(&self) -> bool {
                     if self.has_java_multiple_files() {
@@ -6036,10 +5910,7 @@ pub mod google {
                     self.java_multiple_files = Default::default();
                 }
                 pub const fn has_java_generate_equals_and_hash(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn java_generate_equals_and_hash(&self) -> bool {
                     self.java_generate_equals_and_hash
@@ -6069,10 +5940,7 @@ pub mod google {
                     self.java_generate_equals_and_hash = Default::default();
                 }
                 pub const fn has_java_string_check_utf8(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn java_string_check_utf8(&self) -> bool {
                     if self.has_java_string_check_utf8() {
@@ -6106,10 +5974,7 @@ pub mod google {
                     self.java_string_check_utf8 = Default::default();
                 }
                 pub const fn has_optimize_for(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(5usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(5usize as u8)
                 }
                 pub const fn optimize_for(
                     &self,
@@ -6139,10 +6004,7 @@ pub mod google {
                     self.optimize_for = 0;
                 }
                 pub const fn has_go_package(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(6usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(6usize as u8)
                 }
                 pub const fn go_package(&self) -> &str {
                     self.go_package.as_str()
@@ -6177,10 +6039,7 @@ pub mod google {
                     self.go_package.clear();
                 }
                 pub const fn has_cc_generic_services(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(7usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(7usize as u8)
                 }
                 pub const fn cc_generic_services(&self) -> bool {
                     if self.has_cc_generic_services() {
@@ -6211,10 +6070,7 @@ pub mod google {
                     self.cc_generic_services = Default::default();
                 }
                 pub const fn has_java_generic_services(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(8usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(8usize as u8)
                 }
                 pub const fn java_generic_services(&self) -> bool {
                     if self.has_java_generic_services() {
@@ -6248,10 +6104,7 @@ pub mod google {
                     self.java_generic_services = Default::default();
                 }
                 pub const fn has_py_generic_services(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(9usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(9usize as u8)
                 }
                 pub const fn py_generic_services(&self) -> bool {
                     if self.has_py_generic_services() {
@@ -6282,10 +6135,7 @@ pub mod google {
                     self.py_generic_services = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(10usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(10usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -6308,10 +6158,7 @@ pub mod google {
                     self.deprecated = Default::default();
                 }
                 pub const fn has_cc_enable_arenas(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(11usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(11usize as u8)
                 }
                 pub const fn cc_enable_arenas(&self) -> bool {
                     if self.has_cc_enable_arenas() {
@@ -6342,10 +6189,7 @@ pub mod google {
                     self.cc_enable_arenas = Default::default();
                 }
                 pub const fn has_objc_class_prefix(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(12usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(12usize as u8)
                 }
                 pub const fn objc_class_prefix(&self) -> &str {
                     self.objc_class_prefix.as_str()
@@ -6380,10 +6224,7 @@ pub mod google {
                     self.objc_class_prefix.clear();
                 }
                 pub const fn has_csharp_namespace(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(13usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(13usize as u8)
                 }
                 pub const fn csharp_namespace(&self) -> &str {
                     self.csharp_namespace.as_str()
@@ -6418,10 +6259,7 @@ pub mod google {
                     self.csharp_namespace.clear();
                 }
                 pub const fn has_swift_prefix(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(14usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(14usize as u8)
                 }
                 pub const fn swift_prefix(&self) -> &str {
                     self.swift_prefix.as_str()
@@ -6456,10 +6294,7 @@ pub mod google {
                     self.swift_prefix.clear();
                 }
                 pub const fn has_php_class_prefix(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(15usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(15usize as u8)
                 }
                 pub const fn php_class_prefix(&self) -> &str {
                     self.php_class_prefix.as_str()
@@ -6494,10 +6329,7 @@ pub mod google {
                     self.php_class_prefix.clear();
                 }
                 pub const fn has_php_namespace(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(16usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(16usize as u8)
                 }
                 pub const fn php_namespace(&self) -> &str {
                     self.php_namespace.as_str()
@@ -6532,10 +6364,7 @@ pub mod google {
                     self.php_namespace.clear();
                 }
                 pub const fn has_php_metadata_namespace(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(17usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(17usize as u8)
                 }
                 pub const fn php_metadata_namespace(&self) -> &str {
                     self.php_metadata_namespace.as_str()
@@ -6570,10 +6399,7 @@ pub mod google {
                     self.php_metadata_namespace.clear();
                 }
                 pub const fn has_ruby_package(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(18usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(18usize as u8)
                 }
                 pub const fn ruby_package(&self) -> &str {
                     self.ruby_package.as_str()
@@ -8003,7 +7829,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -8012,10 +7838,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[11].as_ref()
                 }
                 pub const fn has_message_set_wire_format(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn message_set_wire_format(&self) -> bool {
                     if self.has_message_set_wire_format() {
@@ -8049,10 +7872,7 @@ pub mod google {
                     self.message_set_wire_format = Default::default();
                 }
                 pub const fn has_no_standard_descriptor_accessor(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn no_standard_descriptor_accessor(&self) -> bool {
                     if self.has_no_standard_descriptor_accessor() {
@@ -8086,10 +7906,7 @@ pub mod google {
                     self.no_standard_descriptor_accessor = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -8112,10 +7929,7 @@ pub mod google {
                     self.deprecated = Default::default();
                 }
                 pub const fn has_map_entry(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn map_entry(&self) -> bool {
                     self.map_entry
@@ -8138,10 +7952,7 @@ pub mod google {
                     self.map_entry = Default::default();
                 }
                 pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn deprecated_legacy_json_field_conflicts(&self) -> bool {
                     self.deprecated_legacy_json_field_conflicts
@@ -9402,7 +9213,7 @@ pub mod google {
                         Self { has_bits, edition, value }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -9415,10 +9226,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_edition(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn edition(
                         &self,
@@ -9446,10 +9254,7 @@ pub mod google {
                         self.edition = 0;
                     }
                     pub const fn has_value(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn value(&self) -> &str {
                         self.value.as_str()
@@ -9571,7 +9376,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -9584,10 +9389,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_edition_introduced(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn edition_introduced(
                         &self,
@@ -9617,10 +9419,7 @@ pub mod google {
                         self.edition_introduced = 0;
                     }
                     pub const fn has_edition_deprecated(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn edition_deprecated(
                         &self,
@@ -9650,10 +9449,7 @@ pub mod google {
                         self.edition_deprecated = 0;
                     }
                     pub const fn has_deprecation_warning(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(2usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(2usize as u8)
                     }
                     pub const fn deprecation_warning(&self) -> &str {
                         self.deprecation_warning.as_str()
@@ -9688,10 +9484,7 @@ pub mod google {
                         self.deprecation_warning.clear();
                     }
                     pub const fn has_edition_removed(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(3usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(3usize as u8)
                     }
                     pub const fn edition_removed(
                         &self,
@@ -9719,10 +9512,7 @@ pub mod google {
                         self.edition_removed = 0;
                     }
                     pub const fn has_removal_error(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(4usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(4usize as u8)
                     }
                     pub const fn removal_error(&self) -> &str {
                         self.removal_error.as_str()
@@ -10026,7 +9816,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -10035,10 +9825,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[12].as_ref()
                 }
                 pub const fn has_ctype(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn ctype(
                     &self,
@@ -10066,10 +9853,7 @@ pub mod google {
                     self.ctype = 0;
                 }
                 pub const fn has_packed(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn packed(&self) -> bool {
                     self.packed
@@ -10092,10 +9876,7 @@ pub mod google {
                     self.packed = Default::default();
                 }
                 pub const fn has_jstype(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn jstype(
                     &self,
@@ -10123,10 +9904,7 @@ pub mod google {
                     self.jstype = 0;
                 }
                 pub const fn has_lazy(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn lazy(&self) -> bool {
                     if self.has_lazy() { self.lazy } else { false }
@@ -10149,10 +9927,7 @@ pub mod google {
                     self.lazy = Default::default();
                 }
                 pub const fn has_unverified_lazy(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn unverified_lazy(&self) -> bool {
                     if self.has_unverified_lazy() { self.unverified_lazy } else { false }
@@ -10179,10 +9954,7 @@ pub mod google {
                     self.unverified_lazy = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(5usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(5usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -10205,10 +9977,7 @@ pub mod google {
                     self.deprecated = Default::default();
                 }
                 pub const fn has_weak(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(6usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(6usize as u8)
                 }
                 pub const fn weak(&self) -> bool {
                     if self.has_weak() { self.weak } else { false }
@@ -10231,10 +10000,7 @@ pub mod google {
                     self.weak = Default::default();
                 }
                 pub const fn has_debug_redact(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(7usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(7usize as u8)
                 }
                 pub const fn debug_redact(&self) -> bool {
                     if self.has_debug_redact() { self.debug_redact } else { false }
@@ -10257,10 +10023,7 @@ pub mod google {
                     self.debug_redact = Default::default();
                 }
                 pub const fn has_retention(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(8usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(8usize as u8)
                 }
                 pub const fn retention(
                     &self,
@@ -11687,7 +11450,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -12882,7 +12645,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -12891,10 +12654,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[14].as_ref()
                 }
                 pub const fn has_allow_alias(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn allow_alias(&self) -> bool {
                     self.allow_alias
@@ -12917,10 +12677,7 @@ pub mod google {
                     self.allow_alias = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -12943,10 +12700,7 @@ pub mod google {
                     self.deprecated = Default::default();
                 }
                 pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn deprecated_legacy_json_field_conflicts(&self) -> bool {
                     self.deprecated_legacy_json_field_conflicts
@@ -14205,7 +13959,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -14214,10 +13968,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[15].as_ref()
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -14257,10 +14008,7 @@ pub mod google {
                     self.features.clear();
                 }
                 pub const fn has_debug_redact(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn debug_redact(&self) -> bool {
                     if self.has_debug_redact() { self.debug_redact } else { false }
@@ -15518,7 +15266,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -15544,10 +15292,7 @@ pub mod google {
                     self.features.clear();
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -16767,7 +16512,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -16776,10 +16521,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[17].as_ref()
                 }
                 pub const fn has_deprecated(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn deprecated(&self) -> bool {
                     if self.has_deprecated() { self.deprecated } else { false }
@@ -16802,10 +16544,7 @@ pub mod google {
                     self.deprecated = Default::default();
                 }
                 pub const fn has_idempotency_level(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn idempotency_level(
                     &self,
@@ -18031,7 +17770,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -18044,10 +17783,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_name_part(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn name_part(&self) -> &str {
                         self.name_part.as_str()
@@ -18082,10 +17818,7 @@ pub mod google {
                         self.name_part.clear();
                     }
                     pub const fn has_is_extension(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn is_extension(&self) -> bool {
                         self.is_extension
@@ -18209,7 +17942,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -18244,10 +17977,7 @@ pub mod google {
                     self.name.last_mut().unwrap()
                 }
                 pub const fn has_identifier_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn identifier_value(&self) -> &str {
                     self.identifier_value.as_str()
@@ -18282,10 +18012,7 @@ pub mod google {
                     self.identifier_value.clear();
                 }
                 pub const fn has_positive_int_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn positive_int_value(&self) -> u64 {
                     self.positive_int_value
@@ -18312,10 +18039,7 @@ pub mod google {
                     self.positive_int_value = Default::default();
                 }
                 pub const fn has_negative_int_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn negative_int_value(&self) -> i64 {
                     self.negative_int_value
@@ -18342,10 +18066,7 @@ pub mod google {
                     self.negative_int_value = Default::default();
                 }
                 pub const fn has_double_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn double_value(&self) -> f64 {
                     self.double_value
@@ -18368,10 +18089,7 @@ pub mod google {
                     self.double_value = Default::default();
                 }
                 pub const fn has_string_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn string_value(&self) -> &[u8] {
                     self.string_value.slice()
@@ -18406,10 +18124,7 @@ pub mod google {
                     self.string_value.clear();
                 }
                 pub const fn has_aggregate_value(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(5usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(5usize as u8)
                 }
                 pub const fn aggregate_value(&self) -> &str {
                     self.aggregate_value.as_str()
@@ -18628,7 +18343,7 @@ pub mod google {
                         Self { has_bits }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -18856,7 +18571,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -18865,10 +18580,7 @@ pub mod google {
                     Self::file_descriptor().message_type()[19].as_ref()
                 }
                 pub const fn has_field_presence(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn field_presence(
                     &self,
@@ -18898,10 +18610,7 @@ pub mod google {
                     self.field_presence = 0;
                 }
                 pub const fn has_enum_type(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn enum_type(
                     &self,
@@ -18931,10 +18640,7 @@ pub mod google {
                     self.enum_type = 0;
                 }
                 pub const fn has_repeated_field_encoding(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(2usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(2usize as u8)
                 }
                 pub const fn repeated_field_encoding(
                     &self,
@@ -18966,10 +18672,7 @@ pub mod google {
                     self.repeated_field_encoding = 0;
                 }
                 pub const fn has_utf8_validation(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(3usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(3usize as u8)
                 }
                 pub const fn utf8_validation(
                     &self,
@@ -18999,10 +18702,7 @@ pub mod google {
                     self.utf8_validation = 0;
                 }
                 pub const fn has_message_encoding(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(4usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(4usize as u8)
                 }
                 pub const fn message_encoding(
                     &self,
@@ -19032,10 +18732,7 @@ pub mod google {
                     self.message_encoding = 0;
                 }
                 pub const fn has_json_format(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(5usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(5usize as u8)
                 }
                 pub const fn json_format(
                     &self,
@@ -19065,10 +18762,7 @@ pub mod google {
                     self.json_format = 0;
                 }
                 pub const fn has_enforce_naming_style(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(6usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(6usize as u8)
                 }
                 pub const fn enforce_naming_style(
                     &self,
@@ -19100,10 +18794,7 @@ pub mod google {
                     self.enforce_naming_style = 0;
                 }
                 pub const fn has_default_symbol_visibility(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(7usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(7usize as u8)
                 }
                 pub const fn default_symbol_visibility(
                     &self,
@@ -19305,7 +18996,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -19318,10 +19009,7 @@ pub mod google {
                             .as_ref()
                     }
                     pub const fn has_edition(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn edition(
                         &self,
@@ -19530,7 +19218,7 @@ pub mod google {
                     }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -19565,10 +19253,7 @@ pub mod google {
                     self.defaults.last_mut().unwrap()
                 }
                 pub const fn has_minimum_edition(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(0usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(0usize as u8)
                 }
                 pub const fn minimum_edition(
                     &self,
@@ -19596,10 +19281,7 @@ pub mod google {
                     self.minimum_edition = 0;
                 }
                 pub const fn has_maximum_edition(&self) -> bool {
-                    unsafe {
-                        (*(self as *const _ as *const protocrap::base::Object))
-                            .has_bit(1usize as u8)
-                    }
+                    protocrap::as_object(self).has_bit(1usize as u8)
                 }
                 pub const fn maximum_edition(
                     &self,
@@ -19763,7 +19445,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -19792,10 +19474,7 @@ pub mod google {
                         &mut self.span
                     }
                     pub const fn has_leading_comments(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn leading_comments(&self) -> &str {
                         self.leading_comments.as_str()
@@ -19830,10 +19509,7 @@ pub mod google {
                         self.leading_comments.clear();
                     }
                     pub const fn has_trailing_comments(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn trailing_comments(&self) -> &str {
                         self.trailing_comments.as_str()
@@ -19993,7 +19669,7 @@ pub mod google {
                     Self { has_bits, location }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -20157,7 +19833,7 @@ pub mod google {
                         }
                     }
                     pub fn clear(&mut self) {
-                        *self = unsafe { core::mem::zeroed() };
+                        *self = Self::default();
                     }
                     pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                         &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO
@@ -20178,10 +19854,7 @@ pub mod google {
                         &mut self.path
                     }
                     pub const fn has_source_file(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(0usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(0usize as u8)
                     }
                     pub const fn source_file(&self) -> &str {
                         self.source_file.as_str()
@@ -20216,10 +19889,7 @@ pub mod google {
                         self.source_file.clear();
                     }
                     pub const fn has_begin(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(1usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(1usize as u8)
                     }
                     pub const fn begin(&self) -> i32 {
                         self.begin
@@ -20242,10 +19912,7 @@ pub mod google {
                         self.begin = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(2usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(2usize as u8)
                     }
                     pub const fn end(&self) -> i32 {
                         self.end
@@ -20268,10 +19935,7 @@ pub mod google {
                         self.end = Default::default();
                     }
                     pub const fn has_semantic(&self) -> bool {
-                        unsafe {
-                            (*(self as *const _ as *const protocrap::base::Object))
-                                .has_bit(3usize as u8)
-                        }
+                        protocrap::as_object(self).has_bit(3usize as u8)
                     }
                     pub const fn semantic(
                         &self,
@@ -20413,7 +20077,7 @@ pub mod google {
                     Self { has_bits, annotation }
                 }
                 pub fn clear(&mut self) {
-                    *self = unsafe { core::mem::zeroed() };
+                    *self = Self::default();
                 }
                 pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                     &crate::google::protobuf::_descriptor::FILE_DESCRIPTOR_PROTO

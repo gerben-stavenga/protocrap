@@ -36,7 +36,10 @@ pub fn rust_field_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     use protocrap::google::protobuf::FieldDescriptorProto::Label;
 
     let is_repeated = field.label().unwrap() == Label::LABEL_REPEATED;
-    let is_message = matches!(field.r#type(), Some(Type::TYPE_MESSAGE) | Some(Type::TYPE_GROUP));
+    let is_message = matches!(
+        field.r#type(),
+        Some(Type::TYPE_MESSAGE) | Some(Type::TYPE_GROUP)
+    );
 
     if is_repeated {
         let element = rust_element_type_tokens(field);

@@ -1,5 +1,5 @@
 use crate::{
-    Protobuf, ProtobufRef, ProtobufMut,
+    Protobuf, ProtobufMut, ProtobufRef,
     arena::Arena,
     base::{Message, Object},
     containers::{Bytes, String},
@@ -373,7 +373,11 @@ impl<'alloc> DescriptorPool<'alloc> {
         let total_size = layout.size() as u32;
 
         // Count message fields for aux entries
-        let num_aux_entries = descriptor.field().iter().filter(|f| is_message(&**f)).count();
+        let num_aux_entries = descriptor
+            .field()
+            .iter()
+            .filter(|f| is_message(&**f))
+            .count();
 
         // Allocate table with entries - use Layout::extend to handle padding correctly
         let encode_layout = std::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
@@ -596,7 +600,9 @@ impl<'pool, 'msg> core::ops::Deref for DynamicMessage<'pool, 'msg> {
     fn deref(&self) -> &Self::Target {
         // SAFETY: DynamicMessageRef has the same layout with &Object instead of &mut Object
         // and we're only providing immutable access through the Deref
-        unsafe { &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>) }
+        unsafe {
+            &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
+        }
     }
 }
 
@@ -812,7 +818,9 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
     pub fn as_ref(&self) -> &DynamicMessageRef<'pool, 'msg> {
         // SAFETY: DynamicMessage and DynamicMessageRef have the same layout
         // (one has &mut Object, the other &Object)
-        unsafe { &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>) }
+        unsafe {
+            &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
+        }
     }
 }
 

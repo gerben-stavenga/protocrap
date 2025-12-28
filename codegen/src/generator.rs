@@ -324,7 +324,7 @@ fn generate_message_impl(
             }
 
             pub fn clear(&mut self) {
-                *self = unsafe { core::mem::zeroed() };
+                *self = Self::default();
             }
 
             pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
@@ -557,7 +557,7 @@ fn generate_accessors(
             let has_bit = if let Some(has_bit) = has_bit_map.get(&field.number()).cloned() {
                 methods.push(quote! {
                     pub const fn #has_name(&self) -> bool {
-                        unsafe { (*(self as *const _ as *const protocrap::base::Object)).has_bit(#has_bit as u8) }
+                        protocrap::as_object(self).has_bit(#has_bit as u8)
                     }
                 });
                 has_bit as u32

@@ -3,9 +3,9 @@ use core::marker::PhantomData;
 use core::ops::{Deref, DerefMut};
 
 use crate::{
+    Protobuf,
     arena::Arena,
     containers::{Bytes, RepeatedField},
-    Protobuf,
 };
 
 /// Type-erased message pointer for table-driven code.
@@ -169,7 +169,7 @@ impl<T: Protobuf> OptionalMessage<T> {
             None
         } else {
             // Safety: ptr is non-null and points to a valid T allocated in arena
-            Some(unsafe { &*(self.ptr as *const T) } )
+            Some(unsafe { &*(self.ptr as *const T) })
         }
     }
 

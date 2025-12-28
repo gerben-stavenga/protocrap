@@ -11,7 +11,8 @@ fn main() {
         println!("cargo:rerun-if-env-changed=PROTOCRAP_DESCRIPTOR_SET");
         PathBuf::from(path)
     } else {
-        let default_path = workspace_root.join("bazel-bin/conformance/conformance_descriptor_set.bin");
+        let default_path =
+            workspace_root.join("bazel-bin/conformance/conformance_descriptor_set.bin");
         println!("cargo:rerun-if-changed={}", default_path.display());
         default_path
     };

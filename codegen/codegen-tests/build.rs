@@ -18,7 +18,8 @@ fn main() -> Result<()> {
         println!("cargo:rerun-if-env-changed=PROTOCRAP_DESCRIPTOR_SET");
         PathBuf::from(path)
     } else {
-        let default_path = workspace_root.join("bazel-bin/codegen/codegen-tests/test_descriptor_set.bin");
+        let default_path =
+            workspace_root.join("bazel-bin/codegen/codegen-tests/test_descriptor_set.bin");
         println!("cargo:rerun-if-changed={}", default_path.display());
         default_path
     };
@@ -47,6 +48,8 @@ fn main() -> Result<()> {
             );
         }
     };
+
+    println!("cargo:rerun-if-changed={}", codegen_bin.display());
 
     // Generate Rust code
     let out_file = format!("{}/test.pc.rs", out_dir);

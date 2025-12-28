@@ -3,7 +3,7 @@ use serde::ser::{SerializeSeq, SerializeStruct};
 use crate::Protobuf;
 use crate::base::Object;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
-use crate::reflection::{DynamicMessageRef, DynamicMessageArray, Value, default_value};
+use crate::reflection::{DynamicMessageArray, DynamicMessageRef, Value, default_value};
 use crate::tables::{AuxTableEntry, Table};
 
 // Well-known type detection and handling
@@ -1159,11 +1159,7 @@ where
     Ok(())
 }
 
-fn deserialize_duration<'de, A>(
-    obj: &mut Object,
-    table: &Table,
-    mut map: A,
-) -> Result<(), A::Error>
+fn deserialize_duration<'de, A>(obj: &mut Object, table: &Table, mut map: A) -> Result<(), A::Error>
 where
     A: serde::de::MapAccess<'de>,
 {
@@ -1198,7 +1194,9 @@ where
     Ok(())
 }
 
-impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de> for ProtobufVisitor<'arena, 'alloc, 'b, 'pool> {
+impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
+    for ProtobufVisitor<'arena, 'alloc, 'b, 'pool>
+{
     type Value = ();
 
     fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
