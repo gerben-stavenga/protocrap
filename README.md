@@ -66,9 +66,12 @@ Every framework comes with some limits (often unspecified) to where you can push
 
 Field numbers should just be assigned consecutive 1 ... max field. We do tolerate holes, but we do not compress field numbers, assigning a single field struct a field number of 2000. Will lead to a very big table. These restrictions simplify code and allows compression of has bit index and offset of fields into a single 16 bit integer, which makes for compact tables. 
 
-We do not bother with unknown fields and extensions. Unknown fields prevent data loss when parsing and reserializing some data, which is mostly non-sensical to do. If you don't reserialize there is very little you can do with unknown fields as without schema information there is very little you can do interpreting the data. Extensions is a confusing feature that is mostly more pain than it solves. We just skip these during parsing.
+### Intentionally Unsupported Features
 
-We don't implement maps, they are treated as repeated fields of key/value pairs. Unlike unknown fields/extension, maps are useful but they do bring quite a bit of complexity. For now we don't support it.
+- **Unknown fields**: Discarded during parsing. Round-tripping data through parse+serialize may lose unknown fields—but if you're not modifying the data, why reserialize?
+- **Extensions**: Proto2 extensions are silently dropped. A confusing feature that causes more pain than it solves.
+- **Oneof**: Not yet supported. Fields in a oneof are treated as independent optional fields.
+- **Maps**: Not yet supported. Treated as repeated fields of key/value pairs.
 
 ## Quick Example
 ```rust
@@ -136,6 +139,25 @@ for field in dynamic_msg.descriptor().field() {
 }
 ```
 
+## Testing
+
+Protocrap is validated through multiple testing approaches:
+
+- **Conformance tests**: Runs Google's official protobuf conformance test suite in two modes:
+  - *Static mode*: Tests generated Rust structs and their encoding/decoding
+  - *Dynamic mode*: Tests the runtime reflection descriptor pool
+- **Decode fuzzer**: Fuzz testing with `cargo-fuzz` to find edge cases in the decoder
+- **Unit tests**: Coverage of core functionality and edge cases
+
+```bash
+# Run conformance tests via Bazel
+~/bin/bazelisk test //conformance:conformance_test
+~/bin/bazelisk test //conformance:conformance_test_dynamic
+
+# Run fuzz tests (requires nightly)
+cargo +nightly fuzz run decode_fuzz
+```
+
 ## Features
 
 - **Serde support**: Optional serde serialization/deserialization via reflection
@@ -144,7 +166,15 @@ for field in dynamic_msg.descriptor().field() {
 - **Async support**: First-class async/await support without code duplication
 
 ## Status
-🚧 **Alpha** - Core functionality working, API may change
+
+🚧 **Alpha** - This library is not yet mature. Expect:
+- **API changes**: The public API may change in breaking ways between versions
+- **Potential bugs**: While tested via conformance tests and fuzzing, edge cases may exist
+- **Missing features**: Oneof, maps, and some proto3 semantics are not implemented
+
+Use in production at your own risk. Bug reports and contributions welcome!
+
+### Progress
 
 - [x] Basic parsing and serialization
 - [x] Arena allocation with custom allocator support
@@ -155,9 +185,9 @@ for field in dynamic_msg.descriptor().field() {
 - [x] Async/sync streaming support
 - [x] Default value support
 - [x] Self-hosted (uses own implementation to parse descriptor.proto)
-- [ ] Map support (partial - treated as repeated key/value)
+- [x] Conformance test suite (static + dynamic modes)
+- [x] Fuzz testing
+- [ ] Oneof support
+- [ ] Map support
 - [ ] Full documentation
-- [ ] Published to crates.io
-
-See [TODO.md](TODO.md) for detailed roadmap.
 
