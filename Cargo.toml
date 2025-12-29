@@ -5,12 +5,12 @@ resolver = "2"
 
 [package]
 name = "protocrap"
-version = "0.1.17"
+version = "0.1.18"
 edition = "2024"
 rust-version = "1.85"
 description = "A small, efficient, and flexible protobuf implementation"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/priv-gerben/protocrap"
+repository = "https://github.com/gerben-stavenga/protocrap"
 documentation = "https://docs.rs/protocrap"
 keywords = ["protobuf", "serialization", "encoding", "no-std", "arena"]
 categories = ["encoding", "parser-implementations", "no-std"]
