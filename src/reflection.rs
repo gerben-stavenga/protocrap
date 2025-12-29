@@ -272,15 +272,14 @@ impl<'alloc> DescriptorPool<'alloc> {
         &'pool self,
         message_type: &str,
         arena: &mut Arena<'msg>,
-    ) -> anyhow::Result<DynamicMessage<'pool, 'msg>> {
+    ) -> Result<DynamicMessage<'pool, 'msg>, crate::Error> {
         let table = &**self
             .tables
             .get(message_type)
-            .ok_or_else(|| anyhow::anyhow!("Message type '{}' not found in pool", message_type))?;
+            .ok_or(crate::Error::MessageNotFound)?;
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8)
-            .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
+        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8).unwrap();
         let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
         let object = unsafe {
@@ -298,15 +297,14 @@ impl<'alloc> DescriptorPool<'alloc> {
         message_type: &str,
         bytes: &[u8],
         arena: &'msg mut Arena,
-    ) -> anyhow::Result<DynamicMessage<'pool, 'msg>> {
+    ) -> Result<DynamicMessage<'pool, 'msg>, crate::Error> {
         let table = &**self
             .tables
             .get(message_type)
-            .ok_or_else(|| anyhow::anyhow!("Message type '{}' not found in pool", message_type))?;
+            .ok_or(crate::Error::MessageNotFound)?;
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8)
-            .map_err(|e| anyhow::anyhow!("Invalid layout: {}", e))?;
+        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8).unwrap();
         let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
         let object = unsafe {
@@ -567,15 +565,15 @@ impl<'alloc> DescriptorPool<'alloc> {
         table: &Table,
         bytes: &[u8],
         arena: &mut Arena,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), crate::Error> {
         use crate::decoding::ResumeableDecode;
 
         let mut decoder = ResumeableDecode::<32>::new_from_table(object, table, isize::MAX);
         if !decoder.resume(bytes, arena) {
-            return Err(anyhow::anyhow!("Decode failed"));
+            return Err(crate::Error::InvalidData);
         }
         if !decoder.finish(arena) {
-            return Err(anyhow::anyhow!("Decode finish failed"));
+            return Err(crate::Error::InvalidData);
         }
         Ok(())
     }

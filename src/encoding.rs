@@ -219,6 +219,7 @@ fn encode_loop<'a>(
             offset,
             encoded_tag: tag,
         } = obj_state.table[obj_state.field_idx - 1];
+        #[cfg(feature = "std")]
         if false {
             let descriptor = unsafe {
                 *(obj_state.table.as_ptr()

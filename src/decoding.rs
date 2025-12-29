@@ -8,6 +8,7 @@ use crate::tables::{AuxTableEntry, Table};
 use crate::utils::{Stack, StackWithStorage};
 use crate::wire::{FieldKind, ReadCursor, SLOP_SIZE, zigzag_decode};
 
+#[cfg(feature = "std")]
 const TRACE_TAGS: bool = false;
 
 #[repr(C)]
@@ -20,7 +21,7 @@ impl TableEntry {
     }
 
     pub(crate) fn kind(&self) -> FieldKind {
-        unsafe { std::mem::transmute(self.0 as u8) }
+        unsafe { core::mem::transmute(self.0 as u8) }
     }
 
     pub(crate) fn has_bit_idx(&self) -> u32 {
@@ -281,6 +282,7 @@ fn skip_group<'a>(
             if field_number == 0 {
                 return None;
             }
+            #[cfg(feature = "std")]
             if TRACE_TAGS {
                 println!(
                     "Skipping unknown field with field number {} and wire type {}",
@@ -487,6 +489,7 @@ fn decode_loop<'a>(
         'parse_loop: while cursor < limited_end {
             let tag = cursor.read_tag()?;
             let field_number = tag >> 3;
+            #[cfg(feature = "std")]
             if TRACE_TAGS {
                 let descriptor = ctx.table.descriptor;
                 let field = descriptor

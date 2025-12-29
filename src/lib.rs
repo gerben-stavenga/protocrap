@@ -211,7 +211,19 @@ pub use allocator_api2::alloc::Allocator;
 
 pub mod decoding;
 pub mod encoding;
+#[cfg(feature = "std")]
 pub mod reflection;
+#[cfg(not(feature = "std"))]
+pub mod reflection {
+    //! Stub reflection module for no_std - just provides debug_message
+    use crate::Protobuf;
+    pub fn debug_message<T: Protobuf>(
+        _msg: &T,
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result {
+        write!(f, "<{}>", core::any::type_name::<T>())
+    }
+}
 pub mod tables;
 
 use crate as protocrap;
@@ -219,6 +231,35 @@ include!("descriptor.pc.rs");
 
 #[cfg(feature = "serde_support")]
 pub mod serde;
+
+#[derive(Debug)]
+pub enum Error<E = ()> {
+    TreeTooDeep,
+    BufferTooSmall,
+    InvalidData,
+    MessageNotFound,
+    Io(E),
+}
+
+impl<E: core::fmt::Debug> core::fmt::Display for Error<E> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Error::TreeTooDeep => write!(f, "message tree too deep"),
+            Error::BufferTooSmall => write!(f, "buffer too small"),
+            Error::InvalidData => write!(f, "invalid protobuf data"),
+            Error::MessageNotFound => write!(f, "message type not found"),
+            Error::Io(e) => write!(f, "{:?}", e),
+        }
+    }
+}
+
+impl<E: core::fmt::Debug> core::error::Error for Error<E> {}
+
+impl<E> From<E> for Error<E> {
+    fn from(e: E) -> Self {
+        Error::Io(e)
+    }
+}
 
 // One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
 // but that is not allowed because Default and Debug are not local to this crate.
@@ -255,26 +296,26 @@ pub trait ProtobufRef<'pool> {
     fn encode_flat<'a, const STACK_DEPTH: usize>(
         &self,
         buffer: &'a mut [u8],
-    ) -> anyhow::Result<&'a [u8]> {
+    ) -> Result<&'a [u8], Error> {
         let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
         let encoding::ResumeResult::Done(buf) = resumeable_encode
             .resume_encode(buffer)
-            .ok_or(anyhow::anyhow!("Message tree too deep"))?
+            .ok_or(Error::TreeTooDeep)?
         else {
-            return Err(anyhow::anyhow!("Buffer too small for message"));
+            return Err(Error::BufferTooSmall);
         };
         Ok(buf)
     }
 
     #[cfg(feature = "std")]
-    fn encode_vec<const STACK_DEPTH: usize>(&self) -> anyhow::Result<Vec<u8>> {
+    fn encode_vec<const STACK_DEPTH: usize>(&self) -> Result<Vec<u8>, Error> {
         let mut buffer = vec![0u8; 1024];
         let mut stack = Vec::new();
         let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
         loop {
             match resumeable_encode
                 .resume_encode(&mut buffer)
-                .ok_or(anyhow::anyhow!("Message tree too deep"))?
+                .ok_or(Error::TreeTooDeep)?
             {
                 encoding::ResumeResult::Done(buf) => {
                     let len = buf.len();
@@ -316,46 +357,46 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         decoder.finish(arena)
     }
 
-    fn decode<'a, E: core::error::Error + Send + Sync + 'static>(
+    fn decode<'a, E>(
         &mut self,
         arena: &mut crate::arena::Arena,
         provider: &'a mut impl FnMut() -> Result<Option<&'a [u8]>, E>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), Error<E>> {
         let mut decoder = decoding::ResumeableDecode::<32>::new(self, isize::MAX);
         loop {
-            let Some(buffer) = provider()? else {
+            let Some(buffer) = provider().map_err(Error::Io)? else {
                 break;
             };
             if !decoder.resume(buffer, arena) {
-                return Err(anyhow::anyhow!("decode error"));
+                return Err(Error::InvalidData);
             }
         }
         if !decoder.finish(arena) {
-            return Err(anyhow::anyhow!("decode error"));
+            return Err(Error::InvalidData);
         }
         Ok(())
     }
 
-    fn async_decode<'a, E: core::error::Error + Send + Sync + 'static, F>(
+    fn async_decode<'a, E, F>(
         &'a mut self,
         arena: &mut crate::arena::Arena,
         provider: &'a mut impl FnMut() -> F,
-    ) -> impl core::future::Future<Output = anyhow::Result<()>>
+    ) -> impl core::future::Future<Output = Result<(), Error<E>>>
     where
         F: core::future::Future<Output = Result<Option<&'a [u8]>, E>> + 'a,
     {
         async move {
             let mut decoder = decoding::ResumeableDecode::<32>::new(self, isize::MAX);
             loop {
-                let Some(buffer) = provider().await? else {
+                let Some(buffer) = provider().await.map_err(Error::Io)? else {
                     break;
                 };
                 if !decoder.resume(buffer, arena) {
-                    return Err(anyhow::anyhow!("decode error"));
+                    return Err(Error::InvalidData);
                 }
             }
             if !decoder.finish(arena) {
-                return Err(anyhow::anyhow!("decode error"));
+                return Err(Error::InvalidData);
             }
             Ok(())
         }
@@ -366,21 +407,21 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         &mut self,
         arena: &mut crate::arena::Arena,
         reader: &mut impl std::io::BufRead,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), Error<std::io::Error>> {
         let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self, isize::MAX);
         loop {
-            let buffer = reader.fill_buf()?;
+            let buffer = reader.fill_buf().map_err(Error::Io)?;
             let len = buffer.len();
             if len == 0 {
                 break;
             }
             if !decoder.resume(buffer, arena) {
-                return Err(anyhow::anyhow!("decode error"));
+                return Err(Error::InvalidData);
             }
             reader.consume(len);
         }
         if !decoder.finish(arena) {
-            return Err(anyhow::anyhow!("decode error"));
+            return Err(Error::InvalidData);
         }
         Ok(())
     }
@@ -390,7 +431,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         &mut self,
         arena: &mut crate::arena::Arena,
         reader: &mut impl std::io::Read,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), Error<std::io::Error>> {
         let mut buf_reader = std::io::BufReader::new(reader);
         self.decode_from_bufread::<STACK_DEPTH>(arena, &mut buf_reader)
     }
@@ -399,24 +440,24 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         &'a mut self,
         arena: &'a mut crate::arena::Arena<'a>,
         reader: &mut (impl futures::io::AsyncBufRead + Unpin),
-    ) -> impl core::future::Future<Output = anyhow::Result<()>> {
+    ) -> impl core::future::Future<Output = Result<(), Error<futures::io::Error>>> {
         use futures::io::AsyncBufReadExt;
 
         async move {
             let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self, isize::MAX);
             loop {
-                let buffer = reader.fill_buf().await?;
+                let buffer = reader.fill_buf().await.map_err(Error::Io)?;
                 let len = buffer.len();
                 if len == 0 {
                     break;
                 }
                 if !decoder.resume(buffer, arena) {
-                    return Err(anyhow::anyhow!("decode error"));
+                    return Err(Error::InvalidData);
                 }
                 reader.consume_unpin(len);
             }
             if !decoder.finish(arena) {
-                return Err(anyhow::anyhow!("decode error"));
+                return Err(Error::InvalidData);
             }
             Ok(())
         }
@@ -426,7 +467,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         &'a mut self,
         arena: &'a mut crate::arena::Arena<'a>,
         reader: &mut (impl futures::io::AsyncRead + Unpin),
-    ) -> impl core::future::Future<Output = anyhow::Result<()>> {
+    ) -> impl core::future::Future<Output = Result<(), Error<futures::io::Error>>> {
         async move {
             let mut buf_reader = futures::io::BufReader::new(reader);
             self.decode_from_async_bufread::<STACK_DEPTH>(arena, &mut buf_reader)
@@ -465,6 +506,7 @@ impl<T: Protobuf> ProtobufMut<'static> for T {
     }
 }
 
+#[cfg(feature = "std")]
 pub mod tests {
     use crate::{Protobuf, ProtobufMut, ProtobufRef};
 

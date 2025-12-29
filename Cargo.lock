@@ -709,7 +709,6 @@ name = "protocrap"
 version = "0.1.17"
 dependencies = [
  "allocator-api2",
- "anyhow",
  "base64",
  "futures",
  "serde",
