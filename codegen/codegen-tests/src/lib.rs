@@ -346,6 +346,10 @@ fn test_defaults() {
     assert_eq!(msg.get_greeting(), None);
     assert_eq!(msg.get_multiline(), None);
 
+    // Verify enum defaults
+    assert_eq!(msg.status(), Some(Status::ACTIVE)); // Has explicit default
+    assert_eq!(msg.status_no_default(), Some(Status::UNKNOWN)); // Falls back to first value (0)
+
     // Test set/clear behavior
     let mut msg2 = DefaultsTest::ProtoType::default();
 

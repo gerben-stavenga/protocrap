@@ -2429,9 +2429,15 @@ pub mod google {
                 ) -> Option<
                     crate::google::protobuf::ExtensionRangeOptions::VerificationState,
                 > {
-                    crate::google::protobuf::ExtensionRangeOptions::VerificationState::from_i32(
-                        self.verification,
-                    )
+                    if self.has_verification() {
+                        crate::google::protobuf::ExtensionRangeOptions::VerificationState::from_i32(
+                            self.verification,
+                        )
+                    } else {
+                        Some(
+                            crate::google::protobuf::ExtensionRangeOptions::VerificationState::UNVERIFIED,
+                        )
+                    }
                 }
                 pub fn set_verification(
                     &mut self,
@@ -5979,9 +5985,13 @@ pub mod google {
                 pub const fn optimize_for(
                     &self,
                 ) -> Option<crate::google::protobuf::FileOptions::OptimizeMode> {
-                    crate::google::protobuf::FileOptions::OptimizeMode::from_i32(
-                        self.optimize_for,
-                    )
+                    if self.has_optimize_for() {
+                        crate::google::protobuf::FileOptions::OptimizeMode::from_i32(
+                            self.optimize_for,
+                        )
+                    } else {
+                        Some(crate::google::protobuf::FileOptions::OptimizeMode::SPEED)
+                    }
                 }
                 pub fn set_optimize_for(
                     &mut self,
@@ -9830,7 +9840,13 @@ pub mod google {
                 pub const fn ctype(
                     &self,
                 ) -> Option<crate::google::protobuf::FieldOptions::CType> {
-                    crate::google::protobuf::FieldOptions::CType::from_i32(self.ctype)
+                    if self.has_ctype() {
+                        crate::google::protobuf::FieldOptions::CType::from_i32(
+                            self.ctype,
+                        )
+                    } else {
+                        Some(crate::google::protobuf::FieldOptions::CType::STRING)
+                    }
                 }
                 pub fn set_ctype(
                     &mut self,
@@ -9881,7 +9897,13 @@ pub mod google {
                 pub const fn jstype(
                     &self,
                 ) -> Option<crate::google::protobuf::FieldOptions::JSType> {
-                    crate::google::protobuf::FieldOptions::JSType::from_i32(self.jstype)
+                    if self.has_jstype() {
+                        crate::google::protobuf::FieldOptions::JSType::from_i32(
+                            self.jstype,
+                        )
+                    } else {
+                        Some(crate::google::protobuf::FieldOptions::JSType::JS_NORMAL)
+                    }
                 }
                 pub fn set_jstype(
                     &mut self,
@@ -16549,9 +16571,15 @@ pub mod google {
                 pub const fn idempotency_level(
                     &self,
                 ) -> Option<crate::google::protobuf::MethodOptions::IdempotencyLevel> {
-                    crate::google::protobuf::MethodOptions::IdempotencyLevel::from_i32(
-                        self.idempotency_level,
-                    )
+                    if self.has_idempotency_level() {
+                        crate::google::protobuf::MethodOptions::IdempotencyLevel::from_i32(
+                            self.idempotency_level,
+                        )
+                    } else {
+                        Some(
+                            crate::google::protobuf::MethodOptions::IdempotencyLevel::IDEMPOTENCY_UNKNOWN,
+                        )
+                    }
                 }
                 pub fn set_idempotency_level(
                     &mut self,

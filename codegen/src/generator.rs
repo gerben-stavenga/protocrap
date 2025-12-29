@@ -494,8 +494,12 @@ fn parse_primitive_default(
             Err(_) => panic!("Invalid bytes default value: {}", default_str),
         },
         Type::TYPE_ENUM => {
-            // TODO: Handle enum default values
-            None
+            if default_str.is_empty() {
+                return None;
+            }
+            let enum_type = rust_type_tokens(field);
+            let variant = format_ident!("{}", default_str);
+            Some(quote! { Some(#enum_type::#variant) })
         }
         Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
             unreachable!("Messages cannot have default values")
@@ -682,9 +686,23 @@ fn generate_accessors(
                 }
                 Type::TYPE_ENUM => {
                     let enum_type = rust_type_tokens(field);
+                    let default_value = parse_primitive_default(field);
+
+                    let getter_impl = if let Some(default_tokens) = default_value {
+                        quote! {
+                            if self.#has_name() {
+                                #enum_type::from_i32(self.#field_name)
+                            } else {
+                                #default_tokens
+                            }
+                        }
+                    } else {
+                        quote! { #enum_type::from_i32(self.#field_name) }
+                    };
+
                     methods.push(quote! {
                         pub const fn #field_name(&self) -> Option<#enum_type> {
-                            #enum_type::from_i32(self.#field_name)
+                            #getter_impl
                         }
 
                         pub fn #setter_name(&mut self, value: #enum_type) {

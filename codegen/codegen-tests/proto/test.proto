@@ -1,5 +1,12 @@
 syntax = "proto2";
 
+enum Status {
+    UNKNOWN = 0;
+    ACTIVE = 1;
+    INACTIVE = 2;
+    PENDING = 3;
+}
+
 message Test {
     optional uint32 x = 1;
     optional fixed64 y = 2;
@@ -32,4 +39,6 @@ message DefaultsTest {
     optional string multiline = 11 [default = "Line1\nLine2\tTabbed"];
     optional string escaped = 12 [default = "Quote: \" Backslash: \\"];
     optional bytes defaulted_bytes = 13 [default = "My \x0 byte array"];
+    optional Status status = 14 [default = ACTIVE];
+    optional Status status_no_default = 15;
 }
