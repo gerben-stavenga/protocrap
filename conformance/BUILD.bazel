@@ -72,7 +72,7 @@ rust_binary(
     ],
 )
 
-# Run conformance tests
+# Run conformance tests (static mode)
 sh_test(
     name = "conformance_test",
     srcs = ["@protobuf//conformance:conformance_test_runner"],
@@ -81,6 +81,24 @@ sh_test(
         "--failure_list",
         "$(location failing_tests.txt)",
         "$(location :conformance-protocrap)",
+    ],
+    data = [
+        "failing_tests.txt",
+        ":conformance-protocrap",
+    ],
+)
+
+# Run conformance tests (dynamic mode - uses reflection descriptor pool)
+sh_test(
+    name = "conformance_test_dynamic",
+    srcs = ["@protobuf//conformance:conformance_test_runner"],
+    args = [
+        "--enforce_recommended",
+        "--failure_list",
+        "$(location failing_tests.txt)",
+        "$(location :conformance-protocrap)",
+        "--",
+        "--dynamic",
     ],
     data = [
         "failing_tests.txt",
