@@ -229,17 +229,11 @@ Recommended.Proto3.JsonInput.NullValueInOtherOneofOldFormat.Validator
 Required.Proto2.JsonInput.FloatFieldTooLarge
 Required.Proto2.JsonInput.FloatFieldTooSmall
 Required.Proto2.JsonInput.Int32FieldNotInteger
-Required.Proto2.JsonInput.Int32FieldTooLarge
-Required.Proto2.JsonInput.Int32FieldTooSmall
 Required.Proto2.JsonInput.Uint32FieldNotInteger
-Required.Proto2.JsonInput.Uint32FieldTooLarge
 Required.Proto3.JsonInput.FloatFieldTooLarge
 Required.Proto3.JsonInput.FloatFieldTooSmall
 Required.Proto3.JsonInput.Int32FieldNotInteger
-Required.Proto3.JsonInput.Int32FieldTooLarge
-Required.Proto3.JsonInput.Int32FieldTooSmall
 Required.Proto3.JsonInput.Uint32FieldNotInteger
-Required.Proto3.JsonInput.Uint32FieldTooLarge
 Recommended.Proto2.JsonInput.FieldNameDuplicate
 Recommended.Proto3.JsonInput.FieldNameDuplicate
 

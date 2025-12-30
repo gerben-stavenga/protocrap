@@ -1,4 +1,5 @@
 use anyhow::{Context, Result, bail};
+use protocrap::proto_json::{ProtoJsonDeserializer, ProtoJsonSerializer};
 use protocrap::reflection::{DescriptorPool, DynamicMessageRef};
 use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
@@ -34,7 +35,8 @@ fn roundtrip_proto<T: protocrap::Protobuf + 'static>(
             response.set_skipped("Json format input not supported", arena);
             return response;
         }
-        if let Err(e) = msg.serde_deserialize(arena, &mut serde_json::Deserializer::from_str(data))
+        let mut inner = serde_json::Deserializer::from_str(data);
+        if let Err(e) = msg.serde_deserialize(arena, ProtoJsonDeserializer::new(&mut inner))
         {
             response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena);
             return response;
@@ -64,11 +66,11 @@ fn roundtrip_proto<T: protocrap::Protobuf + 'static>(
                 response.set_skipped("Json format output not supported", arena);
                 return response;
             }
-            let mut serializer = serde_json::Serializer::new(Vec::new());
+            let mut inner = serde_json::Serializer::new(Vec::new());
             let dynamic_msg = DynamicMessageRef::new(msg);
-            match dynamic_msg.serialize(&mut serializer) {
+            match dynamic_msg.serialize(ProtoJsonSerializer::new(&mut inner)) {
                 Ok(()) => {
-                    let vec = serializer.into_inner();
+                    let vec = inner.into_inner();
                     let json_str = String::from_utf8(vec).unwrap_or_default();
                     response.set_json_payload(&json_str, arena);
                 }
@@ -125,7 +127,8 @@ fn do_test_dynamic(
             response.set_skipped("Json format input not supported", arena);
             return response;
         }
-        if let Err(e) = msg.serde_deserialize(arena, &mut serde_json::Deserializer::from_str(data))
+        let mut inner = serde_json::Deserializer::from_str(data);
+        if let Err(e) = msg.serde_deserialize(arena, ProtoJsonDeserializer::new(&mut inner))
         {
             response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena);
             return response;
@@ -151,10 +154,10 @@ fn do_test_dynamic(
                 response.set_skipped("Json format output not supported", arena);
                 return response;
             }
-            let mut serializer = serde_json::Serializer::new(Vec::new());
-            match msg.serialize(&mut serializer) {
+            let mut inner = serde_json::Serializer::new(Vec::new());
+            match msg.serialize(ProtoJsonSerializer::new(&mut inner)) {
                 Ok(()) => {
-                    let vec = serializer.into_inner();
+                    let vec = inner.into_inner();
                     let json_str = String::from_utf8(vec).unwrap_or_default();
                     response.set_json_payload(&json_str, arena);
                 }

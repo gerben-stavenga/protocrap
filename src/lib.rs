@@ -235,6 +235,9 @@ include!("descriptor.pc.rs");
 #[cfg(feature = "serde_support")]
 pub mod serde;
 
+#[cfg(feature = "serde_support")]
+pub mod proto_json;
+
 #[cfg(feature = "codegen")]
 pub mod codegen;
 

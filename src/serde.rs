@@ -413,41 +413,10 @@ impl<'msg> serde::Serialize for Value<'static, 'msg> {
             Value::Int64(v) => serializer.serialize_i64(v),
             Value::UInt32(v) => serializer.serialize_u32(v),
             Value::UInt64(v) => serializer.serialize_u64(v),
-            Value::Float(v) => {
-                if v.is_nan() {
-                    serializer.serialize_str("NaN")
-                } else if v.is_infinite() {
-                    if v.is_sign_positive() {
-                        serializer.serialize_str("Infinity")
-                    } else {
-                        serializer.serialize_str("-Infinity")
-                    }
-                } else {
-                    serializer.serialize_f32(v)
-                }
-            }
-            Value::Double(v) => {
-                if v.is_nan() {
-                    serializer.serialize_str("NaN")
-                } else if v.is_infinite() {
-                    if v.is_sign_positive() {
-                        serializer.serialize_str("Infinity")
-                    } else {
-                        serializer.serialize_str("-Infinity")
-                    }
-                } else {
-                    serializer.serialize_f64(v)
-                }
-            }
+            Value::Float(v) => serializer.serialize_f32(v),
+            Value::Double(v) => serializer.serialize_f64(v),
             Value::String(v) => serializer.serialize_str(v),
-            Value::Bytes(v) => {
-                if serializer.is_human_readable() {
-                    use base64::Engine;
-                    serializer.serialize_str(&base64::engine::general_purpose::STANDARD.encode(v))
-                } else {
-                    serializer.serialize_bytes(v)
-                }
-            }
+            Value::Bytes(v) => serializer.serialize_bytes(v),
             Value::Message(ref msg) => msg.serialize(serializer),
             Value::RepeatedBool(list) => list.serialize(serializer),
             Value::RepeatedInt32(list) => list.serialize(serializer),
@@ -468,13 +437,7 @@ impl serde::Serialize for crate::containers::Bytes {
     where
         S: serde::Serializer,
     {
-        if serializer.is_human_readable() {
-            use base64::Engine;
-            serializer
-                .serialize_str(&base64::engine::general_purpose::STANDARD.encode(self.as_ref()))
-        } else {
-            serializer.serialize_bytes(self.as_ref())
-        }
+        serializer.serialize_bytes(self.as_ref())
     }
 }
 
@@ -836,209 +799,6 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
             rf.push(crate::base::Message(entry_obj as *mut Object), arena);
         }
         Ok(())
-    }
-}
-
-// Flexible numeric deserializers - accept both numbers and quoted strings
-struct FlexibleI32;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleI32 {
-    type Value = i32;
-    fn deserialize<D>(self, deserializer: D) -> Result<i32, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleI32Visitor)
-    }
-}
-
-struct FlexibleI32Visitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleI32Visitor {
-    type Value = i32;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("i32 or string")
-    }
-    fn visit_i32<E>(self, v: i32) -> Result<i32, E> {
-        Ok(v)
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<i32, E> {
-        Ok(v as i32)
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<i32, E> {
-        Ok(v as i32)
-    }
-    fn visit_f64<E>(self, v: f64) -> Result<i32, E> {
-        Ok(v as i32)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<i32, E> {
-        v.parse().map_err(E::custom)
-    }
-}
-
-struct FlexibleI64;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleI64 {
-    type Value = i64;
-    fn deserialize<D>(self, deserializer: D) -> Result<i64, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleI64Visitor)
-    }
-}
-
-struct FlexibleI64Visitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleI64Visitor {
-    type Value = i64;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("i64 or string")
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<i64, E> {
-        Ok(v)
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<i64, E> {
-        Ok(v as i64)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<i64, E> {
-        v.parse().map_err(E::custom)
-    }
-}
-
-struct FlexibleU32;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleU32 {
-    type Value = u32;
-    fn deserialize<D>(self, deserializer: D) -> Result<u32, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleU32Visitor)
-    }
-}
-
-struct FlexibleU32Visitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleU32Visitor {
-    type Value = u32;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("u32 or string")
-    }
-    fn visit_u32<E>(self, v: u32) -> Result<u32, E> {
-        Ok(v)
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<u32, E> {
-        Ok(v as u32)
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<u32, E> {
-        Ok(v as u32)
-    }
-    fn visit_f64<E>(self, v: f64) -> Result<u32, E> {
-        Ok(v as u32)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<u32, E> {
-        v.parse().map_err(E::custom)
-    }
-}
-
-struct FlexibleU64;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleU64 {
-    type Value = u64;
-    fn deserialize<D>(self, deserializer: D) -> Result<u64, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleU64Visitor)
-    }
-}
-
-struct FlexibleU64Visitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleU64Visitor {
-    type Value = u64;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("u64 or string")
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<u64, E> {
-        Ok(v)
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<u64, E> {
-        Ok(v as u64)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<u64, E> {
-        v.parse().map_err(E::custom)
-    }
-}
-
-struct FlexibleFloat;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleFloat {
-    type Value = f32;
-    fn deserialize<D>(self, deserializer: D) -> Result<f32, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleFloatVisitor)
-    }
-}
-
-struct FlexibleFloatVisitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleFloatVisitor {
-    type Value = f32;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("f32, string, NaN, or Infinity")
-    }
-    fn visit_f32<E>(self, v: f32) -> Result<f32, E> {
-        Ok(v)
-    }
-    fn visit_f64<E>(self, v: f64) -> Result<f32, E> {
-        Ok(v as f32)
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<f32, E> {
-        Ok(v as f32)
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<f32, E> {
-        Ok(v as f32)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<f32, E> {
-        match v {
-            "NaN" => Ok(f32::NAN),
-            "Infinity" => Ok(f32::INFINITY),
-            "-Infinity" => Ok(f32::NEG_INFINITY),
-            _ => v.parse().map_err(E::custom),
-        }
-    }
-}
-
-struct FlexibleDouble;
-impl<'de> serde::de::DeserializeSeed<'de> for FlexibleDouble {
-    type Value = f64;
-    fn deserialize<D>(self, deserializer: D) -> Result<f64, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        deserializer.deserialize_any(FlexibleDoubleVisitor)
-    }
-}
-
-struct FlexibleDoubleVisitor;
-impl<'de> serde::de::Visitor<'de> for FlexibleDoubleVisitor {
-    type Value = f64;
-    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("f64, string, NaN, or Infinity")
-    }
-    fn visit_f64<E>(self, v: f64) -> Result<f64, E> {
-        Ok(v)
-    }
-    fn visit_f32<E>(self, v: f32) -> Result<f64, E> {
-        Ok(v as f64)
-    }
-    fn visit_i64<E>(self, v: i64) -> Result<f64, E> {
-        Ok(v as f64)
-    }
-    fn visit_u64<E>(self, v: u64) -> Result<f64, E> {
-        Ok(v as f64)
-    }
-    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<f64, E> {
-        match v {
-            "NaN" => Ok(f64::NAN),
-            "Infinity" => Ok(f64::INFINITY),
-            "-Infinity" => Ok(f64::NEG_INFINITY),
-            _ => v.parse().map_err(E::custom),
-        }
     }
 }
 
@@ -1555,19 +1315,19 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         obj.set::<bool>(entry.offset(), entry.has_bit_idx(), v);
                     }
                     Type::TYPE_FIXED64 | Type::TYPE_UINT64 => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleU64))? else {
+                        let Some(v) = map.next_value::<Option<u64>>()? else {
                             continue;
                         };
                         obj.set::<u64>(entry.offset(), entry.has_bit_idx(), v);
                     }
                     Type::TYPE_FIXED32 | Type::TYPE_UINT32 => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleU32))? else {
+                        let Some(v) = map.next_value::<Option<u32>>()? else {
                             continue;
                         };
                         obj.set::<u32>(entry.offset(), entry.has_bit_idx(), v);
                     }
                     Type::TYPE_SFIXED64 | Type::TYPE_INT64 | Type::TYPE_SINT64 => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleI64))? else {
+                        let Some(v) = map.next_value::<Option<i64>>()? else {
                             continue;
                         };
                         obj.set::<i64>(entry.offset(), entry.has_bit_idx(), v);
@@ -1576,19 +1336,19 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     | Type::TYPE_INT32
                     | Type::TYPE_SINT32
                     | Type::TYPE_ENUM => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleI32))? else {
+                        let Some(v) = map.next_value::<Option<i32>>()? else {
                             continue;
                         };
                         obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);
                     }
                     Type::TYPE_FLOAT => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleFloat))? else {
+                        let Some(v) = map.next_value::<Option<f32>>()? else {
                             continue;
                         };
                         obj.set::<f32>(entry.offset(), entry.has_bit_idx(), v);
                     }
                     Type::TYPE_DOUBLE => {
-                        let Some(v) = map.next_value_seed(Optional(FlexibleDouble))? else {
+                        let Some(v) = map.next_value::<Option<f64>>()? else {
                             continue;
                         };
                         obj.set::<f64>(entry.offset(), entry.has_bit_idx(), v);
