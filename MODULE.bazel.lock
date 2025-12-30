@@ -3005,11 +3005,11 @@
         "bzlTransitiveDigest": "GH4S5mOMYo7rTiH9NJbOSEODDfcyHkWLdSbONqT8IjM=",
         "recordedFileInputs": {
           "@@//codegen-tests/Cargo.toml": "7ca4bbdc872875ee0468f9e4759a1d4be3953420d2fb63b5a663f437c1623e5f",
-          "@@//Cargo.toml": "f44e7b1ac70c3991d066bffb2e3a77a7cf7cf3bd653cb447130bf61fa5545eb3",
+          "@@//Cargo.toml": "e023df60a6be41fb9c23091495eb52e0935abea6250a721f4d5222ad5ec074c4",
           "@@//conformance/Cargo.toml": "72ce89ed09c221b6c2430a20bf583fb1861af4889f6cbf8c5d7caa8ec1605dfd",
           "@@//fuzz/Cargo.toml": "cbfbe04a5e2dec34d05e5ec92db3432c950bbf570d7943c5defb20e349fcada1",
           "@@//benchmark/Cargo.toml": "c6752c07848ed7a2afa05fe3fc8049ad2d00f05499a556a32da52cbf9297e317",
-          "@@//Cargo.lock": "33b0b91699343e8036d9d3d94448ea73e36676fdf8a40442c095e3463971f6c3",
+          "@@//Cargo.lock": "69c83b693e090e0176f39a1d07caf0d96b843f904afa7a236aac739590049e06",
           "@@//.cargo/config.toml": "d2a23df9f1bd074f70562c1bbd133b9d26569238982509a96903734521b70e09",
           "@@//MODULE.bazel": "b13bc9ac2452a30b049705dded16f474712c3d9787791a9165ddc5dfa7a108b9",
           "@@rules_rust~~rust_host_tools~rust_host_tools//rust_host_tools": "ENOENT"

@@ -947,7 +947,6 @@ impl<'pool, 'msg> IntoIterator for &DynamicMessageArray<'pool, 'msg> {
     }
 }
 
-#[derive(Debug)]
 pub enum Value<'pool, 'msg> {
     Int32(i32),
     Int64(i64),
@@ -969,6 +968,33 @@ pub enum Value<'pool, 'msg> {
     RepeatedString(&'msg [String]),
     RepeatedBytes(&'msg [Bytes]),
     RepeatedMessage(DynamicMessageArray<'pool, 'msg>),
+}
+
+impl core::fmt::Debug for Value<'_, '_> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Value::Int32(v) => core::fmt::Debug::fmt(v, f),
+            Value::Int64(v) => core::fmt::Debug::fmt(v, f),
+            Value::UInt32(v) => core::fmt::Debug::fmt(v, f),
+            Value::UInt64(v) => core::fmt::Debug::fmt(v, f),
+            Value::Float(v) => core::fmt::Debug::fmt(v, f),
+            Value::Double(v) => core::fmt::Debug::fmt(v, f),
+            Value::Bool(v) => core::fmt::Debug::fmt(v, f),
+            Value::String(v) => core::fmt::Debug::fmt(v, f),
+            Value::Bytes(v) => core::fmt::Debug::fmt(v, f),
+            Value::Message(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedInt32(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedInt64(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedUInt32(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedUInt64(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedFloat(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedDouble(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedBool(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedString(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedBytes(v) => core::fmt::Debug::fmt(v, f),
+            Value::RepeatedMessage(v) => core::fmt::Debug::fmt(v, f),
+        }
+    }
 }
 
 #[cfg(test)]

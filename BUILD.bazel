@@ -29,6 +29,34 @@ rust_library(
     ],
 )
 
+# Main protocrap library
+rust_library(
+    name = "protocrap-with-codegen",
+    srcs = glob(
+        ["src/**/*.rs"],
+        exclude = ["src/main.rs"],
+    ),
+    crate_features = [
+        "std",
+        "serde_support",
+        "codegen",
+    ],
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@crates//:allocator-api2",
+        "@crates//:base64",
+        "@crates//:futures",
+        "@crates//:serde",
+        "@crates//:time",
+        "@crates//:anyhow",
+        "@crates//:prettyplease",
+        "@crates//:proc-macro2",
+        "@crates//:quote",
+        "@crates//:syn",
+    ],
+)
+
 # Protocrap codegen binary
 rust_binary(
     name = "protocrap-codegen",
@@ -36,17 +64,13 @@ rust_binary(
     crate_features = [
         "std",
         "codegen",
+        "bazel",
     ],
     edition = "2024",
     visibility = ["//visibility:public"],
     deps = [
-        ":protocrap",
-        "@crates//:allocator-api2",
+        ":protocrap-with-codegen",
         "@crates//:anyhow",
-        "@crates//:prettyplease",
-        "@crates//:proc-macro2",
-        "@crates//:quote",
-        "@crates//:syn",
     ],
 )
 

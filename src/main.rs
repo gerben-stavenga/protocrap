@@ -1,5 +1,9 @@
 #[cfg(feature = "bootstrap")]
 mod codegen;
+#[cfg(all(not(feature = "bootstrap"), feature = "bazel"))]
+use protocrap_with_codegen::codegen;
+#[cfg(all(not(feature = "bootstrap"), not(feature = "bazel")))]
+use protocrap::codegen;
 
 use std::fs;
 use std::io::{self, Read, Write};
@@ -24,10 +28,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     eprintln!("Read descriptor ({} bytes)", descriptor_bytes.len());
 
     // Generate code
-    #[cfg(feature = "bootstrap")]
     let code = codegen::generate(&descriptor_bytes)?;
-    #[cfg(not(feature = "bootstrap"))]
-    let code = protocrap::codegen::generate(&descriptor_bytes)?;
 
     // Write output
     if args.len() > 2 {
