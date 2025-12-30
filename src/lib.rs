@@ -235,6 +235,9 @@ include!("descriptor.pc.rs");
 #[cfg(feature = "serde_support")]
 pub mod serde;
 
+#[cfg(feature = "codegen")]
+pub mod codegen;
+
 #[derive(Debug)]
 pub enum Error<E = ()> {
     TreeTooDeep,

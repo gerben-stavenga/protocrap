@@ -6,7 +6,7 @@ use anyhow::Result;
 #[cfg(feature = "bootstrap")]
 use bootcrap as protocrap;
 #[cfg(not(feature = "bootstrap"))]
-use protocrap;
+use crate as protocrap;
 
 use protocrap::ProtobufMut;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
