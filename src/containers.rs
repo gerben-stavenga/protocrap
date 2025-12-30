@@ -338,8 +338,14 @@ impl<T> DerefMut for RepeatedField<T> {
 pub type Bytes = RepeatedField<u8>;
 
 #[repr(C)]
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Default, PartialEq, Eq)]
 pub struct String(Bytes);
+
+impl core::fmt::Debug for String {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{:?}", self.as_str())
+    }
+}
 impl String {
     pub const fn new() -> Self {
         String(RepeatedField::new())
