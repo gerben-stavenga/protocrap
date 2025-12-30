@@ -1,3 +1,6 @@
+// When bootstrap feature is enabled, the library is empty (uses bootcrap from crates.io)
+#![cfg(not(feature = "bootstrap"))]
+
 //! # Protocrap
 //!
 //! A small, efficient, and flexible protobuf implementation for Rust.
@@ -268,18 +271,14 @@ pub trait Protobuf: Default + core::fmt::Debug {
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
         Self::table().descriptor
     }
-
-    fn as_object(&self) -> &base::Object {
-        unsafe { &*(self as *const Self as *const base::Object) }
-    }
-
-    fn as_object_mut(&mut self) -> &mut base::Object {
-        unsafe { &mut *(self as *mut Self as *mut base::Object) }
-    }
 }
 
 pub const fn as_object<T: Protobuf>(msg: &T) -> &base::Object {
     unsafe { &*(msg as *const T as *const base::Object) }
+}
+
+pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut base::Object {
+    unsafe { &mut *(msg as *mut T as *mut base::Object) }
 }
 
 /// Read-only protobuf operations (encode, serialize, inspect).
@@ -496,13 +495,13 @@ impl<T: Protobuf> ProtobufRef<'static> for T {
     }
 
     fn as_object(&self) -> &base::Object {
-        <Self as Protobuf>::as_object(self)
+        as_object(self)
     }
 }
 
 impl<T: Protobuf> ProtobufMut<'static> for T {
     fn as_object_mut(&mut self) -> &mut base::Object {
-        <Self as Protobuf>::as_object_mut(self)
+        as_object_mut(self)
     }
 }
 

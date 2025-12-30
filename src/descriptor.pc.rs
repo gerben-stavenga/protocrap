@@ -329,7 +329,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -343,7 +343,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn has_package(&self) -> bool {
@@ -360,7 +360,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.package.assign(value, arena);
                 }
                 pub fn set_optional_package(
@@ -374,7 +374,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_package(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.package.clear();
                 }
                 pub const fn dependency(&self) -> &[protocrap::containers::String] {
@@ -567,7 +567,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.syntax.assign(value, arena);
                 }
                 pub fn set_optional_syntax(
@@ -581,7 +581,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_syntax(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.syntax.clear();
                 }
                 pub const fn has_edition(&self) -> bool {
@@ -591,7 +591,7 @@ pub mod google {
                     crate::google::protobuf::Edition::from_i32(self.edition)
                 }
                 pub fn set_edition(&mut self, value: crate::google::protobuf::Edition) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.edition = value.to_i32();
                 }
                 pub fn set_optional_edition(
@@ -604,7 +604,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_edition(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.edition = 0;
                 }
             }
@@ -997,7 +997,7 @@ pub mod google {
                         if self.has_start() { Some(self.start) } else { None }
                     }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.start = value;
                     }
                     pub fn set_optional_start(&mut self, value: Option<i32>) {
@@ -1007,7 +1007,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_start(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
@@ -1020,7 +1020,7 @@ pub mod google {
                         if self.has_end() { Some(self.end) } else { None }
                     }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.end = value;
                     }
                     pub fn set_optional_end(&mut self, value: Option<i32>) {
@@ -1030,7 +1030,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_end(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.end = Default::default();
                     }
                     pub const fn has_options(&self) -> bool {
@@ -1187,7 +1187,7 @@ pub mod google {
                         if self.has_start() { Some(self.start) } else { None }
                     }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.start = value;
                     }
                     pub fn set_optional_start(&mut self, value: Option<i32>) {
@@ -1197,7 +1197,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_start(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
@@ -1210,7 +1210,7 @@ pub mod google {
                         if self.has_end() { Some(self.end) } else { None }
                     }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.end = value;
                     }
                     pub fn set_optional_end(&mut self, value: Option<i32>) {
@@ -1220,7 +1220,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_end(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.end = Default::default();
                     }
                 }
@@ -1410,7 +1410,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -1424,7 +1424,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn field(
@@ -1648,7 +1648,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::SymbolVisibility,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.visibility = value.to_i32();
                 }
                 pub fn set_optional_visibility(
@@ -1661,7 +1661,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_visibility(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.visibility = 0;
                 }
             }
@@ -2066,7 +2066,7 @@ pub mod google {
                         if self.has_number() { Some(self.number) } else { None }
                     }
                     pub fn set_number(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.number = value;
                     }
                     pub fn set_optional_number(&mut self, value: Option<i32>) {
@@ -2076,7 +2076,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_number(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.number = Default::default();
                     }
                     pub const fn has_full_name(&self) -> bool {
@@ -2097,7 +2097,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.full_name.assign(value, arena);
                     }
                     pub fn set_optional_full_name(
@@ -2111,7 +2111,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_full_name(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.full_name.clear();
                     }
                     pub const fn has_type(&self) -> bool {
@@ -2128,7 +2128,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(2u32);
+                        protocrap::as_object_mut(self).set_has_bit(2u32);
                         self.r#type.assign(value, arena);
                     }
                     pub fn set_optional_type(
@@ -2142,7 +2142,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_type(&mut self) {
-                        self.as_object_mut().clear_has_bit(2u32);
+                        protocrap::as_object_mut(self).clear_has_bit(2u32);
                         self.r#type.clear();
                     }
                     pub const fn has_reserved(&self) -> bool {
@@ -2155,7 +2155,7 @@ pub mod google {
                         if self.has_reserved() { Some(self.reserved) } else { None }
                     }
                     pub fn set_reserved(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(3u32);
+                        protocrap::as_object_mut(self).set_has_bit(3u32);
                         self.reserved = value;
                     }
                     pub fn set_optional_reserved(&mut self, value: Option<bool>) {
@@ -2165,7 +2165,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_reserved(&mut self) {
-                        self.as_object_mut().clear_has_bit(3u32);
+                        protocrap::as_object_mut(self).clear_has_bit(3u32);
                         self.reserved = Default::default();
                     }
                     pub const fn has_repeated(&self) -> bool {
@@ -2178,7 +2178,7 @@ pub mod google {
                         if self.has_repeated() { Some(self.repeated) } else { None }
                     }
                     pub fn set_repeated(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(4u32);
+                        protocrap::as_object_mut(self).set_has_bit(4u32);
                         self.repeated = value;
                     }
                     pub fn set_optional_repeated(&mut self, value: Option<bool>) {
@@ -2188,7 +2188,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_repeated(&mut self) {
-                        self.as_object_mut().clear_has_bit(4u32);
+                        protocrap::as_object_mut(self).clear_has_bit(4u32);
                         self.repeated = Default::default();
                     }
                 }
@@ -2443,7 +2443,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::ExtensionRangeOptions::VerificationState,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.verification = value.to_i32();
                 }
                 pub fn set_optional_verification(
@@ -2458,7 +2458,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_verification(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.verification = 0;
                 }
             }
@@ -3752,7 +3752,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -3766,7 +3766,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn has_number(&self) -> bool {
@@ -3779,7 +3779,7 @@ pub mod google {
                     if self.has_number() { Some(self.number) } else { None }
                 }
                 pub fn set_number(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.number = value;
                 }
                 pub fn set_optional_number(&mut self, value: Option<i32>) {
@@ -3789,7 +3789,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_number(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.number = Default::default();
                 }
                 pub const fn has_label(&self) -> bool {
@@ -3806,7 +3806,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldDescriptorProto::Label,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.label = value.to_i32();
                 }
                 pub fn set_optional_label(
@@ -3819,7 +3819,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_label(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.label = 0;
                 }
                 pub const fn has_type(&self) -> bool {
@@ -3836,7 +3836,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldDescriptorProto::Type,
                 ) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.r#type = value.to_i32();
                 }
                 pub fn set_optional_type(
@@ -3849,7 +3849,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_type(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.r#type = 0;
                 }
                 pub const fn has_type_name(&self) -> bool {
@@ -3870,7 +3870,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.type_name.assign(value, arena);
                 }
                 pub fn set_optional_type_name(
@@ -3884,7 +3884,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_type_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.type_name.clear();
                 }
                 pub const fn has_extendee(&self) -> bool {
@@ -3901,7 +3901,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(5u32);
+                    protocrap::as_object_mut(self).set_has_bit(5u32);
                     self.extendee.assign(value, arena);
                 }
                 pub fn set_optional_extendee(
@@ -3915,7 +3915,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_extendee(&mut self) {
-                    self.as_object_mut().clear_has_bit(5u32);
+                    protocrap::as_object_mut(self).clear_has_bit(5u32);
                     self.extendee.clear();
                 }
                 pub const fn has_default_value(&self) -> bool {
@@ -3936,7 +3936,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(6u32);
+                    protocrap::as_object_mut(self).set_has_bit(6u32);
                     self.default_value.assign(value, arena);
                 }
                 pub fn set_optional_default_value(
@@ -3950,7 +3950,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_default_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(6u32);
+                    protocrap::as_object_mut(self).clear_has_bit(6u32);
                     self.default_value.clear();
                 }
                 pub const fn has_oneof_index(&self) -> bool {
@@ -3963,7 +3963,7 @@ pub mod google {
                     if self.has_oneof_index() { Some(self.oneof_index) } else { None }
                 }
                 pub fn set_oneof_index(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(7u32);
+                    protocrap::as_object_mut(self).set_has_bit(7u32);
                     self.oneof_index = value;
                 }
                 pub fn set_optional_oneof_index(&mut self, value: Option<i32>) {
@@ -3973,7 +3973,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_oneof_index(&mut self) {
-                    self.as_object_mut().clear_has_bit(7u32);
+                    protocrap::as_object_mut(self).clear_has_bit(7u32);
                     self.oneof_index = Default::default();
                 }
                 pub const fn has_json_name(&self) -> bool {
@@ -3994,7 +3994,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(8u32);
+                    protocrap::as_object_mut(self).set_has_bit(8u32);
                     self.json_name.assign(value, arena);
                 }
                 pub fn set_optional_json_name(
@@ -4008,7 +4008,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_json_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(8u32);
+                    protocrap::as_object_mut(self).clear_has_bit(8u32);
                     self.json_name.clear();
                 }
                 pub const fn has_options(&self) -> bool {
@@ -4042,7 +4042,7 @@ pub mod google {
                     }
                 }
                 pub fn set_proto3_optional(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(9u32);
+                    protocrap::as_object_mut(self).set_has_bit(9u32);
                     self.proto3_optional = value;
                 }
                 pub fn set_optional_proto3_optional(&mut self, value: Option<bool>) {
@@ -4052,7 +4052,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_proto3_optional(&mut self) {
-                    self.as_object_mut().clear_has_bit(9u32);
+                    protocrap::as_object_mut(self).clear_has_bit(9u32);
                     self.proto3_optional = Default::default();
                 }
             }
@@ -4284,7 +4284,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -4298,7 +4298,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn has_options(&self) -> bool {
@@ -4446,7 +4446,7 @@ pub mod google {
                         if self.has_start() { Some(self.start) } else { None }
                     }
                     pub fn set_start(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.start = value;
                     }
                     pub fn set_optional_start(&mut self, value: Option<i32>) {
@@ -4456,7 +4456,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_start(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.start = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
@@ -4469,7 +4469,7 @@ pub mod google {
                         if self.has_end() { Some(self.end) } else { None }
                     }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.end = value;
                     }
                     pub fn set_optional_end(&mut self, value: Option<i32>) {
@@ -4479,7 +4479,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_end(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.end = Default::default();
                     }
                 }
@@ -4614,7 +4614,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -4628,7 +4628,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn value(
@@ -4722,7 +4722,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::SymbolVisibility,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.visibility = value.to_i32();
                 }
                 pub fn set_optional_visibility(
@@ -4735,7 +4735,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_visibility(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.visibility = 0;
                 }
             }
@@ -4959,7 +4959,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -4973,7 +4973,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn has_number(&self) -> bool {
@@ -4986,7 +4986,7 @@ pub mod google {
                     if self.has_number() { Some(self.number) } else { None }
                 }
                 pub fn set_number(&mut self, value: i32) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.number = value;
                 }
                 pub fn set_optional_number(&mut self, value: Option<i32>) {
@@ -4996,7 +4996,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_number(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.number = Default::default();
                 }
                 pub const fn has_options(&self) -> bool {
@@ -5167,7 +5167,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -5181,7 +5181,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn method(
@@ -5402,7 +5402,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.name.assign(value, arena);
                 }
                 pub fn set_optional_name(
@@ -5416,7 +5416,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_name(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.name.clear();
                 }
                 pub const fn has_input_type(&self) -> bool {
@@ -5437,7 +5437,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.input_type.assign(value, arena);
                 }
                 pub fn set_optional_input_type(
@@ -5451,7 +5451,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_input_type(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.input_type.clear();
                 }
                 pub const fn has_output_type(&self) -> bool {
@@ -5472,7 +5472,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.output_type.assign(value, arena);
                 }
                 pub fn set_optional_output_type(
@@ -5486,7 +5486,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_output_type(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.output_type.clear();
                 }
                 pub const fn has_options(&self) -> bool {
@@ -5524,7 +5524,7 @@ pub mod google {
                     }
                 }
                 pub fn set_client_streaming(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.client_streaming = value;
                 }
                 pub fn set_optional_client_streaming(&mut self, value: Option<bool>) {
@@ -5534,7 +5534,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_client_streaming(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.client_streaming = Default::default();
                 }
                 pub const fn has_server_streaming(&self) -> bool {
@@ -5555,7 +5555,7 @@ pub mod google {
                     }
                 }
                 pub fn set_server_streaming(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.server_streaming = value;
                 }
                 pub fn set_optional_server_streaming(&mut self, value: Option<bool>) {
@@ -5565,7 +5565,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_server_streaming(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.server_streaming = Default::default();
                 }
             }
@@ -5832,7 +5832,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.java_package.assign(value, arena);
                 }
                 pub fn set_optional_java_package(
@@ -5846,7 +5846,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_package(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.java_package.clear();
                 }
                 pub const fn has_java_outer_classname(&self) -> bool {
@@ -5867,7 +5867,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.java_outer_classname.assign(value, arena);
                 }
                 pub fn set_optional_java_outer_classname(
@@ -5881,7 +5881,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_outer_classname(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.java_outer_classname.clear();
                 }
                 pub const fn has_java_multiple_files(&self) -> bool {
@@ -5902,7 +5902,7 @@ pub mod google {
                     }
                 }
                 pub fn set_java_multiple_files(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.java_multiple_files = value;
                 }
                 pub fn set_optional_java_multiple_files(&mut self, value: Option<bool>) {
@@ -5912,7 +5912,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_multiple_files(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.java_multiple_files = Default::default();
                 }
                 pub const fn has_java_generate_equals_and_hash(&self) -> bool {
@@ -5929,7 +5929,7 @@ pub mod google {
                     }
                 }
                 pub fn set_java_generate_equals_and_hash(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.java_generate_equals_and_hash = value;
                 }
                 pub fn set_optional_java_generate_equals_and_hash(
@@ -5942,7 +5942,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_generate_equals_and_hash(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.java_generate_equals_and_hash = Default::default();
                 }
                 pub const fn has_java_string_check_utf8(&self) -> bool {
@@ -5963,7 +5963,7 @@ pub mod google {
                     }
                 }
                 pub fn set_java_string_check_utf8(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.java_string_check_utf8 = value;
                 }
                 pub fn set_optional_java_string_check_utf8(
@@ -5976,7 +5976,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_string_check_utf8(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.java_string_check_utf8 = Default::default();
                 }
                 pub const fn has_optimize_for(&self) -> bool {
@@ -5997,7 +5997,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FileOptions::OptimizeMode,
                 ) {
-                    self.as_object_mut().set_has_bit(5u32);
+                    protocrap::as_object_mut(self).set_has_bit(5u32);
                     self.optimize_for = value.to_i32();
                 }
                 pub fn set_optional_optimize_for(
@@ -6010,7 +6010,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_optimize_for(&mut self) {
-                    self.as_object_mut().clear_has_bit(5u32);
+                    protocrap::as_object_mut(self).clear_has_bit(5u32);
                     self.optimize_for = 0;
                 }
                 pub const fn has_go_package(&self) -> bool {
@@ -6031,7 +6031,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(6u32);
+                    protocrap::as_object_mut(self).set_has_bit(6u32);
                     self.go_package.assign(value, arena);
                 }
                 pub fn set_optional_go_package(
@@ -6045,7 +6045,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_go_package(&mut self) {
-                    self.as_object_mut().clear_has_bit(6u32);
+                    protocrap::as_object_mut(self).clear_has_bit(6u32);
                     self.go_package.clear();
                 }
                 pub const fn has_cc_generic_services(&self) -> bool {
@@ -6066,7 +6066,7 @@ pub mod google {
                     }
                 }
                 pub fn set_cc_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(7u32);
+                    protocrap::as_object_mut(self).set_has_bit(7u32);
                     self.cc_generic_services = value;
                 }
                 pub fn set_optional_cc_generic_services(&mut self, value: Option<bool>) {
@@ -6076,7 +6076,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_cc_generic_services(&mut self) {
-                    self.as_object_mut().clear_has_bit(7u32);
+                    protocrap::as_object_mut(self).clear_has_bit(7u32);
                     self.cc_generic_services = Default::default();
                 }
                 pub const fn has_java_generic_services(&self) -> bool {
@@ -6097,7 +6097,7 @@ pub mod google {
                     }
                 }
                 pub fn set_java_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(8u32);
+                    protocrap::as_object_mut(self).set_has_bit(8u32);
                     self.java_generic_services = value;
                 }
                 pub fn set_optional_java_generic_services(
@@ -6110,7 +6110,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_java_generic_services(&mut self) {
-                    self.as_object_mut().clear_has_bit(8u32);
+                    protocrap::as_object_mut(self).clear_has_bit(8u32);
                     self.java_generic_services = Default::default();
                 }
                 pub const fn has_py_generic_services(&self) -> bool {
@@ -6131,7 +6131,7 @@ pub mod google {
                     }
                 }
                 pub fn set_py_generic_services(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(9u32);
+                    protocrap::as_object_mut(self).set_has_bit(9u32);
                     self.py_generic_services = value;
                 }
                 pub fn set_optional_py_generic_services(&mut self, value: Option<bool>) {
@@ -6141,7 +6141,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_py_generic_services(&mut self) {
-                    self.as_object_mut().clear_has_bit(9u32);
+                    protocrap::as_object_mut(self).clear_has_bit(9u32);
                     self.py_generic_services = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
@@ -6154,7 +6154,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(10u32);
+                    protocrap::as_object_mut(self).set_has_bit(10u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -6164,7 +6164,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(10u32);
+                    protocrap::as_object_mut(self).clear_has_bit(10u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_cc_enable_arenas(&self) -> bool {
@@ -6185,7 +6185,7 @@ pub mod google {
                     }
                 }
                 pub fn set_cc_enable_arenas(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(11u32);
+                    protocrap::as_object_mut(self).set_has_bit(11u32);
                     self.cc_enable_arenas = value;
                 }
                 pub fn set_optional_cc_enable_arenas(&mut self, value: Option<bool>) {
@@ -6195,7 +6195,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_cc_enable_arenas(&mut self) {
-                    self.as_object_mut().clear_has_bit(11u32);
+                    protocrap::as_object_mut(self).clear_has_bit(11u32);
                     self.cc_enable_arenas = Default::default();
                 }
                 pub const fn has_objc_class_prefix(&self) -> bool {
@@ -6216,7 +6216,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(12u32);
+                    protocrap::as_object_mut(self).set_has_bit(12u32);
                     self.objc_class_prefix.assign(value, arena);
                 }
                 pub fn set_optional_objc_class_prefix(
@@ -6230,7 +6230,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_objc_class_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(12u32);
+                    protocrap::as_object_mut(self).clear_has_bit(12u32);
                     self.objc_class_prefix.clear();
                 }
                 pub const fn has_csharp_namespace(&self) -> bool {
@@ -6251,7 +6251,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(13u32);
+                    protocrap::as_object_mut(self).set_has_bit(13u32);
                     self.csharp_namespace.assign(value, arena);
                 }
                 pub fn set_optional_csharp_namespace(
@@ -6265,7 +6265,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_csharp_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(13u32);
+                    protocrap::as_object_mut(self).clear_has_bit(13u32);
                     self.csharp_namespace.clear();
                 }
                 pub const fn has_swift_prefix(&self) -> bool {
@@ -6286,7 +6286,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(14u32);
+                    protocrap::as_object_mut(self).set_has_bit(14u32);
                     self.swift_prefix.assign(value, arena);
                 }
                 pub fn set_optional_swift_prefix(
@@ -6300,7 +6300,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_swift_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(14u32);
+                    protocrap::as_object_mut(self).clear_has_bit(14u32);
                     self.swift_prefix.clear();
                 }
                 pub const fn has_php_class_prefix(&self) -> bool {
@@ -6321,7 +6321,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(15u32);
+                    protocrap::as_object_mut(self).set_has_bit(15u32);
                     self.php_class_prefix.assign(value, arena);
                 }
                 pub fn set_optional_php_class_prefix(
@@ -6335,7 +6335,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_class_prefix(&mut self) {
-                    self.as_object_mut().clear_has_bit(15u32);
+                    protocrap::as_object_mut(self).clear_has_bit(15u32);
                     self.php_class_prefix.clear();
                 }
                 pub const fn has_php_namespace(&self) -> bool {
@@ -6356,7 +6356,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(16u32);
+                    protocrap::as_object_mut(self).set_has_bit(16u32);
                     self.php_namespace.assign(value, arena);
                 }
                 pub fn set_optional_php_namespace(
@@ -6370,7 +6370,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(16u32);
+                    protocrap::as_object_mut(self).clear_has_bit(16u32);
                     self.php_namespace.clear();
                 }
                 pub const fn has_php_metadata_namespace(&self) -> bool {
@@ -6391,7 +6391,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(17u32);
+                    protocrap::as_object_mut(self).set_has_bit(17u32);
                     self.php_metadata_namespace.assign(value, arena);
                 }
                 pub fn set_optional_php_metadata_namespace(
@@ -6405,7 +6405,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_php_metadata_namespace(&mut self) {
-                    self.as_object_mut().clear_has_bit(17u32);
+                    protocrap::as_object_mut(self).clear_has_bit(17u32);
                     self.php_metadata_namespace.clear();
                 }
                 pub const fn has_ruby_package(&self) -> bool {
@@ -6426,7 +6426,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(18u32);
+                    protocrap::as_object_mut(self).set_has_bit(18u32);
                     self.ruby_package.assign(value, arena);
                 }
                 pub fn set_optional_ruby_package(
@@ -6440,7 +6440,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_ruby_package(&mut self) {
-                    self.as_object_mut().clear_has_bit(18u32);
+                    protocrap::as_object_mut(self).clear_has_bit(18u32);
                     self.ruby_package.clear();
                 }
                 pub const fn has_features(&self) -> bool {
@@ -7865,7 +7865,7 @@ pub mod google {
                     }
                 }
                 pub fn set_message_set_wire_format(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.message_set_wire_format = value;
                 }
                 pub fn set_optional_message_set_wire_format(
@@ -7878,7 +7878,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_message_set_wire_format(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.message_set_wire_format = Default::default();
                 }
                 pub const fn has_no_standard_descriptor_accessor(&self) -> bool {
@@ -7899,7 +7899,7 @@ pub mod google {
                     }
                 }
                 pub fn set_no_standard_descriptor_accessor(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.no_standard_descriptor_accessor = value;
                 }
                 pub fn set_optional_no_standard_descriptor_accessor(
@@ -7912,7 +7912,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_no_standard_descriptor_accessor(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.no_standard_descriptor_accessor = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
@@ -7925,7 +7925,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -7935,7 +7935,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_map_entry(&self) -> bool {
@@ -7948,7 +7948,7 @@ pub mod google {
                     if self.has_map_entry() { Some(self.map_entry) } else { None }
                 }
                 pub fn set_map_entry(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.map_entry = value;
                 }
                 pub fn set_optional_map_entry(&mut self, value: Option<bool>) {
@@ -7958,7 +7958,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_map_entry(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.map_entry = Default::default();
                 }
                 pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
@@ -7980,7 +7980,7 @@ pub mod google {
                     &mut self,
                     value: bool,
                 ) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.deprecated_legacy_json_field_conflicts = value;
                 }
                 pub fn set_optional_deprecated_legacy_json_field_conflicts(
@@ -7993,7 +7993,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated_legacy_json_field_conflicts(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.deprecated_legacy_json_field_conflicts = Default::default();
                 }
                 pub const fn has_features(&self) -> bool {
@@ -9247,7 +9247,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.edition = value.to_i32();
                     }
                     pub fn set_optional_edition(
@@ -9260,7 +9260,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_edition(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.edition = 0;
                     }
                     pub const fn has_value(&self) -> bool {
@@ -9277,7 +9277,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.value.assign(value, arena);
                     }
                     pub fn set_optional_value(
@@ -9291,7 +9291,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_value(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.value.clear();
                     }
                 }
@@ -9412,7 +9412,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.edition_introduced = value.to_i32();
                     }
                     pub fn set_optional_edition_introduced(
@@ -9425,7 +9425,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_edition_introduced(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.edition_introduced = 0;
                     }
                     pub const fn has_edition_deprecated(&self) -> bool {
@@ -9442,7 +9442,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.edition_deprecated = value.to_i32();
                     }
                     pub fn set_optional_edition_deprecated(
@@ -9455,7 +9455,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_edition_deprecated(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.edition_deprecated = 0;
                     }
                     pub const fn has_deprecation_warning(&self) -> bool {
@@ -9476,7 +9476,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(2u32);
+                        protocrap::as_object_mut(self).set_has_bit(2u32);
                         self.deprecation_warning.assign(value, arena);
                     }
                     pub fn set_optional_deprecation_warning(
@@ -9490,7 +9490,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_deprecation_warning(&mut self) {
-                        self.as_object_mut().clear_has_bit(2u32);
+                        protocrap::as_object_mut(self).clear_has_bit(2u32);
                         self.deprecation_warning.clear();
                     }
                     pub const fn has_edition_removed(&self) -> bool {
@@ -9505,7 +9505,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(3u32);
+                        protocrap::as_object_mut(self).set_has_bit(3u32);
                         self.edition_removed = value.to_i32();
                     }
                     pub fn set_optional_edition_removed(
@@ -9518,7 +9518,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_edition_removed(&mut self) {
-                        self.as_object_mut().clear_has_bit(3u32);
+                        protocrap::as_object_mut(self).clear_has_bit(3u32);
                         self.edition_removed = 0;
                     }
                     pub const fn has_removal_error(&self) -> bool {
@@ -9539,7 +9539,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(4u32);
+                        protocrap::as_object_mut(self).set_has_bit(4u32);
                         self.removal_error.assign(value, arena);
                     }
                     pub fn set_optional_removal_error(
@@ -9553,7 +9553,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_removal_error(&mut self) {
-                        self.as_object_mut().clear_has_bit(4u32);
+                        protocrap::as_object_mut(self).clear_has_bit(4u32);
                         self.removal_error.clear();
                     }
                 }
@@ -9852,7 +9852,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::CType,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.ctype = value.to_i32();
                 }
                 pub fn set_optional_ctype(
@@ -9865,7 +9865,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_ctype(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.ctype = 0;
                 }
                 pub const fn has_packed(&self) -> bool {
@@ -9878,7 +9878,7 @@ pub mod google {
                     if self.has_packed() { Some(self.packed) } else { None }
                 }
                 pub fn set_packed(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.packed = value;
                 }
                 pub fn set_optional_packed(&mut self, value: Option<bool>) {
@@ -9888,7 +9888,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_packed(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.packed = Default::default();
                 }
                 pub const fn has_jstype(&self) -> bool {
@@ -9909,7 +9909,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::JSType,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.jstype = value.to_i32();
                 }
                 pub fn set_optional_jstype(
@@ -9922,7 +9922,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_jstype(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.jstype = 0;
                 }
                 pub const fn has_lazy(&self) -> bool {
@@ -9935,7 +9935,7 @@ pub mod google {
                     if self.has_lazy() { Some(self.lazy) } else { None }
                 }
                 pub fn set_lazy(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.lazy = value;
                 }
                 pub fn set_optional_lazy(&mut self, value: Option<bool>) {
@@ -9945,7 +9945,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_lazy(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.lazy = Default::default();
                 }
                 pub const fn has_unverified_lazy(&self) -> bool {
@@ -9962,7 +9962,7 @@ pub mod google {
                     }
                 }
                 pub fn set_unverified_lazy(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.unverified_lazy = value;
                 }
                 pub fn set_optional_unverified_lazy(&mut self, value: Option<bool>) {
@@ -9972,7 +9972,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_unverified_lazy(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.unverified_lazy = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
@@ -9985,7 +9985,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(5u32);
+                    protocrap::as_object_mut(self).set_has_bit(5u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -9995,7 +9995,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(5u32);
+                    protocrap::as_object_mut(self).clear_has_bit(5u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_weak(&self) -> bool {
@@ -10008,7 +10008,7 @@ pub mod google {
                     if self.has_weak() { Some(self.weak) } else { None }
                 }
                 pub fn set_weak(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(6u32);
+                    protocrap::as_object_mut(self).set_has_bit(6u32);
                     self.weak = value;
                 }
                 pub fn set_optional_weak(&mut self, value: Option<bool>) {
@@ -10018,7 +10018,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_weak(&mut self) {
-                    self.as_object_mut().clear_has_bit(6u32);
+                    protocrap::as_object_mut(self).clear_has_bit(6u32);
                     self.weak = Default::default();
                 }
                 pub const fn has_debug_redact(&self) -> bool {
@@ -10031,7 +10031,7 @@ pub mod google {
                     if self.has_debug_redact() { Some(self.debug_redact) } else { None }
                 }
                 pub fn set_debug_redact(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(7u32);
+                    protocrap::as_object_mut(self).set_has_bit(7u32);
                     self.debug_redact = value;
                 }
                 pub fn set_optional_debug_redact(&mut self, value: Option<bool>) {
@@ -10041,7 +10041,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_debug_redact(&mut self) {
-                    self.as_object_mut().clear_has_bit(7u32);
+                    protocrap::as_object_mut(self).clear_has_bit(7u32);
                     self.debug_redact = Default::default();
                 }
                 pub const fn has_retention(&self) -> bool {
@@ -10058,7 +10058,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FieldOptions::OptionRetention,
                 ) {
-                    self.as_object_mut().set_has_bit(8u32);
+                    protocrap::as_object_mut(self).set_has_bit(8u32);
                     self.retention = value.to_i32();
                 }
                 pub fn set_optional_retention(
@@ -10071,7 +10071,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_retention(&mut self) {
-                    self.as_object_mut().clear_has_bit(8u32);
+                    protocrap::as_object_mut(self).clear_has_bit(8u32);
                     self.retention = 0;
                 }
                 pub const fn targets(&self) -> &[i32] {
@@ -12685,7 +12685,7 @@ pub mod google {
                     if self.has_allow_alias() { Some(self.allow_alias) } else { None }
                 }
                 pub fn set_allow_alias(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.allow_alias = value;
                 }
                 pub fn set_optional_allow_alias(&mut self, value: Option<bool>) {
@@ -12695,7 +12695,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_allow_alias(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.allow_alias = Default::default();
                 }
                 pub const fn has_deprecated(&self) -> bool {
@@ -12708,7 +12708,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -12718,7 +12718,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_deprecated_legacy_json_field_conflicts(&self) -> bool {
@@ -12740,7 +12740,7 @@ pub mod google {
                     &mut self,
                     value: bool,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.deprecated_legacy_json_field_conflicts = value;
                 }
                 pub fn set_optional_deprecated_legacy_json_field_conflicts(
@@ -12753,7 +12753,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated_legacy_json_field_conflicts(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.deprecated_legacy_json_field_conflicts = Default::default();
                 }
                 pub const fn has_features(&self) -> bool {
@@ -13999,7 +13999,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -14009,7 +14009,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_features(&self) -> bool {
@@ -14039,7 +14039,7 @@ pub mod google {
                     if self.has_debug_redact() { Some(self.debug_redact) } else { None }
                 }
                 pub fn set_debug_redact(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.debug_redact = value;
                 }
                 pub fn set_optional_debug_redact(&mut self, value: Option<bool>) {
@@ -14049,7 +14049,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_debug_redact(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.debug_redact = Default::default();
                 }
                 pub const fn has_feature_support(&self) -> bool {
@@ -15323,7 +15323,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -15333,7 +15333,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn uninterpreted_option(
@@ -16552,7 +16552,7 @@ pub mod google {
                     if self.has_deprecated() { Some(self.deprecated) } else { None }
                 }
                 pub fn set_deprecated(&mut self, value: bool) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.deprecated = value;
                 }
                 pub fn set_optional_deprecated(&mut self, value: Option<bool>) {
@@ -16562,7 +16562,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_deprecated(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.deprecated = Default::default();
                 }
                 pub const fn has_idempotency_level(&self) -> bool {
@@ -16585,7 +16585,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::MethodOptions::IdempotencyLevel,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.idempotency_level = value.to_i32();
                 }
                 pub fn set_optional_idempotency_level(
@@ -16600,7 +16600,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_idempotency_level(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.idempotency_level = 0;
                 }
                 pub const fn has_features(&self) -> bool {
@@ -17828,7 +17828,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.name_part.assign(value, arena);
                     }
                     pub fn set_optional_name_part(
@@ -17842,7 +17842,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_name_part(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.name_part.clear();
                     }
                     pub const fn has_is_extension(&self) -> bool {
@@ -17859,7 +17859,7 @@ pub mod google {
                         }
                     }
                     pub fn set_is_extension(&mut self, value: bool) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.is_extension = value;
                     }
                     pub fn set_optional_is_extension(&mut self, value: Option<bool>) {
@@ -17869,7 +17869,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_is_extension(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.is_extension = Default::default();
                     }
                 }
@@ -18022,7 +18022,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.identifier_value.assign(value, arena);
                 }
                 pub fn set_optional_identifier_value(
@@ -18036,7 +18036,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_identifier_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.identifier_value.clear();
                 }
                 pub const fn has_positive_int_value(&self) -> bool {
@@ -18053,7 +18053,7 @@ pub mod google {
                     }
                 }
                 pub fn set_positive_int_value(&mut self, value: u64) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.positive_int_value = value;
                 }
                 pub fn set_optional_positive_int_value(&mut self, value: Option<u64>) {
@@ -18063,7 +18063,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_positive_int_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.positive_int_value = Default::default();
                 }
                 pub const fn has_negative_int_value(&self) -> bool {
@@ -18080,7 +18080,7 @@ pub mod google {
                     }
                 }
                 pub fn set_negative_int_value(&mut self, value: i64) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.negative_int_value = value;
                 }
                 pub fn set_optional_negative_int_value(&mut self, value: Option<i64>) {
@@ -18090,7 +18090,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_negative_int_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.negative_int_value = Default::default();
                 }
                 pub const fn has_double_value(&self) -> bool {
@@ -18103,7 +18103,7 @@ pub mod google {
                     if self.has_double_value() { Some(self.double_value) } else { None }
                 }
                 pub fn set_double_value(&mut self, value: f64) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.double_value = value;
                 }
                 pub fn set_optional_double_value(&mut self, value: Option<f64>) {
@@ -18113,7 +18113,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_double_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.double_value = Default::default();
                 }
                 pub const fn has_string_value(&self) -> bool {
@@ -18134,7 +18134,7 @@ pub mod google {
                     value: &[u8],
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.string_value.assign(value, arena);
                 }
                 pub fn set_optional_string_value(
@@ -18148,7 +18148,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_string_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.string_value.clear();
                 }
                 pub const fn has_aggregate_value(&self) -> bool {
@@ -18169,7 +18169,7 @@ pub mod google {
                     value: &str,
                     arena: &mut protocrap::arena::Arena,
                 ) {
-                    self.as_object_mut().set_has_bit(5u32);
+                    protocrap::as_object_mut(self).set_has_bit(5u32);
                     self.aggregate_value.assign(value, arena);
                 }
                 pub fn set_optional_aggregate_value(
@@ -18183,7 +18183,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_aggregate_value(&mut self) {
-                    self.as_object_mut().clear_has_bit(5u32);
+                    protocrap::as_object_mut(self).clear_has_bit(5u32);
                     self.aggregate_value.clear();
                 }
             }
@@ -18621,7 +18621,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::FieldPresence,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.field_presence = value.to_i32();
                 }
                 pub fn set_optional_field_presence(
@@ -18634,7 +18634,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_field_presence(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.field_presence = 0;
                 }
                 pub const fn has_enum_type(&self) -> bool {
@@ -18651,7 +18651,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::EnumType,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.enum_type = value.to_i32();
                 }
                 pub fn set_optional_enum_type(
@@ -18664,7 +18664,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_enum_type(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.enum_type = 0;
                 }
                 pub const fn has_repeated_field_encoding(&self) -> bool {
@@ -18681,7 +18681,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::RepeatedFieldEncoding,
                 ) {
-                    self.as_object_mut().set_has_bit(2u32);
+                    protocrap::as_object_mut(self).set_has_bit(2u32);
                     self.repeated_field_encoding = value.to_i32();
                 }
                 pub fn set_optional_repeated_field_encoding(
@@ -18696,7 +18696,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_repeated_field_encoding(&mut self) {
-                    self.as_object_mut().clear_has_bit(2u32);
+                    protocrap::as_object_mut(self).clear_has_bit(2u32);
                     self.repeated_field_encoding = 0;
                 }
                 pub const fn has_utf8_validation(&self) -> bool {
@@ -18713,7 +18713,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::Utf8Validation,
                 ) {
-                    self.as_object_mut().set_has_bit(3u32);
+                    protocrap::as_object_mut(self).set_has_bit(3u32);
                     self.utf8_validation = value.to_i32();
                 }
                 pub fn set_optional_utf8_validation(
@@ -18726,7 +18726,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_utf8_validation(&mut self) {
-                    self.as_object_mut().clear_has_bit(3u32);
+                    protocrap::as_object_mut(self).clear_has_bit(3u32);
                     self.utf8_validation = 0;
                 }
                 pub const fn has_message_encoding(&self) -> bool {
@@ -18743,7 +18743,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::MessageEncoding,
                 ) {
-                    self.as_object_mut().set_has_bit(4u32);
+                    protocrap::as_object_mut(self).set_has_bit(4u32);
                     self.message_encoding = value.to_i32();
                 }
                 pub fn set_optional_message_encoding(
@@ -18756,7 +18756,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_message_encoding(&mut self) {
-                    self.as_object_mut().clear_has_bit(4u32);
+                    protocrap::as_object_mut(self).clear_has_bit(4u32);
                     self.message_encoding = 0;
                 }
                 pub const fn has_json_format(&self) -> bool {
@@ -18773,7 +18773,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::JsonFormat,
                 ) {
-                    self.as_object_mut().set_has_bit(5u32);
+                    protocrap::as_object_mut(self).set_has_bit(5u32);
                     self.json_format = value.to_i32();
                 }
                 pub fn set_optional_json_format(
@@ -18786,7 +18786,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_json_format(&mut self) {
-                    self.as_object_mut().clear_has_bit(5u32);
+                    protocrap::as_object_mut(self).clear_has_bit(5u32);
                     self.json_format = 0;
                 }
                 pub const fn has_enforce_naming_style(&self) -> bool {
@@ -18803,7 +18803,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::EnforceNamingStyle,
                 ) {
-                    self.as_object_mut().set_has_bit(6u32);
+                    protocrap::as_object_mut(self).set_has_bit(6u32);
                     self.enforce_naming_style = value.to_i32();
                 }
                 pub fn set_optional_enforce_naming_style(
@@ -18818,7 +18818,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_enforce_naming_style(&mut self) {
-                    self.as_object_mut().clear_has_bit(6u32);
+                    protocrap::as_object_mut(self).clear_has_bit(6u32);
                     self.enforce_naming_style = 0;
                 }
                 pub const fn has_default_symbol_visibility(&self) -> bool {
@@ -18837,7 +18837,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::FeatureSet::VisibilityFeature::DefaultSymbolVisibility,
                 ) {
-                    self.as_object_mut().set_has_bit(7u32);
+                    protocrap::as_object_mut(self).set_has_bit(7u32);
                     self.default_symbol_visibility = value.to_i32();
                 }
                 pub fn set_optional_default_symbol_visibility(
@@ -18852,7 +18852,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_default_symbol_visibility(&mut self) {
-                    self.as_object_mut().clear_has_bit(7u32);
+                    protocrap::as_object_mut(self).clear_has_bit(7u32);
                     self.default_symbol_visibility = 0;
                 }
             }
@@ -19048,7 +19048,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::Edition,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.edition = value.to_i32();
                     }
                     pub fn set_optional_edition(
@@ -19061,7 +19061,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_edition(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.edition = 0;
                     }
                     pub const fn has_overridable_features(&self) -> bool {
@@ -19292,7 +19292,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::Edition,
                 ) {
-                    self.as_object_mut().set_has_bit(0u32);
+                    protocrap::as_object_mut(self).set_has_bit(0u32);
                     self.minimum_edition = value.to_i32();
                 }
                 pub fn set_optional_minimum_edition(
@@ -19305,7 +19305,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_minimum_edition(&mut self) {
-                    self.as_object_mut().clear_has_bit(0u32);
+                    protocrap::as_object_mut(self).clear_has_bit(0u32);
                     self.minimum_edition = 0;
                 }
                 pub const fn has_maximum_edition(&self) -> bool {
@@ -19320,7 +19320,7 @@ pub mod google {
                     &mut self,
                     value: crate::google::protobuf::Edition,
                 ) {
-                    self.as_object_mut().set_has_bit(1u32);
+                    protocrap::as_object_mut(self).set_has_bit(1u32);
                     self.maximum_edition = value.to_i32();
                 }
                 pub fn set_optional_maximum_edition(
@@ -19333,7 +19333,7 @@ pub mod google {
                     }
                 }
                 pub fn clear_maximum_edition(&mut self) {
-                    self.as_object_mut().clear_has_bit(1u32);
+                    protocrap::as_object_mut(self).clear_has_bit(1u32);
                     self.maximum_edition = 0;
                 }
             }
@@ -19519,7 +19519,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.leading_comments.assign(value, arena);
                     }
                     pub fn set_optional_leading_comments(
@@ -19533,7 +19533,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_leading_comments(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.leading_comments.clear();
                     }
                     pub const fn has_trailing_comments(&self) -> bool {
@@ -19554,7 +19554,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.trailing_comments.assign(value, arena);
                     }
                     pub fn set_optional_trailing_comments(
@@ -19568,7 +19568,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_trailing_comments(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.trailing_comments.clear();
                     }
                     pub const fn leading_detached_comments(
@@ -19899,7 +19899,7 @@ pub mod google {
                         value: &str,
                         arena: &mut protocrap::arena::Arena,
                     ) {
-                        self.as_object_mut().set_has_bit(0u32);
+                        protocrap::as_object_mut(self).set_has_bit(0u32);
                         self.source_file.assign(value, arena);
                     }
                     pub fn set_optional_source_file(
@@ -19913,7 +19913,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_source_file(&mut self) {
-                        self.as_object_mut().clear_has_bit(0u32);
+                        protocrap::as_object_mut(self).clear_has_bit(0u32);
                         self.source_file.clear();
                     }
                     pub const fn has_begin(&self) -> bool {
@@ -19926,7 +19926,7 @@ pub mod google {
                         if self.has_begin() { Some(self.begin) } else { None }
                     }
                     pub fn set_begin(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(1u32);
+                        protocrap::as_object_mut(self).set_has_bit(1u32);
                         self.begin = value;
                     }
                     pub fn set_optional_begin(&mut self, value: Option<i32>) {
@@ -19936,7 +19936,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_begin(&mut self) {
-                        self.as_object_mut().clear_has_bit(1u32);
+                        protocrap::as_object_mut(self).clear_has_bit(1u32);
                         self.begin = Default::default();
                     }
                     pub const fn has_end(&self) -> bool {
@@ -19949,7 +19949,7 @@ pub mod google {
                         if self.has_end() { Some(self.end) } else { None }
                     }
                     pub fn set_end(&mut self, value: i32) {
-                        self.as_object_mut().set_has_bit(2u32);
+                        protocrap::as_object_mut(self).set_has_bit(2u32);
                         self.end = value;
                     }
                     pub fn set_optional_end(&mut self, value: Option<i32>) {
@@ -19959,7 +19959,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_end(&mut self) {
-                        self.as_object_mut().clear_has_bit(2u32);
+                        protocrap::as_object_mut(self).clear_has_bit(2u32);
                         self.end = Default::default();
                     }
                     pub const fn has_semantic(&self) -> bool {
@@ -19978,7 +19978,7 @@ pub mod google {
                         &mut self,
                         value: crate::google::protobuf::GeneratedCodeInfo::Annotation::Semantic,
                     ) {
-                        self.as_object_mut().set_has_bit(3u32);
+                        protocrap::as_object_mut(self).set_has_bit(3u32);
                         self.semantic = value.to_i32();
                     }
                     pub fn set_optional_semantic(
@@ -19993,7 +19993,7 @@ pub mod google {
                         }
                     }
                     pub fn clear_semantic(&mut self) {
-                        self.as_object_mut().clear_has_bit(3u32);
+                        protocrap::as_object_mut(self).clear_has_bit(3u32);
                         self.semantic = 0;
                     }
                 }

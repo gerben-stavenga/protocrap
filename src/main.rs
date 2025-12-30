@@ -1,3 +1,5 @@
+mod codegen;
+
 use std::fs;
 use std::io::{self, Read, Write};
 
@@ -11,27 +13,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Read descriptor bytes
     let descriptor_bytes = if args[1] == "-" {
-        // Read from stdin
         let mut buf = Vec::new();
         io::stdin().read_to_end(&mut buf)?;
         buf
     } else {
-        // Read from file
         fs::read(&args[1])?
     };
 
-    eprintln!("✅ Read descriptor ({} bytes)", descriptor_bytes.len());
+    eprintln!("Read descriptor ({} bytes)", descriptor_bytes.len());
 
     // Generate code
-    let code = protocrap_codegen::generate(&descriptor_bytes)?;
+    let code = codegen::generate(&descriptor_bytes)?;
 
     // Write output
     if args.len() > 2 {
-        // Write to file
-        fs::write(&args[2], code)?;
-        eprintln!("✅ Generated {}", args[2]);
+        fs::write(&args[2], &code)?;
+        eprintln!("Generated {}", args[2]);
     } else {
-        // Write to stdout
         io::stdout().write_all(code.as_bytes())?;
     }
 
@@ -42,8 +40,8 @@ fn print_usage(program: &str) {
     eprintln!("Protocrap Code Generator");
     eprintln!();
     eprintln!("USAGE:");
-    eprintln!("  {} <descriptor.pb> [output.rs]", program);
-    eprintln!("  {} - < descriptor.pb > output.rs", program);
+    eprintln!("  {program} <descriptor.pb> [output.rs]");
+    eprintln!("  {program} - < descriptor.pb > output.rs");
     eprintln!();
     eprintln!("ARGUMENTS:");
     eprintln!("  descriptor.pb   FileDescriptorSet from protoc");
@@ -51,11 +49,5 @@ fn print_usage(program: &str) {
     eprintln!();
     eprintln!("EXAMPLE:");
     eprintln!("  protoc --descriptor_set_out=desc.pb --include_imports my.proto");
-    eprintln!("  {} desc.pb my.pc.rs", program);
-    eprintln!();
-    eprintln!("  # Or use in pipeline:");
-    eprintln!(
-        "  protoc --descriptor_set_out=- --include_imports my.proto | {} -",
-        program
-    );
+    eprintln!("  {program} desc.pb my.pc.rs");
 }

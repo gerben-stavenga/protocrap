@@ -27,8 +27,8 @@ genrule(
     name = "conformance_generated",
     srcs = [":conformance_descriptor_set"],
     outs = ["src/conformance_all.pc.rs"],
-    cmd = "$(execpath //codegen:protocrap-codegen) $(location :conformance_descriptor_set) $@",
-    tools = ["//codegen:protocrap-codegen"],
+    cmd = "$(execpath //:protocrap-codegen) $(location :conformance_descriptor_set) $@",
+    tools = ["//:protocrap-codegen"],
 )
 
 # Conformance library with generated code

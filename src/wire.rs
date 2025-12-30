@@ -2,6 +2,7 @@ use core::{
     ops::{Add, AddAssign, Index, IndexMut, Sub},
     ptr::NonNull,
 };
+use std::io::Read;
 
 pub(crate) const SLOP_SIZE: usize = 16;
 
@@ -17,60 +18,57 @@ pub fn zigzag_encode(n: i64) -> u64 {
 pub struct ReadCursor(pub NonNull<u8>);
 
 #[inline(never)]
-fn read_varint(ptr: *const u8) -> (*const u8, u64) {
+fn read_varint(ptr: ReadCursor) -> (Option<ReadCursor>, u64) {
     let mut result = 0;
     let mut extra = 0;
     for i in 0..10 {
-        let b = unsafe { *ptr.add(i) };
+        let b = ptr[i];
         if i == 9 && b != 1 {
             break;
         }
         result ^= (b as u64) << (7 * i);
         if b < 0x80 {
-            let new_ptr = unsafe { ptr.add(i + 1) };
-            return (new_ptr, result ^ extra);
+            return (Some(ptr + i + 1), result ^ extra);
         }
         extra ^= 0x80 << (7 * i);
     }
-    (core::ptr::null(), 0)
+    (None, 0)
 }
 
 #[inline(never)]
-fn read_tag(ptr: *const u8) -> (*const u8, u32) {
+fn read_tag(ptr: ReadCursor) -> (Option<ReadCursor>, u32) {
     let mut result = 0;
     let mut extra = 0;
     for i in 0..5 {
-        let b = unsafe { *ptr.add(i) };
+        let b = ptr[i];
         if i == 4 && (b == 0 || b > 15) {
             break;
         }
         result ^= (b as u32) << (7 * i);
         if b < 0x80 {
-            let new_ptr = unsafe { ptr.add(i + 1) };
-            return (new_ptr, result ^ extra);
+            return (Some(ptr + i + 1), result ^ extra);
         }
         extra ^= 0x80 << (7 * i);
     }
-    (core::ptr::null(), 0)
+    (None, 0)
 }
 
 #[inline(never)]
-fn read_size(ptr: *const u8) -> (*const u8, isize) {
+fn read_size(ptr: ReadCursor) -> (Option<ReadCursor>, isize) {
     let mut result = 0;
     let mut extra = 0;
     for i in 0..5 {
-        let b = unsafe { *ptr.add(i) };
+        let b = ptr[i];
         if i == 4 && (b == 0 || b > 7) {
             break;
         }
         result ^= (b as isize) << (7 * i);
         if b < 0x80 {
-            let new_ptr = unsafe { ptr.add(i + 1) };
-            return (new_ptr, result ^ extra);
+            return (Some(ptr + i + 1), result ^ extra);
         }
         extra ^= 0x80 << (7 * i);
     }
-    (core::ptr::null(), 0)
+    (None, 0)
 }
 
 impl ReadCursor {
@@ -87,11 +85,10 @@ impl ReadCursor {
             *self += 1;
             Some(res)
         } else {
-            let (new_ptr, value) = read_varint(self.0.as_ptr());
-            if new_ptr.is_null() {
+            let (Some(new_ptr), value) = read_varint(*self) else {
                 return None;
-            }
-            self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
+            };
+            *self = new_ptr;
             Some(value)
         }
     }
@@ -103,11 +100,10 @@ impl ReadCursor {
             *self += 1;
             Some(res)
         } else {
-            let (new_ptr, value) = read_tag(self.0.as_ptr());
-            if new_ptr.is_null() {
+            let (Some(new_ptr), value) = read_tag(*self) else {
                 return None;
-            }
-            self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
+            };
+            *self = new_ptr;
             Some(value)
         }
     }
@@ -120,19 +116,17 @@ impl ReadCursor {
             *self += 1;
             Some(res)
         } else {
-            let (new_ptr, value) = read_size(self.0.as_ptr());
-            if new_ptr.is_null() {
+            let (Some(new_ptr), value) = read_size(*self) else {
                 return None;
-            }
-            self.0 = unsafe { NonNull::new_unchecked(new_ptr as *mut u8) };
+            };
+            *self = new_ptr;
             Some(value)
         }
     }
 
     #[inline(always)]
     pub fn read_unaligned<T>(&mut self) -> T {
-        let p = self.0.as_ptr();
-        let value = unsafe { core::ptr::read_unaligned(p as *const T) };
+        let value = unsafe { self.0.cast::<T>().read_unaligned() };
         *self += core::mem::size_of::<T>() as isize;
         value
     }
@@ -143,11 +137,6 @@ impl ReadCursor {
         let slice = unsafe { core::slice::from_raw_parts(p, len as usize) };
         *self += len;
         slice
-    }
-
-    #[inline(always)]
-    pub fn peek_tag(&self) -> u32 {
-        unsafe { core::ptr::read_unaligned(self.0.as_ptr() as *const u16) as u32 }
     }
 }
 
@@ -222,9 +211,8 @@ impl WriteCursor {
 
     pub fn write_unaligned<T>(&mut self, value: T) {
         *self += -(core::mem::size_of::<T>() as isize);
-        let p = self.0.as_ptr();
         unsafe {
-            core::ptr::write_unaligned(p as *mut T, value);
+            self.0.cast::<T>().write_unaligned(value);
         }
     }
 

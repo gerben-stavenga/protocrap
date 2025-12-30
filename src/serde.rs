@@ -510,7 +510,7 @@ impl<'de, 'arena, 'alloc, T: Protobuf + 'alloc> serde::de::DeserializeSeed<'de>
         // Deserialization logic to be implemented
         let SerdeDeserialize(arena, _) = self;
         let mut msg = T::default();
-        serde_deserialize_struct(msg.as_object_mut(), T::table(), arena, deserializer)?;
+        serde_deserialize_struct(crate::as_object_mut(&mut msg), T::table(), arena, deserializer)?;
         Ok(msg)
     }
 }

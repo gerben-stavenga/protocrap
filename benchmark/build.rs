@@ -12,8 +12,8 @@ fn main() -> Result<()> {
     prost_build::Config::new()
         .out_dir(&out_dir)
         .compile_protos(
-            &["../codegen/codegen-tests/proto/test.proto"],
-            &["../codegen/codegen-tests/proto/"],
+            &["../codegen-tests/proto/test.proto"],
+            &["../codegen-tests/proto/"],
         )?;
 
     Ok(())

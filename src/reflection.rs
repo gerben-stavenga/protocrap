@@ -631,7 +631,7 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
         T: crate::Protobuf,
     {
         DynamicMessageRef {
-            object: msg.as_object(),
+            object: crate::as_object(msg),
             table: T::table(),
         }
     }
@@ -810,7 +810,7 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
         T: crate::Protobuf,
     {
         DynamicMessage {
-            object: msg.as_object_mut(),
+            object: crate::as_object_mut(msg),
             table: T::table(),
         }
     }

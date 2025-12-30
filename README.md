@@ -100,11 +100,27 @@ async_msg.decode_from_async_bufread::<32>(&mut arena, &mut async_reader).await?;
 Generate Rust code from protobuf definitions:
 
 ```bash
+# Install the code generator
+cargo install protocrap --features codegen
+
 # Generate descriptor set from .proto file
 protoc --include_imports --descriptor_set_out=descriptor.bin my_types.proto
 
 # Generate Rust code
-cargo run -p protocrap-codegen -- descriptor.bin my_types.pc.rs
+protocrap descriptor.bin my_types.pc.rs
+```
+
+Or build and run from source:
+
+```bash
+cargo run --features codegen -- descriptor.bin my_types.pc.rs
+```
+
+Include the generated code in your crate:
+
+```rust
+use protocrap;
+include!("my_types.pc.rs");
 ```
 
 For working on protocrap itself (regenerating descriptor.pc.rs):
@@ -113,8 +129,8 @@ For working on protocrap itself (regenerating descriptor.pc.rs):
 # Normal update (uses current protocrap)
 ./generate_descriptor.sh
 
-# Bootstrap mode (uses protocrap_stable for table layout changes)
-./generate_descriptor.sh bootcrap
+# Bootstrap mode (uses protocrap from crates.io for table layout changes)
+./generate_descriptor.sh bootstrap
 ```
 
 ## Runtime Reflection

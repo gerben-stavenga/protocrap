@@ -20,8 +20,8 @@ genrule(
     name = "test_generated",
     srcs = [":test_descriptor_set"],
     outs = ["src/test.pc.rs"],
-    cmd = "$(execpath //codegen:protocrap-codegen) $(location :test_descriptor_set) $@",
-    tools = ["//codegen:protocrap-codegen"],
+    cmd = "$(execpath //:protocrap-codegen) $(location :test_descriptor_set) $@",
+    tools = ["//:protocrap-codegen"],
 )
 
 # Codegen tests library

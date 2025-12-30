@@ -4,8 +4,8 @@ use std::panic;
 
 use allocator_api2::alloc::Global;
 use super::protocrap;
-use crate::names::*;
-use crate::tables;
+use super::names::*;
+use super::tables;
 use anyhow::Result;
 use proc_macro2::TokenStream;
 use protocrap::ProtobufRef;
@@ -110,10 +110,10 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
             &serialized,
             &mut arena,
         )?;
-        crate::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
+        super::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
     } else {
         let dynamic_file = protocrap::reflection::DynamicMessageRef::new(file);
-        crate::static_gen::generate_static_dynamic(&dynamic_file)?
+        super::static_gen::generate_static_dynamic(&dynamic_file)?
     };
 
     // Create a unique module name based on the proto filename (without path and extension)
@@ -602,7 +602,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().set_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
@@ -614,7 +614,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
                         }
                     });
@@ -646,7 +646,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
-                            self.as_object_mut().set_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
@@ -658,7 +658,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
                         }
                     });
@@ -706,7 +706,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: #enum_type) {
-                            self.as_object_mut().set_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value.to_i32();
                         }
 
@@ -718,7 +718,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = 0;
                         }
                     });
@@ -757,7 +757,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: #return_type) {
-                            self.as_object_mut().set_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value;
                         }
 
@@ -769,7 +769,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            self.as_object_mut().clear_has_bit(#has_bit);
+                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = Default::default();
                         }
                     });

@@ -1,13 +1,13 @@
 [workspace]
-members = [".", "codegen/codegen-tests", "benchmark", "codegen", "conformance", "fuzz"]
+members = [".", "codegen-tests", "benchmark", "conformance", "fuzz"]
 exclude = ["fuzz", ".rustup"]
 resolver = "2"
 
 [package]
 name = "protocrap"
-version = "0.1.18"
+version = "0.1.19"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.91"
 description = "A small, efficient, and flexible protobuf implementation"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gerben-stavenga/protocrap"
@@ -20,14 +20,30 @@ readme = "README.md"
 allocator-api2 = "0.2"
 base64 = "0.22.1"
 futures = "0.3.31"
-serde = { version = "1.0.228", optional = true}
+serde = { version = "1.0.228", optional = true }
 time = { version = "0.3", features = ["formatting", "parsing", "macros"] }
+
+# Codegen dependencies (optional)
+anyhow = { version = "1.0", optional = true }
+quote = { version = "1.0", optional = true }
+syn = { version = "2.0", features = ["full", "parsing"], optional = true }
+proc-macro2 = { version = "1.0", optional = true }
+prettyplease = { version = "0.2", optional = true }
+
+# Bootstrap: use published protocrap for codegen
+# bootcrap = { package = "protocrap", version = "0.1", optional = true }
 
 [features]
 default = ["std", "serde_support"]
 serde_support = ["serde"]
 std = []
 nightly = []
+codegen = ["std", "anyhow", "quote", "syn", "proc-macro2", "prettyplease"]
+# bootstrap = ["codegen", "bootcrap"]
+
+[[bin]]
+name = "protocrap"
+required-features = ["codegen"]
 
 [profile.dev]
 panic = 'abort'

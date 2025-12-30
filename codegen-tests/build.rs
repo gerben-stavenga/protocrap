@@ -9,8 +9,6 @@ fn main() -> Result<()> {
     let workspace_root = PathBuf::from(&manifest_dir)
         .parent()
         .unwrap()
-        .parent()
-        .unwrap()
         .to_path_buf();
 
     // Find descriptor set - either from env var or default bazel-bin location
@@ -19,7 +17,7 @@ fn main() -> Result<()> {
         PathBuf::from(path)
     } else {
         let default_path =
-            workspace_root.join("bazel-bin/codegen/codegen-tests/test_descriptor_set.bin");
+            workspace_root.join("bazel-bin/codegen-tests/test_descriptor_set.bin");
         println!("cargo:rerun-if-changed={}", default_path.display());
         default_path
     };
@@ -30,7 +28,7 @@ fn main() -> Result<()> {
         let bazelisk = workspace_root.join("bazelisk.sh");
         let status = std::process::Command::new(&bazelisk)
             .current_dir(&workspace_root)
-            .args(["build", "//codegen/codegen-tests:test_descriptor_set"])
+            .args(["build", "//codegen-tests:test_descriptor_set"])
             .status()
             .expect("Failed to run bazelisk.sh");
 
@@ -50,8 +48,8 @@ fn main() -> Result<()> {
     let codegen_bin = if let Ok(path) = std::env::var("PROTOCRAP_CODEGEN") {
         PathBuf::from(path)
     } else {
-        let debug_bin = workspace_root.join("target/debug/protocrap-codegen");
-        let release_bin = workspace_root.join("target/release/protocrap-codegen");
+        let debug_bin = workspace_root.join("target/debug/protocrap");
+        let release_bin = workspace_root.join("target/release/protocrap");
 
         if release_bin.exists() {
             release_bin
@@ -59,7 +57,7 @@ fn main() -> Result<()> {
             debug_bin
         } else {
             panic!(
-                "protocrap-codegen binary not found. Build it first with: cargo build -p protocrap-codegen"
+                "protocrap binary not found. Build it first with: cargo build --features codegen"
             );
         }
     };
