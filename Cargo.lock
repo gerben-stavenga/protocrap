@@ -162,7 +162,7 @@ version = "0.1.0"
 dependencies = [
  "allocator-api2",
  "criterion",
- "protocrap",
+ "protocrap 0.1.19",
  "rand",
  "serde",
  "serde_json",
@@ -706,6 +706,19 @@ dependencies = [
 
 [[package]]
 name = "protocrap"
+version = "0.1.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4bbbc6db84b4d90e76d7aa18762c27aa7b063bba0441e0ab9cf1f2f8fecd8b39"
+dependencies = [
+ "allocator-api2",
+ "base64",
+ "futures",
+ "serde",
+ "time",
+]
+
+[[package]]
+name = "protocrap"
 version = "0.1.19"
 dependencies = [
  "allocator-api2",
@@ -714,6 +727,7 @@ dependencies = [
  "futures",
  "prettyplease",
  "proc-macro2",
+ "protocrap 0.1.18",
  "quote",
  "serde",
  "syn",
@@ -728,7 +742,7 @@ dependencies = [
  "criterion",
  "prost",
  "prost-build",
- "protocrap",
+ "protocrap 0.1.19",
 ]
 
 [[package]]
@@ -738,7 +752,7 @@ dependencies = [
  "allocator-api2",
  "anyhow",
  "byteorder",
- "protocrap",
+ "protocrap 0.1.19",
  "serde",
  "serde_json",
 ]
@@ -749,7 +763,7 @@ version = "0.0.0"
 dependencies = [
  "arbitrary",
  "libfuzzer-sys",
- "protocrap",
+ "protocrap 0.1.19",
 ]
 
 [[package]]

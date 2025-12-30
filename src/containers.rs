@@ -31,9 +31,8 @@
 use core::alloc::Layout;
 use core::fmt::Debug;
 use core::marker::PhantomData;
-use core::mem;
 use core::ops::{Deref, DerefMut};
-use core::ptr::{self, NonNull};
+use core::ptr;
 
 #[repr(C)]
 #[derive(Copy, Clone)]

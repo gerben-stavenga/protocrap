@@ -2,7 +2,6 @@ use core::{
     ops::{Add, AddAssign, Index, IndexMut, Sub},
     ptr::NonNull,
 };
-use std::io::Read;
 
 pub(crate) const SLOP_SIZE: usize = 16;
 
