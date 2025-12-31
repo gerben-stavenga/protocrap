@@ -51,27 +51,18 @@ Recommended.Proto3.ProtobufInput.ValidDataScalarBinary.UINT64[0].ProtobufOutput
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Unknown enum string values - we ignore (don't reject)
+# Unknown enum string values - we reject (don't ignore)
 # ----------------------------------------------------------------------------
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
+Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
+Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
+Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedField.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedPart.ProtobufOutput
-Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInMapValue
-Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInOptionalField
-Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInRepeatedField
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
+Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
+Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
+Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInRepeatedField.ProtobufOutput
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInRepeatedPart.ProtobufOutput
-Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInMapValue
-Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInOptionalField
-Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInRepeatedField
-
-# ----------------------------------------------------------------------------
-# JSON field name duplicate with different casing (not detected)
-# We only index by json_name, so original proto name treated as unknown/skipped
-# ----------------------------------------------------------------------------
-Recommended.Proto2.JsonInput.FieldNameDuplicateDifferentCasing1
-Recommended.Proto2.JsonInput.FieldNameDuplicateDifferentCasing2
-Recommended.Proto3.JsonInput.FieldNameDuplicateDifferentCasing1
-Recommended.Proto3.JsonInput.FieldNameDuplicateDifferentCasing2
 
 # ----------------------------------------------------------------------------
 # Well-known types not fully implemented (Any, Duration, Timestamp, etc.)
@@ -130,13 +121,6 @@ Recommended.Proto3.JsonInput.NullValueInOtherOneofOldFormat.Validator
 # JSON validation not strict enough (missing range/format checks)
 # ----------------------------------------------------------------------------
 
-# ----------------------------------------------------------------------------
-# JSON field name handling issues
-# ----------------------------------------------------------------------------
-Required.Proto2.JsonInput.OriginalProtoFieldName.JsonOutput
-Required.Proto2.JsonInput.OriginalProtoFieldName.ProtobufOutput
-Required.Proto3.JsonInput.OriginalProtoFieldName.JsonOutput
-Required.Proto3.JsonInput.OriginalProtoFieldName.ProtobufOutput
 
 # ----------------------------------------------------------------------------
 # JSON oneof duplicate detection (null clears field, complicates detection)

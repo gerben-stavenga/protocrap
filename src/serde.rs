@@ -1677,8 +1677,9 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
 
         let mut field_map = std::collections::HashMap::new();
         for (field_index, field) in table.descriptor.field().iter().enumerate() {
-            let field_name = field.json_name();
-            field_map.insert(field_name, field_index);
+            // Accept both json_name and original proto field name
+            field_map.insert(field.json_name(), field_index);
+            field_map.insert(field.name(), field_index);
         }
         let mut seen = std::collections::HashSet::new();
         while let Some(idx_opt) = map.next_key_seed(StructKeyVisitor(&field_map))? {
