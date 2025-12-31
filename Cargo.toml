@@ -43,7 +43,8 @@ bootstrap = ["codegen", "bootcrap"]
 bazel = []
 
 [[bin]]
-name = "protocrap"
+name = "protocrap-codegen"
+path = "src/main.rs"
 required-features = ["codegen"]
 
 [profile.dev]

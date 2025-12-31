@@ -18,12 +18,14 @@ fn main() {
         // Build descriptor set with bazelisk if missing
         if !default_path.exists() {
             eprintln!("Building conformance descriptor set with bazelisk...");
-            let bazelisk = workspace_root.join("bazelisk.sh");
+            // Try bazelisk in PATH first, then fall back to bazelisk.sh
+            let bazelisk = which::which("bazelisk")
+                .unwrap_or_else(|_| workspace_root.join("bazelisk.sh"));
             let status = Command::new(&bazelisk)
                 .current_dir(&workspace_root)
                 .args(["build", "//conformance:conformance_descriptor_set"])
                 .status()
-                .expect("Failed to run bazelisk.sh");
+                .expect("Failed to run bazelisk");
 
             if !status.success() {
                 panic!("bazelisk build failed");
@@ -44,8 +46,8 @@ fn main() {
     let codegen_bin = if let Ok(path) = std::env::var("PROTOCRAP_CODEGEN") {
         PathBuf::from(path)
     } else {
-        let debug_bin = workspace_root.join("target/debug/protocrap");
-        let release_bin = workspace_root.join("target/release/protocrap");
+        let debug_bin = workspace_root.join("target/debug/protocrap-codegen");
+        let release_bin = workspace_root.join("target/release/protocrap-codegen");
 
         if release_bin.exists() {
             release_bin
@@ -53,7 +55,7 @@ fn main() {
             debug_bin
         } else {
             panic!(
-                "protocrap-codegen binary not found. Build it first with: cargo build -p protocrap-codegen"
+                "protocrap binary not found. Build it first with: cargo build --features codegen"
             );
         }
     };
