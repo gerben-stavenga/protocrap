@@ -29,3 +29,6 @@ jobs:
 
       - name: Build codegen
         run: cargo build --features codegen
+
+      - name: Run conformance tests
+        run: ./bazelisk.sh test //conformance:conformance_test --test_output=errors
