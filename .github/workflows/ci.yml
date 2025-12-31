@@ -19,10 +19,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Build
-        run: cargo build --all-targets
+        run: cargo build --workspace --all-targets
 
       - name: Run tests
-        run: cargo test --all
+        run: cargo test --workspace
 
       - name: Build codegen
         run: cargo build --features codegen
