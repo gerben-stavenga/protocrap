@@ -2,7 +2,7 @@ use allocator_api2::alloc::Global;
 use anyhow::{Result, bail};
 use protocrap; // Keep this for generated code
 use protocrap::ProtobufMut;
-use protocrap::reflection::DescriptorPool;
+use protocrap::descriptor_pool::DescriptorPool;
 
 // Include all generated code from conformance_all.proto
 // This includes conformance.proto, test_messages_proto2.proto, and test_messages_proto3.proto

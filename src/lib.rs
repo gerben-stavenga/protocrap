@@ -87,7 +87,7 @@
 //! ```
 //! use protocrap::{Protobuf, ProtobufRef, arena::Arena};
 //! use protocrap::google::protobuf::{FileDescriptorProto, DescriptorProto};
-//! use protocrap::reflection::DescriptorPool;
+//! use protocrap::descriptor_pool::DescriptorPool;
 //! use allocator_api2::alloc::Global;
 //!
 //! // Build descriptor pool from the library's own file descriptor
@@ -214,19 +214,9 @@ pub use allocator_api2::alloc::Allocator;
 
 pub mod decoding;
 pub mod encoding;
-#[cfg(feature = "std")]
 pub mod reflection;
-#[cfg(not(feature = "std"))]
-pub mod reflection {
-    //! Stub reflection module for no_std - just provides debug_message
-    use crate::Protobuf;
-    pub fn debug_message<T: Protobuf>(
-        _msg: &T,
-        f: &mut core::fmt::Formatter<'_>,
-    ) -> core::fmt::Result {
-        write!(f, "<{}>", core::any::type_name::<T>())
-    }
-}
+#[cfg(feature = "std")]
+pub mod descriptor_pool;
 pub mod tables;
 
 use crate as protocrap;
@@ -566,7 +556,7 @@ pub mod tests {
 
     #[test]
     fn dynamic_file_descriptor_roundtrip() {
-        let mut pool = crate::reflection::DescriptorPool::new(&Global);
+        let mut pool = crate::descriptor_pool::DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
         pool.add_file(&file_descriptor);

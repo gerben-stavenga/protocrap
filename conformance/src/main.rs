@@ -1,6 +1,7 @@
 use anyhow::{Context, Result, bail};
 use protocrap::proto_json::{ProtoJsonDeserializer, ProtoJsonSerializer};
-use protocrap::reflection::{DescriptorPool, DynamicMessageRef};
+use protocrap::descriptor_pool::DescriptorPool;
+use protocrap::reflection::DynamicMessageRef;
 use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
 use protocrap_conformance::protobuf_test_messages::proto2::TestAllTypesProto2;
