@@ -115,9 +115,13 @@ impl serde::Serialize for EnumValue<'_> {
     where
         S: serde::Serializer,
     {
-        match lookup_enum_name(self.descriptor, self.type_name, self.value) {
-            Some(name) => serializer.serialize_str(name),
-            None => serializer.serialize_i32(self.value),
+        if serializer.is_human_readable() {
+            match lookup_enum_name(self.descriptor, self.type_name, self.value) {
+                Some(name) => serializer.serialize_str(name),
+                None => serializer.serialize_i32(self.value),
+            }
+        } else {
+            serializer.serialize_i32(self.value)
         }
     }
 }
@@ -135,11 +139,16 @@ impl serde::Serialize for RepeatedEnumValue<'_> {
         S: serde::Serializer,
     {
         use serde::ser::SerializeSeq;
+        let human_readable = serializer.is_human_readable();
         let mut seq = serializer.serialize_seq(Some(self.values.len()))?;
         for &v in self.values {
-            match lookup_enum_name(self.descriptor, self.type_name, v) {
-                Some(name) => seq.serialize_element(name)?,
-                None => seq.serialize_element(&v)?,
+            if human_readable {
+                match lookup_enum_name(self.descriptor, self.type_name, v) {
+                    Some(name) => seq.serialize_element(name)?,
+                    None => seq.serialize_element(&v)?,
+                }
+            } else {
+                seq.serialize_element(&v)?;
             }
         }
         seq.end()
@@ -422,18 +431,22 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
                     let json_name: &'static str =
                         unsafe { std::mem::transmute(field.json_name()) };
 
-                    // Check if this is an enum field - serialize as string name
+                    // Check if this is an enum field - use wrapper that respects is_human_readable
                     if field.r#type() == Some(Type::TYPE_ENUM) {
                         let type_name = field.type_name();
                         match v {
                             Value::Int32(int_val) => {
-                                match lookup_enum_name(descriptor, type_name, int_val) {
-                                    Some(name) => {
-                                        let name: &'static str =
-                                            unsafe { std::mem::transmute(name) };
-                                        struct_serializer.serialize_field(json_name, name)?
-                                    }
-                                    None => struct_serializer.serialize_field(json_name, &int_val)?,
+                                let enum_val = EnumValue {
+                                    descriptor,
+                                    type_name,
+                                    value: int_val,
+                                };
+                                unsafe {
+                                    let enum_val = std::mem::transmute::<
+                                        EnumValue<'_>,
+                                        EnumValue<'static>,
+                                    >(enum_val);
+                                    struct_serializer.serialize_field(json_name, &enum_val)?;
                                 }
                             }
                             Value::RepeatedInt32(list) => {
