@@ -22,10 +22,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
 
       - name: Build
-        run: cargo build --workspace --exclude protocrap-fuzz --all-targets
+        run: cargo build --workspace --all-targets
 
       - name: Run tests
-        run: cargo test --workspace --exclude protocrap-fuzz
+        run: cargo test --workspace
 
       - name: Build codegen
         run: cargo build --features codegen

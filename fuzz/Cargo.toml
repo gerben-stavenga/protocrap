@@ -8,9 +8,10 @@ edition = "2024"
 cargo-fuzz = true
 
 [dependencies]
+allocator-api2 = "0.2"
 libfuzzer-sys = "0.4"
 arbitrary = { version = "1", features = ["derive"] }
-protocrap = { path = "..", features = ["nightly"] }
+protocrap = { path = ".." }
 
 [[bin]]
 name = "decode_raw"

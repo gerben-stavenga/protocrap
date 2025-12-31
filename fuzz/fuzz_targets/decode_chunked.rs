@@ -1,6 +1,6 @@
-#![feature(allocator_api)]
 #![no_main]
 
+use allocator_api2::alloc::Global;
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
 use protocrap::decoding::ResumeableDecode;
@@ -12,7 +12,7 @@ struct ChunkedInput {
 }
 
 fuzz_target!(|input: ChunkedInput| {
-    let mut arena = protocrap::arena::Arena::new(&std::alloc::Global);
+    let mut arena = protocrap::arena::Arena::new(&Global);
     let mut msg = protocrap::google::protobuf::FileDescriptorProto::ProtoType::default();
     let mut decoder = ResumeableDecode::<32>::new(&mut msg, isize::MAX);
 
