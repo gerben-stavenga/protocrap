@@ -103,6 +103,49 @@ fn lookup_enum_name<'a>(
     None
 }
 
+/// Wrapper for serializing a single enum value as its string name.
+struct EnumValue<'a> {
+    descriptor: &'a crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &'a str,
+    value: i32,
+}
+
+impl serde::Serialize for EnumValue<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match lookup_enum_name(self.descriptor, self.type_name, self.value) {
+            Some(name) => serializer.serialize_str(name),
+            None => serializer.serialize_i32(self.value),
+        }
+    }
+}
+
+/// Wrapper for serializing repeated enum values as string names.
+struct RepeatedEnumValue<'a> {
+    descriptor: &'a crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &'a str,
+    values: &'a [i32],
+}
+
+impl serde::Serialize for RepeatedEnumValue<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        use serde::ser::SerializeSeq;
+        let mut seq = serializer.serialize_seq(Some(self.values.len()))?;
+        for &v in self.values {
+            match lookup_enum_name(self.descriptor, self.type_name, v) {
+                Some(name) => seq.serialize_element(name)?,
+                None => seq.serialize_element(&v)?,
+            }
+        }
+        seq.end()
+    }
+}
+
 // Timestamp validation and formatting
 fn validate_timestamp(seconds: i64, nanos: i32) -> Result<(), &'static str> {
     // RFC 3339 valid range: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z
@@ -363,21 +406,67 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
             WellKnownType::Duration => serialize_duration(self, serializer),
             WellKnownType::None => {
                 // Regular message serialization
-                let mut fields = Vec::new();
+                // Count fields first
+                let field_count = descriptor
+                    .field()
+                    .iter()
+                    .filter(|f| self.get_field(f.as_ref()).is_some())
+                    .count();
+                let mut struct_serializer = serializer.serialize_struct("", field_count)?;
+
                 for field in descriptor.field() {
                     let Some(v) = self.get_field(field.as_ref()) else {
                         continue;
                     };
-                    fields.push((field.json_name(), v));
-                }
-                let mut struct_serializer = serializer.serialize_struct("", fields.len())?;
-                for (name, value) in fields {
-                    // TODO fixme
-                    unsafe {
-                        let name = std::mem::transmute::<&str, &'static str>(name);
-                        let value =
-                            std::mem::transmute::<Value<'_, '_>, Value<'static, 'msg>>(value);
-                        struct_serializer.serialize_field(name, &value)?;
+                    // Transmute needed due to serialize_field requiring 'static
+                    let json_name: &'static str =
+                        unsafe { std::mem::transmute(field.json_name()) };
+
+                    // Check if this is an enum field - serialize as string name
+                    if field.r#type() == Some(Type::TYPE_ENUM) {
+                        let type_name = field.type_name();
+                        match v {
+                            Value::Int32(int_val) => {
+                                match lookup_enum_name(descriptor, type_name, int_val) {
+                                    Some(name) => {
+                                        let name: &'static str =
+                                            unsafe { std::mem::transmute(name) };
+                                        struct_serializer.serialize_field(json_name, name)?
+                                    }
+                                    None => struct_serializer.serialize_field(json_name, &int_val)?,
+                                }
+                            }
+                            Value::RepeatedInt32(list) => {
+                                let enum_vals = RepeatedEnumValue {
+                                    descriptor,
+                                    type_name,
+                                    values: list,
+                                };
+                                unsafe {
+                                    let enum_vals = std::mem::transmute::<
+                                        RepeatedEnumValue<'_>,
+                                        RepeatedEnumValue<'static>,
+                                    >(enum_vals);
+                                    struct_serializer.serialize_field(json_name, &enum_vals)?;
+                                }
+                            }
+                            _ => {
+                                // Shouldn't happen, but serialize as-is
+                                unsafe {
+                                    let value =
+                                        std::mem::transmute::<Value<'_, '_>, Value<'static, 'msg>>(
+                                            v,
+                                        );
+                                    struct_serializer.serialize_field(json_name, &value)?;
+                                }
+                            }
+                        }
+                    } else {
+                        unsafe {
+                            let value =
+                                std::mem::transmute::<Value<'_, '_>, Value<'static, 'msg>>(v);
+                            struct_serializer.serialize_field(json_name, &value)?;
+                        }
                     }
                 }
                 struct_serializer.end()
@@ -447,7 +536,21 @@ impl<'msg> serde::Serialize for DynamicMessageArray<'static, 'msg> {
                 if !seen_keys.insert(map_key) {
                     continue; // Skip duplicate keys, keep the last one
                 }
-                map_serializer.serialize_entry(&key_val, &value_val)?;
+                // Check if value is an enum field
+                if value_field.r#type() == Some(Type::TYPE_ENUM) {
+                    if let Some(Value::Int32(int_val)) = value_val {
+                        let enum_val = EnumValue {
+                            descriptor: self.table.descriptor,
+                            type_name: value_field.type_name(),
+                            value: int_val,
+                        };
+                        map_serializer.serialize_entry(&key_val, &enum_val)?;
+                    } else {
+                        map_serializer.serialize_entry(&key_val, &value_val)?;
+                    }
+                } else {
+                    map_serializer.serialize_entry(&key_val, &value_val)?;
+                }
             }
             return map_serializer.end();
         }
