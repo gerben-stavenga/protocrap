@@ -19,4 +19,4 @@ echo "Building descriptor.proto via Bazel..."
 $BAZELISK build //:descriptor_set
 
 # Run codegen on the generated descriptor set
-RUST_BACKTRACE=full cargo run --bin protocrap $CARGO_FLAGS -- bazel-bin/descriptor_set.bin src/descriptor.pc.rs
+RUST_BACKTRACE=full cargo run --bin protocrap-codegen $CARGO_FLAGS -- bazel-bin/descriptor_set.bin src/descriptor.pc.rs
