@@ -441,6 +441,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         self.decode_from_bufread::<STACK_DEPTH>(arena, &mut buf_reader)
     }
 
+    #[cfg(feature = "std")]
     fn decode_from_async_bufread<'a, const STACK_DEPTH: usize>(
         &'a mut self,
         arena: &'a mut crate::arena::Arena<'a>,
@@ -468,6 +469,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         }
     }
 
+    #[cfg(feature = "std")]
     fn decode_from_async_read<'a, const STACK_DEPTH: usize>(
         &'a mut self,
         arena: &'a mut crate::arena::Arena<'a>,
