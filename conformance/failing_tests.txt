@@ -51,22 +51,33 @@ Recommended.Proto3.ProtobufInput.ValidDataScalarBinary.UINT64[0].ProtobufOutput
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Ignore unknown enum string values - not implemented
+# Unknown enum string values - we ignore (don't reject)
 # ----------------------------------------------------------------------------
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
-Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
-Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
-Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedField.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedPart.ProtobufOutput
+Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInMapValue
+Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInOptionalField
+Recommended.Proto2.JsonInput.RejectUnknownEnumStringValueInRepeatedField
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
-Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
-Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
-Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInRepeatedField.ProtobufOutput
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInRepeatedPart.ProtobufOutput
+Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInMapValue
+Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInOptionalField
+Recommended.Proto3.JsonInput.RejectUnknownEnumStringValueInRepeatedField
+
+# ----------------------------------------------------------------------------
+# JSON field name duplicate with different casing (not detected)
+# We only index by json_name, so original proto name treated as unknown/skipped
+# ----------------------------------------------------------------------------
+Recommended.Proto2.JsonInput.FieldNameDuplicateDifferentCasing1
+Recommended.Proto2.JsonInput.FieldNameDuplicateDifferentCasing2
+Recommended.Proto3.JsonInput.FieldNameDuplicateDifferentCasing1
+Recommended.Proto3.JsonInput.FieldNameDuplicateDifferentCasing2
 
 # ----------------------------------------------------------------------------
 # Well-known types not fully implemented (Any, Duration, Timestamp, etc.)
 # ----------------------------------------------------------------------------
+Required.Proto3.JsonInput.AnyWktRepresentationWithBadType
+Required.Proto3.JsonInput.AnyWktRepresentationWithEmptyTypeAndValue
 Required.Proto3.JsonInput.Any.JsonOutput
 Required.Proto3.JsonInput.Any.ProtobufOutput
 Required.Proto3.JsonInput.AnyNested.JsonOutput
@@ -133,21 +144,6 @@ Required.Proto3.JsonInput.OriginalProtoFieldName.ProtobufOutput
 Required.Proto2.JsonInput.OneofFieldDuplicate
 Required.Proto3.JsonInput.OneofFieldDuplicate
 
-# ----------------------------------------------------------------------------
-# JSON unknown field handling
-# ----------------------------------------------------------------------------
-Required.Proto2.JsonInput.IgnoreUnknownJsonFalse.ProtobufOutput
-Required.Proto2.JsonInput.IgnoreUnknownJsonNull.ProtobufOutput
-Required.Proto2.JsonInput.IgnoreUnknownJsonNumber.ProtobufOutput
-Required.Proto2.JsonInput.IgnoreUnknownJsonObject.ProtobufOutput
-Required.Proto2.JsonInput.IgnoreUnknownJsonString.ProtobufOutput
-Required.Proto2.JsonInput.IgnoreUnknownJsonTrue.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonFalse.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonNull.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonNumber.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonObject.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonString.ProtobufOutput
-Required.Proto3.JsonInput.IgnoreUnknownJsonTrue.ProtobufOutput
 
 
 # ----------------------------------------------------------------------------
