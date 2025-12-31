@@ -45,6 +45,64 @@ fn detect_well_known_type(
     }
 }
 
+/// Look up enum value by name from the message descriptor
+/// Returns the integer value if found, None otherwise
+fn lookup_enum_value(
+    descriptor: &crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &str,
+    value_name: &str,
+) -> Option<i32> {
+    // Extract enum name from type_name (e.g., ".package.Message.EnumName" -> "EnumName")
+    let enum_name = type_name.rsplit('.').next()?;
+
+    // Search nested enums in this message
+    for enum_type in descriptor.enum_type() {
+        if enum_type.name() == enum_name {
+            for value in enum_type.value() {
+                if value.name() == value_name {
+                    return Some(value.number());
+                }
+            }
+        }
+    }
+
+    // Search in nested messages
+    for nested in descriptor.nested_type() {
+        if let Some(v) = lookup_enum_value(nested.as_ref(), type_name, value_name) {
+            return Some(v);
+        }
+    }
+
+    None
+}
+
+/// Look up enum name by value from the message descriptor
+fn lookup_enum_name<'a>(
+    descriptor: &'a crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &str,
+    value: i32,
+) -> Option<&'a str> {
+    let enum_name = type_name.rsplit('.').next()?;
+
+    for enum_type in descriptor.enum_type() {
+        if enum_type.name() == enum_name {
+            for enum_value in enum_type.value() {
+                if enum_value.number() == value {
+                    return Some(enum_value.name());
+                }
+            }
+        }
+    }
+
+    for nested in descriptor.nested_type() {
+        if let Some(name) = lookup_enum_name(nested.as_ref(), type_name, value) {
+            return Some(name);
+        }
+    }
+
+    None
+}
+
 // Timestamp validation and formatting
 fn validate_timestamp(seconds: i64, nanos: i32) -> Result<(), &'static str> {
     // RFC 3339 valid range: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z
@@ -500,6 +558,84 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::DeserializeSeed<'de>
 
 pub struct Optional<T>(T);
 
+/// DeserializeSeed for enum values - accepts both integers and string names
+struct EnumSeed<'a> {
+    descriptor: &'a crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &'a str,
+}
+
+impl<'de, 'a> serde::de::DeserializeSeed<'de> for EnumSeed<'a> {
+    type Value = i32;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_any(self)
+    }
+}
+
+impl<'de, 'a> serde::de::Visitor<'de> for EnumSeed<'a> {
+    type Value = i32;
+
+    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        formatter.write_str("enum value (integer or string name)")
+    }
+
+    fn visit_i64<E: serde::de::Error>(self, v: i64) -> Result<Self::Value, E> {
+        Ok(v as i32)
+    }
+
+    fn visit_u64<E: serde::de::Error>(self, v: u64) -> Result<Self::Value, E> {
+        Ok(v as i32)
+    }
+
+    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+        lookup_enum_value(self.descriptor, self.type_name, v).ok_or_else(|| {
+            E::custom(format!(
+                "unknown enum value '{}' for type '{}'",
+                v, self.type_name
+            ))
+        })
+    }
+}
+
+/// DeserializeSeed for repeated enum values
+struct EnumArraySeed<'a> {
+    descriptor: &'a crate::google::protobuf::DescriptorProto::ProtoType,
+    type_name: &'a str,
+}
+
+impl<'de, 'a> serde::de::DeserializeSeed<'de> for EnumArraySeed<'a> {
+    type Value = Vec<i32>;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_seq(self)
+    }
+}
+
+impl<'de, 'a> serde::de::Visitor<'de> for EnumArraySeed<'a> {
+    type Value = Vec<i32>;
+
+    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        formatter.write_str("array of enum values")
+    }
+
+    fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+        let mut values = Vec::new();
+        while let Some(v) = seq.next_element_seed(EnumSeed {
+            descriptor: self.descriptor,
+            type_name: self.type_name,
+        })? {
+            values.push(v);
+        }
+        Ok(values)
+    }
+}
+
 impl<'de, T> serde::de::DeserializeSeed<'de> for Optional<T>
 where
     T: serde::de::DeserializeSeed<'de>,
@@ -740,8 +876,16 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                     let v: bool = map.next_value()?;
                     entry_obj.set::<bool>(value_entry.offset(), value_entry.has_bit_idx(), v);
                 }
-                Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 | Type::TYPE_ENUM => {
+                Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 => {
                     let v: i32 = map.next_value()?;
+                    entry_obj.set::<i32>(value_entry.offset(), value_entry.has_bit_idx(), v);
+                }
+                Type::TYPE_ENUM => {
+                    let seed = EnumSeed {
+                        descriptor: table.descriptor,
+                        type_name: value_field.type_name(),
+                    };
+                    let v: i32 = map.next_value_seed(seed)?;
                     entry_obj.set::<i32>(value_entry.offset(), value_entry.has_bit_idx(), v);
                 }
                 Type::TYPE_INT64 | Type::TYPE_SINT64 | Type::TYPE_SFIXED64 => {
@@ -1250,11 +1394,20 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             obj.add::<i64>(entry.offset(), v, arena);
                         }
                     }
-                    Type::TYPE_SFIXED32
-                    | Type::TYPE_INT32
-                    | Type::TYPE_SINT32
-                    | Type::TYPE_ENUM => {
+                    Type::TYPE_SFIXED32 | Type::TYPE_INT32 | Type::TYPE_SINT32 => {
                         let Some(slice) = map.next_value::<Option<Vec<i32>>>()? else {
+                            continue;
+                        };
+                        for v in slice {
+                            obj.add::<i32>(entry.offset(), v, arena);
+                        }
+                    }
+                    Type::TYPE_ENUM => {
+                        let seed = EnumArraySeed {
+                            descriptor: table.descriptor,
+                            type_name: field.type_name(),
+                        };
+                        let Some(slice) = map.next_value_seed(Optional(seed))? else {
                             continue;
                         };
                         for v in slice {
@@ -1353,11 +1506,18 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         };
                         obj.set::<i64>(entry.offset(), entry.has_bit_idx(), v);
                     }
-                    Type::TYPE_SFIXED32
-                    | Type::TYPE_INT32
-                    | Type::TYPE_SINT32
-                    | Type::TYPE_ENUM => {
+                    Type::TYPE_SFIXED32 | Type::TYPE_INT32 | Type::TYPE_SINT32 => {
                         let Some(v) = map.next_value::<Option<i32>>()? else {
+                            continue;
+                        };
+                        obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);
+                    }
+                    Type::TYPE_ENUM => {
+                        let seed = EnumSeed {
+                            descriptor: table.descriptor,
+                            type_name: field.type_name(),
+                        };
+                        let Some(v) = map.next_value_seed(Optional(seed))? else {
                             continue;
                         };
                         obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);

@@ -95,31 +95,27 @@ Recommended.Proto3.ProtobufInput.ValidDataScalarBinary.UINT64[0].ProtobufOutput
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Enum JSON parsing - we parse enums as integers, not string names
+# Enum JSON serialization - we output integers instead of string names
 # ----------------------------------------------------------------------------
 Required.Proto2.JsonInput.EnumField.JsonOutput
-Required.Proto2.JsonInput.EnumField.ProtobufOutput
 Required.Proto2.JsonInput.EnumRepeatedField.JsonOutput
-Required.Proto2.JsonInput.EnumRepeatedField.ProtobufOutput
 Required.Proto3.JsonInput.EnumField.JsonOutput
-Required.Proto3.JsonInput.EnumField.ProtobufOutput
 Required.Proto3.JsonInput.EnumFieldWithAlias.JsonOutput
-Required.Proto3.JsonInput.EnumFieldWithAlias.ProtobufOutput
 Required.Proto3.JsonInput.EnumFieldWithAliasDifferentCase.JsonOutput
-Required.Proto3.JsonInput.EnumFieldWithAliasDifferentCase.ProtobufOutput
 Required.Proto3.JsonInput.EnumFieldWithAliasLowerCase.JsonOutput
-Required.Proto3.JsonInput.EnumFieldWithAliasLowerCase.ProtobufOutput
 Required.Proto3.JsonInput.EnumFieldWithAliasUseAlias.JsonOutput
-Required.Proto3.JsonInput.EnumFieldWithAliasUseAlias.ProtobufOutput
 Required.Proto3.JsonInput.EnumRepeatedField.JsonOutput
-Required.Proto3.JsonInput.EnumRepeatedField.ProtobufOutput
+Recommended.Proto2.JsonInput.OneofZeroEnum.JsonOutput
+Recommended.Proto2.JsonInput.OneofZeroEnum.ProtobufOutput
+
+# ----------------------------------------------------------------------------
+# Ignore unknown enum string values - not implemented
+# ----------------------------------------------------------------------------
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedField.ProtobufOutput
 Recommended.Proto2.JsonInput.IgnoreUnknownEnumStringValueInRepeatedPart.ProtobufOutput
-Recommended.Proto2.JsonInput.OneofZeroEnum.JsonOutput
-Recommended.Proto2.JsonInput.OneofZeroEnum.ProtobufOutput
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapPart.ProtobufOutput
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInMapValue.ProtobufOutput
 Recommended.Proto3.JsonInput.IgnoreUnknownEnumStringValueInOptionalField.ProtobufOutput
