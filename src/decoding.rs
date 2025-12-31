@@ -161,8 +161,16 @@ impl<'a> DecodeObjectState<'a> {
     }
 
     #[inline(always)]
-    fn set<T>(&mut self, entry: TableEntry, val: T) {
-        self.obj.set(entry.offset(), entry.has_bit_idx(), val);
+    fn set<T>(&mut self, entry: TableEntry, field_number: u32, val: T) {
+        let has_bit_idx = entry.has_bit_idx();
+        if has_bit_idx & 0x80 != 0 {
+            // Oneof field: has_bit_idx stores discriminant word index with 0x80 flag
+            let discriminant_word_idx = has_bit_idx & 0x7F;
+            self.obj
+                .set_oneof(entry.offset(), discriminant_word_idx, field_number, val);
+        } else {
+            self.obj.set(entry.offset(), has_bit_idx, val);
+        }
     }
 
     #[inline(always)]
@@ -174,16 +182,32 @@ impl<'a> DecodeObjectState<'a> {
     fn set_bytes(
         &mut self,
         entry: TableEntry,
+        field_number: u32,
         slice: &[u8],
         arena: &mut crate::arena::Arena,
     ) -> &'a mut Bytes {
-        unsafe {
-            core::mem::transmute(self.obj.set_bytes(
-                entry.offset(),
-                entry.has_bit_idx(),
-                slice,
-                arena,
-            ))
+        let has_bit_idx = entry.has_bit_idx();
+        if has_bit_idx & 0x80 != 0 {
+            // Oneof field
+            let discriminant_word_idx = has_bit_idx & 0x7F;
+            unsafe {
+                core::mem::transmute(self.obj.set_bytes_oneof(
+                    entry.offset(),
+                    discriminant_word_idx,
+                    field_number,
+                    slice,
+                    arena,
+                ))
+            }
+        } else {
+            unsafe {
+                core::mem::transmute(self.obj.set_bytes(
+                    entry.offset(),
+                    has_bit_idx,
+                    slice,
+                    arena,
+                ))
+            }
         }
     }
 
@@ -521,19 +545,19 @@ fn decode_loop<'a>(
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, cursor.read_varint()?);
+                            ctx.set(entry, field_number, cursor.read_varint()?);
                         }
                         FieldKind::Varint32 | FieldKind::Int32 => {
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, cursor.read_varint()? as u32);
+                            ctx.set(entry, field_number, cursor.read_varint()? as u32);
                         }
                         FieldKind::Varint64Zigzag => {
                             if tag & 7 != 0 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, zigzag_decode(cursor.read_varint()?));
+                            ctx.set(entry, field_number, zigzag_decode(cursor.read_varint()?));
                         }
                         FieldKind::Varint32Zigzag => {
                             if tag & 7 != 0 {
@@ -541,6 +565,7 @@ fn decode_loop<'a>(
                             };
                             ctx.set(
                                 entry,
+                                field_number,
                                 zigzag_decode(cursor.read_varint()? as u32 as u64) as i32,
                             );
                         }
@@ -549,19 +574,19 @@ fn decode_loop<'a>(
                                 break 'unknown;
                             };
                             let val = cursor.read_varint()?;
-                            ctx.set(entry, val != 0);
+                            ctx.set(entry, field_number, val != 0);
                         }
                         FieldKind::Fixed64 => {
                             if tag & 7 != 1 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, cursor.read_unaligned::<u64>());
+                            ctx.set(entry, field_number, cursor.read_unaligned::<u64>());
                         }
                         FieldKind::Fixed32 => {
                             if tag & 7 != 5 {
                                 break 'unknown;
                             };
-                            ctx.set(entry, cursor.read_unaligned::<u32>());
+                            ctx.set(entry, field_number, cursor.read_unaligned::<u32>());
                         }
                         FieldKind::Bytes | FieldKind::String => {
                             if tag & 7 != 2 {
@@ -574,11 +599,12 @@ fn decode_loop<'a>(
                                 if validate_utf8 && core::str::from_utf8(slice).is_err() {
                                     return None;
                                 }
-                                ctx.set_bytes(entry, slice, arena);
+                                ctx.set_bytes(entry, field_number, slice, arena);
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
                                 let bytes = ctx.set_bytes(
                                     entry,
+                                    field_number,
                                     cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
                                     arena,
                                 );
@@ -589,6 +615,12 @@ fn decode_loop<'a>(
                             if tag & 7 != 2 {
                                 break 'unknown;
                             };
+                            // For oneof message fields, set the discriminant
+                            let has_bit_idx = entry.has_bit_idx();
+                            if has_bit_idx & 0x80 != 0 {
+                                let discriminant_word_idx = has_bit_idx & 0x7F;
+                                *ctx.obj.ref_mut::<u32>(discriminant_word_idx * 4) = field_number;
+                            }
                             let len = cursor.read_size()?;
                             limited_end = ctx.push_limit(len, cursor, end, stack)?;
                             (ctx.obj, ctx.table) = ctx.get_or_create_child_object(entry, arena);

@@ -109,8 +109,12 @@ pub fn is_message(field: &FieldDescriptorProto) -> bool {
     )
 }
 
+pub fn is_in_oneof(field: &FieldDescriptorProto) -> bool {
+    field.has_oneof_index()
+}
+
 pub fn needs_has_bit(field: &FieldDescriptorProto) -> bool {
-    !is_repeated(field) && !is_message(field)
+    !is_repeated(field) && !is_message(field) && !is_in_oneof(field)
 }
 
 pub fn default_value<'a>(field: &'a FieldDescriptorProto) -> Option<Value<'a, 'a>> {
@@ -335,7 +339,10 @@ impl<'alloc> DescriptorPool<'alloc> {
             .iter()
             .filter(|f| needs_has_bit(f))
             .count();
-        let has_bits_size = (num_has_bits.div_ceil(32) * 4) as u32;
+        let has_bits_words = num_has_bits.div_ceil(32);
+        let oneof_count = descriptor.oneof_decl().len();
+        let metadata_words = has_bits_words + oneof_count;
+        let metadata_size = (metadata_words * 4) as u32;
 
         // Calculate max field number for sparse decode table
         let max_field_number = descriptor
@@ -351,12 +358,33 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         let num_decode_entries = (max_field_number + 1) as usize;
 
+        // Group fields by oneof_index and calculate union sizes
+        let mut oneof_sizes: std::vec::Vec<(usize, usize)> = vec![(0, 1); oneof_count]; // (size, align)
+        for field in descriptor.field() {
+            if is_in_oneof(field) {
+                let oneof_idx = field.oneof_index() as usize;
+                let field_size = self.field_size(field) as usize;
+                let field_align = self.field_align(field) as usize;
+                if field_size > oneof_sizes[oneof_idx].0 {
+                    oneof_sizes[oneof_idx].0 = field_size;
+                }
+                if field_align > oneof_sizes[oneof_idx].1 {
+                    oneof_sizes[oneof_idx].1 = field_align;
+                }
+            }
+        }
+
         // Calculate field offsets and total size using Layout::extend for proper padding
-        // Start with has_bits layout (always u32 array, so alignment is 4)
-        let mut layout = core::alloc::Layout::from_size_align(has_bits_size as usize, 4).unwrap();
+        // Start with metadata layout (always u32 array, so alignment is 4)
+        let mut layout =
+            core::alloc::Layout::from_size_align(metadata_size as usize, 4).unwrap();
         let mut field_offsets = std::vec::Vec::new();
 
+        // First add regular fields (not in oneof)
         for field in descriptor.field() {
+            if is_in_oneof(field) {
+                continue; // Skip oneof fields, handled separately
+            }
             let field_size = self.field_size(field);
             let field_align = self.field_align(field);
             let field_layout =
@@ -366,6 +394,31 @@ impl<'alloc> DescriptorPool<'alloc> {
             let (new_layout, offset) = layout.extend(field_layout).unwrap();
             field_offsets.push((*field, offset as u32));
             layout = new_layout;
+        }
+
+        // Then add unions for each oneof
+        let mut oneof_offsets = std::vec::Vec::new();
+        for (oneof_idx, &(size, align)) in oneof_sizes.iter().enumerate() {
+            if size > 0 {
+                let union_layout = core::alloc::Layout::from_size_align(size, align).unwrap();
+                let (new_layout, offset) = layout.extend(union_layout).unwrap();
+                oneof_offsets.push((oneof_idx, offset as u32));
+                layout = new_layout;
+            }
+        }
+
+        // Add oneof fields with their union offsets
+        for field in descriptor.field() {
+            if !is_in_oneof(field) {
+                continue;
+            }
+            let oneof_idx = field.oneof_index() as usize;
+            let union_offset = oneof_offsets
+                .iter()
+                .find(|(idx, _)| *idx == oneof_idx)
+                .map(|(_, off)| *off)
+                .unwrap_or(0);
+            field_offsets.push((*field, union_offset));
         }
 
         // Pad to struct alignment
@@ -427,7 +480,11 @@ impl<'alloc> DescriptorPool<'alloc> {
             // Build encode entries
             let mut has_bit_idx = 0u8;
             for (i, &(field, offset)) in field_offsets.iter().enumerate() {
-                let has_bit = if needs_has_bit(&field) {
+                let has_bit = if is_in_oneof(&field) {
+                    // Oneof field: has_bit = 0x80 | discriminant_word_idx
+                    let oneof_idx = field.oneof_index() as usize;
+                    (0x80 | (has_bits_words + oneof_idx)) as u8
+                } else if needs_has_bit(&field) {
                     let bit = has_bit_idx;
                     has_bit_idx += 1;
                     bit
@@ -461,8 +518,38 @@ impl<'alloc> DescriptorPool<'alloc> {
                     .iter()
                     .find(|f| f.number() == field_number)
                 {
-                    let entry = if is_message(&**field) {
-                        // For message fields, offset points to aux entry
+                    let offset = field_offsets
+                        .iter()
+                        .find(|(f, _)| f.number() == field_number)
+                        .map(|(_, o)| *o)
+                        .unwrap_or(0);
+
+                    // Check oneof first (applies to all field types including message)
+                    let entry = if is_in_oneof(&**field) {
+                        // Oneof field: has_bit = 0x80 | discriminant_word_idx
+                        let oneof_idx = field.oneof_index() as usize;
+                        let has_bit = (0x80 | (has_bits_words + oneof_idx)) as u32;
+
+                        if is_message(&**field) {
+                            // Oneof message field - offset points to aux entry
+                            let aux_index = aux_index_map[&field_number];
+                            let aux_offset =
+                                (aux_ptr as usize) + aux_index * core::mem::size_of::<AuxTableEntry>();
+                            let table_addr = table_ptr as usize;
+                            decoding::TableEntry::new(
+                                field_kind_tokens(field),
+                                has_bit,
+                                aux_offset - table_addr,
+                            )
+                        } else {
+                            decoding::TableEntry::new(
+                                field_kind_tokens(field),
+                                has_bit,
+                                offset as usize,
+                            )
+                        }
+                    } else if is_message(&**field) {
+                        // Regular message field - offset points to aux entry
                         let aux_index = aux_index_map[&field_number];
                         let aux_offset =
                             (aux_ptr as usize) + aux_index * core::mem::size_of::<AuxTableEntry>();
@@ -473,11 +560,6 @@ impl<'alloc> DescriptorPool<'alloc> {
                             aux_offset - table_addr,
                         )
                     } else {
-                        let offset = field_offsets
-                            .iter()
-                            .find(|(f, _)| f.number() == field_number)
-                            .map(|(_, o)| *o)
-                            .unwrap_or(0);
                         let has_bit = if needs_has_bit(&**field) {
                             has_bit_index_map[&field_number]
                         } else {
@@ -781,6 +863,15 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
                     Value::Bytes(self.object.get_slice::<u8>(entry.offset() as usize))
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
+                    // For oneof message fields, check discriminant first
+                    let has_bit_idx = entry.has_bit_idx();
+                    if has_bit_idx & 0x80 != 0 {
+                        let discriminant_word_idx = (has_bit_idx & 0x7F) as usize;
+                        let discriminant = self.object.get::<u32>(discriminant_word_idx * 4);
+                        if discriminant != field.number() as u32 {
+                            return None;
+                        }
+                    }
                     let aux_entry = self.table.aux_entry_decode(entry);
                     let offset = aux_entry.offset as usize;
                     let msg = self.object.get::<Message>(offset);
@@ -794,8 +885,18 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
                     return Some(Value::Message(dynamic_msg));
                 }
             };
-            debug_assert!(needs_has_bit(field));
-            if self.object.has_bit(entry.has_bit_idx() as u8) {
+            // Check if field is set
+            let has_bit_idx = entry.has_bit_idx();
+            let is_set = if has_bit_idx & 0x80 != 0 {
+                // Oneof field - check discriminant matches field number
+                let discriminant_word_idx = (has_bit_idx & 0x7F) as usize;
+                let discriminant = self.object.get::<u32>(discriminant_word_idx * 4);
+                discriminant == field.number() as u32
+            } else {
+                debug_assert!(needs_has_bit(field));
+                self.object.has_bit(has_bit_idx as u8)
+            };
+            if is_set {
                 Some(value)
             } else {
                 None

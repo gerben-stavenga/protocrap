@@ -1,7 +1,7 @@
 #! /bin/bash
 set -euo pipefail
 
-BAZELISK=$(which bazelisk || echo "bazelisk")
+BAZELISK=$(which bazelisk 2>/dev/null || echo "./bazelisk.sh")
 
 echo "Generating protocrap descriptor... using Bazelisk at $BAZELISK"
 

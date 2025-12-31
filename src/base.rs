@@ -296,6 +296,24 @@ impl Object {
         field
     }
 
+    /// Set a oneof field value and discriminant.
+    /// discriminant_word_idx is the index into the metadata array where the discriminant is stored.
+    /// field_number is written to the discriminant to indicate which field is active.
+    pub(crate) fn set_oneof<T>(
+        &mut self,
+        offset: u32,
+        discriminant_word_idx: u32,
+        field_number: u32,
+        val: T,
+    ) -> &mut T {
+        // Write field number to discriminant
+        *self.ref_mut::<u32>(discriminant_word_idx * 4) = field_number;
+        // Write value
+        let field = self.ref_mut::<T>(offset);
+        *field = val;
+        field
+    }
+
     pub(crate) fn add<T>(&mut self, offset: u32, val: T, arena: &mut Arena) {
         let field = self.ref_mut::<RepeatedField<T>>(offset);
         field.push(val, arena);
@@ -313,6 +331,23 @@ impl Object {
         arena: &mut Arena,
     ) -> &mut Bytes {
         self.set_has_bit(has_bit_idx);
+        let field = self.ref_mut::<Bytes>(offset);
+        field.assign(bytes, arena);
+        field
+    }
+
+    /// Set bytes field that's in a oneof.
+    pub(crate) fn set_bytes_oneof(
+        &mut self,
+        offset: u32,
+        discriminant_word_idx: u32,
+        field_number: u32,
+        bytes: &[u8],
+        arena: &mut Arena,
+    ) -> &mut Bytes {
+        // Write field number to discriminant
+        *self.ref_mut::<u32>(discriminant_word_idx * 4) = field_number;
+        // Write value
         let field = self.ref_mut::<Bytes>(offset);
         field.assign(bytes, arena);
         field

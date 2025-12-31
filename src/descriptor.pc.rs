@@ -72,7 +72,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 0usize],
+                metadata: [u32; 0usize],
                 file: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::FileDescriptorProto::ProtoType,
@@ -87,14 +87,14 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 0usize],
+                    metadata: [u32; 0usize],
                     file: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::FileDescriptorProto::ProtoType,
                         >,
                     >,
                 ) -> Self {
-                    Self { has_bits, file }
+                    Self { metadata, file }
                 }
                 pub fn clear(&mut self) {
                     *self = Self::default();
@@ -200,7 +200,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 package: protocrap::containers::String,
                 dependency: protocrap::containers::RepeatedField<
@@ -248,7 +248,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     package: protocrap::containers::String,
                     dependency: protocrap::containers::RepeatedField<
@@ -289,7 +289,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         package,
                         dependency,
@@ -942,7 +942,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     start: i32,
                     end: i32,
                     options: protocrap::base::OptionalMessage<
@@ -960,7 +960,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         start: i32,
                         end: i32,
                         options: protocrap::base::OptionalMessage<
@@ -968,7 +968,7 @@ pub mod google {
                         >,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             start,
                             end,
                             options,
@@ -1143,7 +1143,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     start: i32,
                     end: i32,
                 }
@@ -1158,11 +1158,11 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         start: i32,
                         end: i32,
                     ) -> Self {
-                        Self { has_bits, start, end }
+                        Self { metadata, start, end }
                     }
                     pub fn clear(&mut self) {
                         *self = Self::default();
@@ -1274,7 +1274,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 field: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
@@ -1327,7 +1327,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     field: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
@@ -1373,7 +1373,7 @@ pub mod google {
                     visibility: i32,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         field,
                         extension,
@@ -2009,7 +2009,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     number: i32,
                     full_name: protocrap::containers::String,
                     r#type: protocrap::containers::String,
@@ -2027,7 +2027,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         number: i32,
                         full_name: protocrap::containers::String,
                         r#type: protocrap::containers::String,
@@ -2035,7 +2035,7 @@ pub mod google {
                         repeated: bool,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             number,
                             full_name,
                             r#type,
@@ -2295,7 +2295,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 uninterpreted_option: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::UninterpretedOption::ProtoType,
@@ -2319,7 +2319,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     declaration: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::ExtensionRangeOptions::Declaration::ProtoType,
@@ -2336,7 +2336,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         uninterpreted_option,
                         declaration,
                         features,
@@ -3676,7 +3676,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 number: i32,
                 label: i32,
@@ -3699,7 +3699,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     extendee: protocrap::containers::String,
                     number: i32,
@@ -3715,7 +3715,7 @@ pub mod google {
                     proto3_optional: bool,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         number,
                         label,
@@ -4239,7 +4239,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 options: protocrap::base::OptionalMessage<
                     crate::google::protobuf::OneofOptions::ProtoType,
@@ -4253,13 +4253,13 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     options: protocrap::base::OptionalMessage<
                         crate::google::protobuf::OneofOptions::ProtoType,
                     >,
                 ) -> Self {
-                    Self { has_bits, name, options }
+                    Self { metadata, name, options }
                 }
                 pub fn clear(&mut self) {
                     *self = Self::default();
@@ -4402,7 +4402,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     start: i32,
                     end: i32,
                 }
@@ -4417,11 +4417,11 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         start: i32,
                         end: i32,
                     ) -> Self {
-                        Self { has_bits, start, end }
+                        Self { metadata, start, end }
                     }
                     pub fn clear(&mut self) {
                         *self = Self::default();
@@ -4533,7 +4533,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 value: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
@@ -4561,7 +4561,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     value: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
@@ -4582,7 +4582,7 @@ pub mod google {
                     visibility: i32,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         value,
                         options,
@@ -4907,7 +4907,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 number: i32,
                 options: protocrap::base::OptionalMessage<
@@ -4922,7 +4922,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     number: i32,
                     options: protocrap::base::OptionalMessage<
@@ -4930,7 +4930,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         number,
                         options,
@@ -5107,7 +5107,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 method: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
@@ -5126,7 +5126,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     method: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
@@ -5138,7 +5138,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         method,
                         options,
@@ -5341,7 +5341,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::String,
                 input_type: protocrap::containers::String,
                 output_type: protocrap::containers::String,
@@ -5359,7 +5359,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::String,
                     input_type: protocrap::containers::String,
                     output_type: protocrap::containers::String,
@@ -5370,7 +5370,7 @@ pub mod google {
                     server_streaming: bool,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         input_type,
                         output_type,
@@ -5714,7 +5714,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 java_package: protocrap::containers::String,
                 java_outer_classname: protocrap::containers::String,
                 java_multiple_files: bool,
@@ -5751,7 +5751,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     java_package: protocrap::containers::String,
                     java_outer_classname: protocrap::containers::String,
                     optimize_for: i32,
@@ -5781,7 +5781,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         java_package,
                         java_outer_classname,
                         java_multiple_files,
@@ -7789,7 +7789,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 message_set_wire_format: bool,
                 no_standard_descriptor_accessor: bool,
                 deprecated: bool,
@@ -7812,7 +7812,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     message_set_wire_format: bool,
                     no_standard_descriptor_accessor: bool,
                     deprecated: bool,
@@ -7828,7 +7828,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         message_set_wire_format,
                         no_standard_descriptor_accessor,
                         deprecated,
@@ -9201,7 +9201,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     edition: i32,
                     value: protocrap::containers::String,
                 }
@@ -9216,11 +9216,11 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         value: protocrap::containers::String,
                         edition: i32,
                     ) -> Self {
-                        Self { has_bits, edition, value }
+                        Self { metadata, edition, value }
                     }
                     pub fn clear(&mut self) {
                         *self = Self::default();
@@ -9351,7 +9351,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     edition_introduced: i32,
                     edition_deprecated: i32,
                     deprecation_warning: protocrap::containers::String,
@@ -9369,7 +9369,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         edition_introduced: i32,
                         edition_deprecated: i32,
                         deprecation_warning: protocrap::containers::String,
@@ -9377,7 +9377,7 @@ pub mod google {
                         removal_error: protocrap::containers::String,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             edition_introduced,
                             edition_deprecated,
                             deprecation_warning,
@@ -9743,7 +9743,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 ctype: i32,
                 packed: bool,
                 jstype: i32,
@@ -9779,7 +9779,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     ctype: i32,
                     packed: bool,
                     deprecated: bool,
@@ -9808,7 +9808,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         ctype,
                         packed,
                         jstype,
@@ -11437,7 +11437,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 0usize],
+                metadata: [u32; 0usize],
                 features: protocrap::base::OptionalMessage<
                     crate::google::protobuf::FeatureSet::ProtoType,
                 >,
@@ -11455,7 +11455,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 0usize],
+                    metadata: [u32; 0usize],
                     features: protocrap::base::OptionalMessage<
                         crate::google::protobuf::FeatureSet::ProtoType,
                     >,
@@ -11466,7 +11466,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         features,
                         uninterpreted_option,
                     }
@@ -12623,7 +12623,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 allow_alias: bool,
                 deprecated: bool,
                 deprecated_legacy_json_field_conflicts: bool,
@@ -12644,7 +12644,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     allow_alias: bool,
                     deprecated: bool,
                     deprecated_legacy_json_field_conflicts: bool,
@@ -12658,7 +12658,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         allow_alias,
                         deprecated,
                         deprecated_legacy_json_field_conflicts,
@@ -13933,7 +13933,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 deprecated: bool,
                 features: protocrap::base::OptionalMessage<
                     crate::google::protobuf::FeatureSet::ProtoType,
@@ -13956,7 +13956,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     deprecated: bool,
                     features: protocrap::base::OptionalMessage<
                         crate::google::protobuf::FeatureSet::ProtoType,
@@ -13972,7 +13972,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         deprecated,
                         features,
                         debug_redact,
@@ -15250,7 +15250,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 features: protocrap::base::OptionalMessage<
                     crate::google::protobuf::FeatureSet::ProtoType,
                 >,
@@ -15269,7 +15269,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     deprecated: bool,
                     features: protocrap::base::OptionalMessage<
                         crate::google::protobuf::FeatureSet::ProtoType,
@@ -15281,7 +15281,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         features,
                         deprecated,
                         uninterpreted_option,
@@ -16493,7 +16493,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 deprecated: bool,
                 idempotency_level: i32,
                 features: protocrap::base::OptionalMessage<
@@ -16513,7 +16513,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     deprecated: bool,
                     idempotency_level: i32,
                     features: protocrap::base::OptionalMessage<
@@ -16526,7 +16526,7 @@ pub mod google {
                     >,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         deprecated,
                         idempotency_level,
                         features,
@@ -17772,7 +17772,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name_part: protocrap::containers::String,
                     is_extension: bool,
                 }
@@ -17787,12 +17787,12 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         name_part: protocrap::containers::String,
                         is_extension: bool,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             name_part,
                             is_extension,
                         }
@@ -17924,7 +17924,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 name: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::UninterpretedOption::NamePart::ProtoType,
@@ -17945,7 +17945,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     name: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::UninterpretedOption::NamePart::ProtoType,
@@ -17959,7 +17959,7 @@ pub mod google {
                     aggregate_value: protocrap::containers::String,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         name,
                         identifier_value,
                         positive_int_value,
@@ -18355,7 +18355,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 0usize],
+                    metadata: [u32; 0usize],
                 }
                 impl core::fmt::Debug for ProtoType {
                     fn fmt(
@@ -18367,8 +18367,8 @@ pub mod google {
                 }
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
-                    pub const fn from_static(has_bits: [u32; 0usize]) -> Self {
-                        Self { has_bits }
+                    pub const fn from_static(metadata: [u32; 0usize]) -> Self {
+                        Self { metadata }
                     }
                     pub fn clear(&mut self) {
                         *self = Self::default();
@@ -18558,7 +18558,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 field_presence: i32,
                 enum_type: i32,
                 repeated_field_encoding: i32,
@@ -18576,7 +18576,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     field_presence: i32,
                     enum_type: i32,
                     repeated_field_encoding: i32,
@@ -18587,7 +18587,7 @@ pub mod google {
                     default_symbol_visibility: i32,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         field_presence,
                         enum_type,
                         repeated_field_encoding,
@@ -18987,7 +18987,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     edition: i32,
                     overridable_features: protocrap::base::OptionalMessage<
                         crate::google::protobuf::FeatureSet::ProtoType,
@@ -19007,7 +19007,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         edition: i32,
                         overridable_features: protocrap::base::OptionalMessage<
                             crate::google::protobuf::FeatureSet::ProtoType,
@@ -19017,7 +19017,7 @@ pub mod google {
                         >,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             edition,
                             overridable_features,
                             fixed_features,
@@ -19212,7 +19212,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 1usize],
+                metadata: [u32; 1usize],
                 defaults: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ProtoType,
@@ -19229,7 +19229,7 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     defaults: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::FeatureSetDefaults::FeatureSetEditionDefault::ProtoType,
@@ -19239,7 +19239,7 @@ pub mod google {
                     maximum_edition: i32,
                 ) -> Self {
                     Self {
-                        has_bits,
+                        metadata,
                         defaults,
                         minimum_edition,
                         maximum_edition,
@@ -19434,7 +19434,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     path: protocrap::containers::RepeatedField<i32>,
                     span: protocrap::containers::RepeatedField<i32>,
                     leading_comments: protocrap::containers::String,
@@ -19454,7 +19454,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         path: protocrap::containers::RepeatedField<i32>,
                         span: protocrap::containers::RepeatedField<i32>,
                         leading_comments: protocrap::containers::String,
@@ -19464,7 +19464,7 @@ pub mod google {
                         >,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             path,
                             span,
                             leading_comments,
@@ -19672,7 +19672,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 0usize],
+                metadata: [u32; 0usize],
                 location: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::SourceCodeInfo::Location::ProtoType,
@@ -19687,14 +19687,14 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 0usize],
+                    metadata: [u32; 0usize],
                     location: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::SourceCodeInfo::Location::ProtoType,
                         >,
                     >,
                 ) -> Self {
-                    Self { has_bits, location }
+                    Self { metadata, location }
                 }
                 pub fn clear(&mut self) {
                     *self = Self::default();
@@ -19826,7 +19826,7 @@ pub mod google {
                 #[repr(C)]
                 #[derive(Default)]
                 pub struct ProtoType {
-                    has_bits: [u32; 1usize],
+                    metadata: [u32; 1usize],
                     path: protocrap::containers::RepeatedField<i32>,
                     source_file: protocrap::containers::String,
                     begin: i32,
@@ -19844,7 +19844,7 @@ pub mod google {
                 impl ProtoType {
                     #[allow(clippy::too_many_arguments)]
                     pub const fn from_static(
-                        has_bits: [u32; 1usize],
+                        metadata: [u32; 1usize],
                         path: protocrap::containers::RepeatedField<i32>,
                         source_file: protocrap::containers::String,
                         begin: i32,
@@ -19852,7 +19852,7 @@ pub mod google {
                         semantic: i32,
                     ) -> Self {
                         Self {
-                            has_bits,
+                            metadata,
                             path,
                             source_file,
                             begin,
@@ -20080,7 +20080,7 @@ pub mod google {
             #[repr(C)]
             #[derive(Default)]
             pub struct ProtoType {
-                has_bits: [u32; 0usize],
+                metadata: [u32; 0usize],
                 annotation: protocrap::containers::RepeatedField<
                     protocrap::base::TypedMessage<
                         crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType,
@@ -20095,14 +20095,14 @@ pub mod google {
             impl ProtoType {
                 #[allow(clippy::too_many_arguments)]
                 pub const fn from_static(
-                    has_bits: [u32; 0usize],
+                    metadata: [u32; 0usize],
                     annotation: protocrap::containers::RepeatedField<
                         protocrap::base::TypedMessage<
                             crate::google::protobuf::GeneratedCodeInfo::Annotation::ProtoType,
                         >,
                     >,
                 ) -> Self {
-                    Self { has_bits, annotation }
+                    Self { metadata, annotation }
                 }
                 pub fn clear(&mut self) {
                     *self = Self::default();

@@ -165,6 +165,14 @@ impl<T: PartialEq> PartialEq<&[T]> for RepeatedField<T> {
 
 impl<T: Eq> Eq for RepeatedField<T> where T: Eq {}
 
+// Copy is safe because we don't implement Drop (arena handles deallocation)
+impl<T: Copy> Copy for RepeatedField<T> {}
+impl<T: Copy> Clone for RepeatedField<T> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
 impl<T> Default for RepeatedField<T> {
     fn default() -> Self {
         Self::new()
@@ -338,7 +346,7 @@ impl<T> DerefMut for RepeatedField<T> {
 pub type Bytes = RepeatedField<u8>;
 
 #[repr(C)]
-#[derive(Default, PartialEq, Eq)]
+#[derive(Default, PartialEq, Eq, Copy, Clone)]
 pub struct String(Bytes);
 
 impl core::fmt::Debug for String {

@@ -15,6 +15,7 @@ use protocrap::google::protobuf::FieldDescriptorProto::Type;
 use protocrap::google::protobuf::FileDescriptorProto::ProtoType as FileDescriptorProto;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
 use protocrap::reflection::is_repeated;
+use protocrap::reflection::is_in_oneof;
 use protocrap::reflection::needs_has_bit;
 use quote::{format_ident, quote};
 
@@ -228,7 +229,7 @@ fn generate_message_impl(
         .map(|e| generate_enum(e.as_ref()))
         .collect::<Result<Vec<_>, _>>()?;
 
-    // Calculate has bits
+    // Calculate has bits (excludes oneof fields)
     let has_bit_fields: Vec<_> = message
         .field()
         .iter()
@@ -238,26 +239,80 @@ fn generate_message_impl(
     let has_bits_count = has_bit_fields.len();
     let has_bits_words = has_bits_count.div_ceil(32);
 
-    // Struct fields
-    let struct_fields: Vec<_> = message
+    // Count oneofs - each needs a u32 discriminant in metadata
+    let oneof_count = message.oneof_decl().len();
+    let metadata_words = has_bits_words + oneof_count;
+
+    // Group fields by oneof index
+    let mut oneof_fields: std::collections::HashMap<i32, Vec<_>> = std::collections::HashMap::new();
+    for field in message.field() {
+        if is_in_oneof(field.as_ref()) {
+            oneof_fields
+                .entry(field.oneof_index())
+                .or_default()
+                .push(field.as_ref());
+        }
+    }
+
+    // Generate union types for each oneof
+    let mut union_defs = Vec::new();
+    let mut union_fields = Vec::new();
+    for (idx, oneof) in message.oneof_decl().iter().enumerate() {
+        let union_name = format_ident!("{}Union", to_pascal_case(oneof.name()));
+        let oneof_field_name = format_ident!("{}", sanitize_field_name(oneof.name()));
+
+        if let Some(fields) = oneof_fields.get(&(idx as i32)) {
+            let variants: Vec<_> = fields
+                .iter()
+                .map(|f| {
+                    let variant_name = format_ident!("{}", sanitize_field_name(f.name()));
+                    let variant_type = rust_field_type_tokens(f);
+                    quote! { #variant_name: #variant_type }
+                })
+                .collect();
+
+            union_defs.push(quote! {
+                #[repr(C)]
+                #[derive(Clone, Copy)]
+                pub union #union_name {
+                    #(pub #variants,)*
+                }
+
+                impl Default for #union_name {
+                    fn default() -> Self {
+                        unsafe { core::mem::zeroed() }
+                    }
+                }
+            });
+
+            union_fields.push(quote! { #oneof_field_name: #union_name });
+        }
+    }
+
+    // Regular struct fields (non-oneof)
+    let regular_fields: Vec<_> = message
         .field()
         .iter()
+        .filter(|f| !is_in_oneof(f.as_ref()))
         .map(|field| {
             let field_name = format_ident!("{}", sanitize_field_name(field.name()));
             let field_type = rust_field_type_tokens(field);
-            (
-                field_name.clone(),
-                (field.number(), quote! { #field_name: #field_type }),
-            )
+            (field.number(), quote! { #field_name: #field_type })
         })
         .collect();
 
-    let (struct_field_names, struct_fields): (Vec<_>, Vec<_>) = struct_fields.into_iter().unzip();
-    let mut sorted_struct_fields: Vec<_> = struct_fields.clone();
-    sorted_struct_fields.sort_by_key(|(field_num, _)| *field_num);
+    let mut sorted_regular_fields = regular_fields.clone();
+    sorted_regular_fields.sort_by_key(|(field_num, _)| *field_num);
 
-    let (_, struct_fields): (Vec<_>, Vec<_>) = struct_fields.into_iter().unzip();
-    let (_, sorted_struct_fields): (Vec<_>, Vec<_>) = sorted_struct_fields.into_iter().unzip();
+    let struct_field_names: Vec<_> = message
+        .field()
+        .iter()
+        .filter(|f| !is_in_oneof(f.as_ref()))
+        .map(|f| format_ident!("{}", sanitize_field_name(f.name())))
+        .collect();
+
+    let (_, regular_fields): (Vec<_>, Vec<_>) = regular_fields.into_iter().unzip();
+    let (_, sorted_regular_fields): (Vec<_>, Vec<_>) = sorted_regular_fields.into_iter().unzip();
 
     // Build has_bit map
     let has_bit_map: std::collections::HashMap<_, _> = has_bit_fields
@@ -266,13 +321,27 @@ fn generate_message_impl(
         .map(|(i, f)| (f.number(), i))
         .collect();
 
+    // Build oneof info map: field_number -> (discriminant_word_index, oneof_field_name)
+    // discriminant_word_index = has_bits_words + oneof_idx (index into metadata array)
+    let oneof_info: std::collections::HashMap<i32, (usize, String)> = message
+        .field()
+        .iter()
+        .filter(|f| is_in_oneof(f.as_ref()))
+        .map(|f| {
+            let oneof_idx = f.oneof_index() as usize;
+            let discriminant_word_idx = has_bits_words + oneof_idx;
+            let oneof_name = message.oneof_decl()[oneof_idx].name().to_string();
+            (f.number(), (discriminant_word_idx, oneof_name))
+        })
+        .collect();
+
     // Accessor methods
     let accessors = generate_accessors(message, &has_bit_map)?;
 
     // Protobuf trait impl
     let protobuf_impl = generate_protobuf_impl();
 
-    let table = tables::generate_table(message, &has_bit_map, Some(file.syntax()))?;
+    let table = tables::generate_table(message, &has_bit_map, &oneof_info, Some(file.syntax()))?;
 
     // Build path to FILE_DESCRIPTOR_PROTO in the file-specific module
     let filename = std::path::Path::new(file.name())
@@ -295,15 +364,25 @@ fn generate_message_impl(
 
     let message_descriptor_accessor = build_descriptor_accessor(&path);
 
+    // Names for union fields in struct (for from_static)
+    let union_field_names: Vec<_> = message
+        .oneof_decl()
+        .iter()
+        .map(|oneof| format_ident!("{}", sanitize_field_name(oneof.name())))
+        .collect();
+
     Ok(quote! {
         #(#nested_items)*
         #(#nested_enums)*
 
+        #(#union_defs)*
+
         #[repr(C)]
         #[derive(Default)]
         pub struct ProtoType {
-            has_bits: [u32; #has_bits_words],
-            #(#struct_fields,)*
+            metadata: [u32; #metadata_words],
+            #(#regular_fields,)*
+            #(#union_fields,)*
         }
 
         impl core::fmt::Debug for ProtoType {
@@ -315,12 +394,14 @@ fn generate_message_impl(
         impl ProtoType {
             #[allow(clippy::too_many_arguments)]
             pub const fn from_static(
-                has_bits: [u32; #has_bits_words],
-                #(#sorted_struct_fields,)*
+                metadata: [u32; #metadata_words],
+                #(#sorted_regular_fields,)*
+                #(#union_fields,)*
             ) -> Self {
                 Self {
-                    has_bits,
+                    metadata,
                     #(#struct_field_names,)*
+                    #(#union_field_names,)*
                 }
             }
 
@@ -513,8 +594,175 @@ fn generate_accessors(
 ) -> Result<TokenStream> {
     let mut methods = Vec::new();
 
+    // Calculate has_bits_words for discriminant offset calculation
+    let has_bits_count = message
+        .field()
+        .iter()
+        .filter(|f| needs_has_bit(f.as_ref()))
+        .count();
+    let has_bits_words = has_bits_count.div_ceil(32);
+
     for field in message.field() {
         let field_name = format_ident!("{}", sanitize_field_name(field.name()));
+
+        // Handle oneof fields specially
+        if is_in_oneof(field.as_ref()) {
+            let oneof_idx = field.oneof_index() as usize;
+            let oneof = &message.oneof_decl()[oneof_idx];
+            let oneof_field_name = format_ident!("{}", sanitize_field_name(oneof.name()));
+            let discriminant_word_idx = has_bits_words + oneof_idx;
+            let field_number = field.number() as u32;
+
+            let setter_name = format_ident!("set_{}", field_name);
+            let has_name = format_ident!("has_{}", field_name);
+            let clear_name = format_ident!("clear_{}", field_name);
+
+            // Generate has_<field> - check if discriminant matches this field
+            methods.push(quote! {
+                pub fn #has_name(&self) -> bool {
+                    self.metadata[#discriminant_word_idx] == #field_number
+                }
+            });
+
+            match field.r#type().unwrap() {
+                Type::TYPE_STRING => {
+                    let optional_name = format_ident!("get_{}", field_name);
+                    methods.push(quote! {
+                        pub fn #field_name(&self) -> &str {
+                            if self.#has_name() {
+                                unsafe { self.#oneof_field_name.#field_name.as_str() }
+                            } else {
+                                ""
+                            }
+                        }
+
+                        pub fn #optional_name(&self) -> Option<&str> {
+                            if self.#has_name() {
+                                Some(unsafe { self.#oneof_field_name.#field_name.as_str() })
+                            } else {
+                                None
+                            }
+                        }
+
+                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
+                            self.metadata[#discriminant_word_idx] = #field_number;
+                            unsafe { self.#oneof_field_name.#field_name.assign(value, arena) };
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            if self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = 0;
+                            }
+                        }
+                    });
+                }
+                Type::TYPE_BYTES => {
+                    let optional_name = format_ident!("get_{}", field_name);
+                    methods.push(quote! {
+                        pub fn #field_name(&self) -> &[u8] {
+                            if self.#has_name() {
+                                unsafe { self.#oneof_field_name.#field_name.slice() }
+                            } else {
+                                &[]
+                            }
+                        }
+
+                        pub fn #optional_name(&self) -> Option<&[u8]> {
+                            if self.#has_name() {
+                                Some(unsafe { self.#oneof_field_name.#field_name.slice() })
+                            } else {
+                                None
+                            }
+                        }
+
+                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
+                            self.metadata[#discriminant_word_idx] = #field_number;
+                            unsafe { self.#oneof_field_name.#field_name.assign(value, arena) };
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            if self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = 0;
+                            }
+                        }
+                    });
+                }
+                Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
+                    let msg_type = rust_type_tokens(field);
+                    let field_name_mut = format_ident!("{}_mut", field_name);
+                    methods.push(quote! {
+                        pub fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
+                            if self.#has_name() {
+                                unsafe { self.#oneof_field_name.#field_name.get() }
+                            } else {
+                                None
+                            }
+                        }
+
+                        pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
+                            self.metadata[#discriminant_word_idx] = #field_number;
+                            unsafe { self.#oneof_field_name.#field_name.get_or_init(arena) }
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            if self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = 0;
+                            }
+                        }
+                    });
+                }
+                Type::TYPE_ENUM => {
+                    let enum_type = rust_type_tokens(field);
+                    methods.push(quote! {
+                        pub fn #field_name(&self) -> Option<#enum_type> {
+                            if self.#has_name() {
+                                #enum_type::from_i32(unsafe { self.#oneof_field_name.#field_name })
+                            } else {
+                                None
+                            }
+                        }
+
+                        pub fn #setter_name(&mut self, value: #enum_type) {
+                            self.metadata[#discriminant_word_idx] = #field_number;
+                            self.#oneof_field_name.#field_name = value.to_i32();
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            if self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = 0;
+                            }
+                        }
+                    });
+                }
+                _ => {
+                    // Scalar types
+                    let return_type = rust_element_type_tokens(field);
+                    methods.push(quote! {
+                        pub fn #field_name(&self) -> #return_type {
+                            if self.#has_name() {
+                                unsafe { self.#oneof_field_name.#field_name }
+                            } else {
+                                Default::default()
+                            }
+                        }
+
+                        pub fn #setter_name(&mut self, value: #return_type) {
+                            self.metadata[#discriminant_word_idx] = #field_number;
+                            self.#oneof_field_name.#field_name = value;
+                        }
+
+                        pub fn #clear_name(&mut self) {
+                            if self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = 0;
+                            }
+                        }
+                    });
+                }
+            }
+            continue;
+        }
+
+        // Regular (non-oneof) fields
 
         if is_repeated(field) {
             // Repeated field accessor

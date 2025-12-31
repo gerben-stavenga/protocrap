@@ -22,6 +22,19 @@ pub fn sanitize_field_name(name: &str) -> String {
     }
 }
 
+/// Convert snake_case to PascalCase (for union type names)
+pub fn to_pascal_case(name: &str) -> String {
+    name.split('_')
+        .map(|part| {
+            let mut chars = part.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(first) => first.to_uppercase().chain(chars).collect(),
+            }
+        })
+        .collect()
+}
+
 /// Sanitize a module name by appending underscore for keywords
 /// (can't use r# prefix for modules, especially with leading underscores)
 pub fn sanitize_module_name(name: &str) -> String {

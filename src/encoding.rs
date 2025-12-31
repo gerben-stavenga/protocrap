@@ -84,8 +84,19 @@ impl<'a> ObjectEncodeState<'a> {
         Some((tag, byte_count))
     }
 
-    fn has_bit(&self, has_bit_idx: u8) -> bool {
-        self.obj.has_bit(has_bit_idx)
+    /// Check if a field should be serialized.
+    /// For regular fields, checks has_bit.
+    /// For oneof fields (has_bit & 0x80 != 0), checks if discriminant matches field_number.
+    fn is_field_set(&self, has_bit: u8, tag: u32) -> bool {
+        if has_bit & 0x80 != 0 {
+            // Oneof field - check discriminant
+            let discriminant_word_idx = (has_bit & 0x7F) as usize;
+            let discriminant = self.obj.get::<u32>(discriminant_word_idx * 4);
+            let field_number = tag >> 3;
+            discriminant == field_number
+        } else {
+            self.obj.has_bit(has_bit)
+        }
     }
 
     fn get<T>(&self, offset: usize) -> T
@@ -255,7 +266,7 @@ fn encode_loop<'a>(
                 unreachable!()
             }
             FieldKind::Varint64 => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -264,7 +275,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Varint32 => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -274,7 +285,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Int32 => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -284,7 +295,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Varint64Zigzag => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -293,7 +304,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Varint32Zigzag => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -303,7 +314,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Bool => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -313,7 +324,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Fixed64 => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -322,7 +333,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Fixed32 => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -331,7 +342,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Bytes | FieldKind::String => {
-                if obj_state.has_bit(has_bit) {
+                if obj_state.is_field_set(has_bit, tag) {
                     if cursor <= begin {
                         break;
                     }
@@ -351,17 +362,22 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::Message => {
-                let AuxTableEntry {
-                    offset,
-                    child_table,
-                } = Table::table(obj_state.table).aux_entry(offset);
-                let child_ptr = obj_state.get::<*const Object>(offset as usize);
-                if !child_ptr.is_null() {
-                    obj_state.field_idx -= 1;
-                    obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
-                    obj_state =
-                        ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
-                    continue 'out; // Continue with child message
+                // For oneof fields, check if this is the active field
+                if has_bit & 0x80 != 0 && !obj_state.is_field_set(has_bit, tag) {
+                    // Skip - not the active oneof field
+                } else {
+                    let AuxTableEntry {
+                        offset,
+                        child_table,
+                    } = Table::table(obj_state.table).aux_entry(offset);
+                    let child_ptr = obj_state.get::<*const Object>(offset as usize);
+                    if !child_ptr.is_null() {
+                        obj_state.field_idx -= 1;
+                        obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
+                        obj_state =
+                            ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
+                        continue 'out; // Continue with child message
+                    }
                 }
             }
             FieldKind::Group => {

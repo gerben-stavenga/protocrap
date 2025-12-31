@@ -6,6 +6,24 @@ use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
 use crate::reflection::{DynamicMessageArray, DynamicMessageRef, Value, default_value};
 use crate::tables::{AuxTableEntry, Table};
 
+/// Helper to set a field value, handling both regular fields and oneof fields.
+/// For oneof fields (has_bit_idx & 0x80 != 0), sets the discriminant to field_number.
+fn set_field<T>(
+    obj: &mut Object,
+    entry: crate::decoding::TableEntry,
+    field_number: i32,
+    val: T,
+) {
+    let has_bit_idx = entry.has_bit_idx();
+    if has_bit_idx & 0x80 != 0 {
+        // Oneof field
+        let discriminant_word_idx = has_bit_idx & 0x7F;
+        obj.set_oneof(entry.offset(), discriminant_word_idx, field_number as u32, val);
+    } else {
+        obj.set(entry.offset(), has_bit_idx, val);
+    }
+}
+
 // Well-known type detection and handling
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum WellKnownType {
@@ -1599,34 +1617,34 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 },
                 _ => match field.r#type().unwrap() {
                     Type::TYPE_BOOL => {
-                        let Some(v) = map.next_value()? else {
+                        let Some(v) = map.next_value::<Option<bool>>()? else {
                             continue;
                         };
-                        obj.set::<bool>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_FIXED64 | Type::TYPE_UINT64 => {
                         let Some(v) = map.next_value::<Option<u64>>()? else {
                             continue;
                         };
-                        obj.set::<u64>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_FIXED32 | Type::TYPE_UINT32 => {
                         let Some(v) = map.next_value::<Option<u32>>()? else {
                             continue;
                         };
-                        obj.set::<u32>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_SFIXED64 | Type::TYPE_INT64 | Type::TYPE_SINT64 => {
                         let Some(v) = map.next_value::<Option<i64>>()? else {
                             continue;
                         };
-                        obj.set::<i64>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_SFIXED32 | Type::TYPE_INT32 | Type::TYPE_SINT32 => {
                         let Some(v) = map.next_value::<Option<i32>>()? else {
                             continue;
                         };
-                        obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_ENUM => {
                         let seed = EnumSeed {
@@ -1636,37 +1654,33 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         let Some(v) = map.next_value_seed(Optional(seed))? else {
                             continue;
                         };
-                        obj.set::<i32>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_FLOAT => {
                         let Some(v) = map.next_value::<Option<f32>>()? else {
                             continue;
                         };
-                        obj.set::<f32>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_DOUBLE => {
                         let Some(v) = map.next_value::<Option<f64>>()? else {
                             continue;
                         };
-                        obj.set::<f64>(entry.offset(), entry.has_bit_idx(), v);
+                        set_field(obj, entry, field.number(), v);
                     }
                     Type::TYPE_STRING => {
                         let Some(v) = map.next_value::<Option<String>>()? else {
                             continue;
                         };
                         let s = crate::containers::String::from_str(&v, arena);
-                        obj.set::<crate::containers::String>(
-                            entry.offset(),
-                            entry.has_bit_idx(),
-                            s,
-                        );
+                        set_field(obj, entry, field.number(), s);
                     }
                     Type::TYPE_BYTES => {
                         let Some(v) = map.next_value::<Option<BytesBuf>>()? else {
                             continue;
                         };
                         let b = crate::containers::Bytes::from_slice(&v.0, arena);
-                        obj.set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
+                        set_field(obj, entry, field.number(), b);
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                         // TODO handle null
@@ -1684,6 +1698,12 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         if map.next_value_seed(seed)?.is_none() {
                             continue;
                         };
+                        // For oneof message fields, set the discriminant
+                        let has_bit_idx = entry.has_bit_idx();
+                        if has_bit_idx & 0x80 != 0 {
+                            let discriminant_word_idx = has_bit_idx & 0x7F;
+                            *obj.ref_mut::<u32>(discriminant_word_idx * 4) = field.number() as u32;
+                        }
                         *obj.ref_mut::<crate::base::Message>(offset) =
                             crate::base::Message(child_obj);
                     }
