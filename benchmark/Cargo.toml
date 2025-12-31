@@ -5,6 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
+allocator-api2 = "0.2"
 protocrap = { path = ".." }
 codegen-tests = { path = "../codegen-tests" }
 prost = { version = "0.14.1" }

@@ -1,5 +1,4 @@
-#![feature(allocator_api)]
-
+use allocator_api2::alloc::Global;
 use criterion::{
     BenchmarkGroup, Criterion, Throughput, black_box, criterion_group, criterion_main,
     measurement::Measurement,
@@ -8,7 +7,7 @@ use prost::Message;
 
 // Your crate
 use codegen_tests::{Test::ProtoType as Test, make_large, make_medium, make_small};
-use protocrap::{ProtobufExt, arena};
+use protocrap::{ProtobufMut, ProtobufRef, arena};
 
 mod prost_gen {
     include!(concat!(env!("OUT_DIR"), "/_.rs"));
@@ -22,7 +21,7 @@ fn bench_decoding(
     group.throughput(Throughput::Bytes(data.len() as u64));
 
     group.bench_function(&format!("{}/protocrap", bench_function_name), |b| {
-        let mut arena = crate::arena::Arena::new(&std::alloc::Global);
+        let mut arena = crate::arena::Arena::new(&Global);
         let mut msg = Test::default();
         b.iter(|| {
             msg.nested_message_mut().clear();
@@ -47,14 +46,14 @@ fn bench_decode(c: &mut Criterion) {
     bench_decoding(&mut group, "small", &small_data);
 
     // Medium message
-    let mut medium_arena = arena::Arena::new(&std::alloc::Global);
+    let mut medium_arena = arena::Arena::new(&Global);
     let medium_data = make_medium(&mut medium_arena)
         .encode_vec::<32>()
         .expect("should encode");
     bench_decoding(&mut group, "medium", &medium_data);
 
     // Large message
-    let mut large_arena = arena::Arena::new(&std::alloc::Global);
+    let mut large_arena = arena::Arena::new(&Global);
     let large_data = make_large(&mut large_arena)
         .encode_vec::<32>()
         .expect("should encode");
@@ -99,12 +98,12 @@ fn bench_encode(c: &mut Criterion) {
     bench_encoding(&mut group, "small", &small_prost);
 
     // Medium
-    let mut medium_arena = arena::Arena::new(&std::alloc::Global);
+    let mut medium_arena = arena::Arena::new(&Global);
     let medium_prost = make_medium(&mut medium_arena);
     bench_encoding(&mut group, "medium", &medium_prost);
 
     // Large
-    let mut large_arena = arena::Arena::new(&std::alloc::Global);
+    let mut large_arena = arena::Arena::new(&Global);
     let large_prost = make_large(&mut large_arena);
     bench_encoding(&mut group, "large", &large_prost);
 
@@ -122,7 +121,7 @@ pub fn push_loop_protocrap_inner(arena: &mut arena::Arena) {
 }
 
 pub fn push_loop_protocrap() {
-    let mut arena = arena::Arena::new(&std::alloc::Global);
+    let mut arena = arena::Arena::new(&Global);
     push_loop_protocrap_inner(&mut arena);
 }
 
