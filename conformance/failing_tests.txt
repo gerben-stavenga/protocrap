@@ -172,28 +172,6 @@ Recommended.Proto3.FieldMaskPathsDontRoundTrip.JsonOutput
 Recommended.Proto3.FieldMaskTooManyUnderscore.JsonOutput
 
 # ----------------------------------------------------------------------------
-# Wrapper types not implemented
-# ----------------------------------------------------------------------------
-Required.Proto3.JsonInput.OptionalDoubleWrapper.JsonOutput
-Required.Proto3.JsonInput.OptionalDoubleWrapper.ProtobufOutput
-Required.Proto3.JsonInput.OptionalFloatWrapper.JsonOutput
-Required.Proto3.JsonInput.OptionalFloatWrapper.ProtobufOutput
-Required.Proto3.JsonInput.OptionalInt32Wrapper.JsonOutput
-Required.Proto3.JsonInput.OptionalInt32Wrapper.ProtobufOutput
-Required.Proto3.JsonInput.OptionalInt64Wrapper.JsonOutput
-Required.Proto3.JsonInput.OptionalInt64Wrapper.ProtobufOutput
-Required.Proto3.JsonInput.OptionalWrapperTypesWithNonDefaultValue.JsonOutput
-Required.Proto3.JsonInput.OptionalWrapperTypesWithNonDefaultValue.ProtobufOutput
-Required.Proto3.JsonInput.RepeatedDoubleWrapper.JsonOutput
-Required.Proto3.JsonInput.RepeatedDoubleWrapper.ProtobufOutput
-Required.Proto3.JsonInput.RepeatedFloatWrapper.JsonOutput
-Required.Proto3.JsonInput.RepeatedFloatWrapper.ProtobufOutput
-Required.Proto3.JsonInput.RepeatedInt32Wrapper.JsonOutput
-Required.Proto3.JsonInput.RepeatedInt32Wrapper.ProtobufOutput
-Required.Proto3.JsonInput.RepeatedInt64Wrapper.JsonOutput
-Required.Proto3.JsonInput.RepeatedInt64Wrapper.ProtobufOutput
-
-# ----------------------------------------------------------------------------
 # Struct/Value/ListValue types not implemented
 # ----------------------------------------------------------------------------
 Required.Proto3.JsonInput.RepeatedListValue.JsonOutput

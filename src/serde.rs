@@ -1016,6 +1016,10 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 Ok(())
             }
             WellKnownType::Int32Value => self.visit_i32(v as i32),
+            WellKnownType::UInt64Value => self.visit_u64(v as u64),
+            WellKnownType::UInt32Value => self.visit_u32(v as u32),
+            WellKnownType::FloatValue => self.visit_f32(v as f32),
+            WellKnownType::DoubleValue => self.visit_f64(v as f64),
             _ => Err(E::invalid_type(serde::de::Unexpected::Signed(v), &self)),
         }
     }
@@ -1054,6 +1058,10 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 Ok(())
             }
             WellKnownType::UInt32Value => self.visit_u32(v as u32),
+            WellKnownType::Int64Value => self.visit_i64(v as i64),
+            WellKnownType::Int32Value => self.visit_i32(v as i32),
+            WellKnownType::FloatValue => self.visit_f32(v as f32),
+            WellKnownType::DoubleValue => self.visit_f64(v as f64),
             _ => Err(E::invalid_type(serde::de::Unexpected::Unsigned(v), &self)),
         }
     }
@@ -1161,6 +1169,14 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 self.obj
                     .set::<i32>(nanos_entry.offset(), nanos_entry.has_bit_idx(), nanos);
                 Ok(())
+            }
+            WellKnownType::Int64Value => {
+                let n: i64 = v.parse().map_err(E::custom)?;
+                self.visit_i64(n)
+            }
+            WellKnownType::UInt64Value => {
+                let n: u64 = v.parse().map_err(E::custom)?;
+                self.visit_u64(n)
             }
             _ => Err(E::invalid_type(serde::de::Unexpected::Str(v), &self)),
         }
