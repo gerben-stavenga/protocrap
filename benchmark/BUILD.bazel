@@ -1,1 +1,40 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
 exports_files(["Cargo.toml"])
+
+# Benchmark library (without prost comparison)
+rust_library(
+    name = "protocrap_benchmarks",
+    srcs = [
+        "src/lib.rs",
+        "benches/proto_bench.rs",
+    ],
+    crate_features = [],  # No prost-compare feature
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:protocrap",
+        "//codegen-tests:codegen_tests_lib",
+        "@crates//:allocator-api2",
+        "@crates//:criterion",
+    ],
+)
+
+# Test that benchmark code compiles
+rust_test(
+    name = "protocrap_benchmarks_test",
+    crate = ":protocrap_benchmarks",
+)
+
+# Runnable benchmark binary
+rust_binary(
+    name = "bench",
+    srcs = ["benches/proto_bench.rs"],
+    edition = "2024",
+    deps = [
+        "//:protocrap",
+        "//codegen-tests:codegen_tests_lib",
+        "@crates//:allocator-api2",
+        "@crates//:criterion",
+    ],
+)

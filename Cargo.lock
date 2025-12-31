@@ -745,6 +745,7 @@ dependencies = [
 name = "protocrap-benchmarks"
 version = "0.1.0"
 dependencies = [
+ "allocator-api2",
  "codegen-tests",
  "criterion",
  "prost",
@@ -769,6 +770,7 @@ dependencies = [
 name = "protocrap-fuzz"
 version = "0.0.0"
 dependencies = [
+ "allocator-api2",
  "arbitrary",
  "libfuzzer-sys",
  "protocrap 0.1.19",

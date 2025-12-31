@@ -3,12 +3,14 @@ use criterion::{
     BenchmarkGroup, Criterion, Throughput, black_box, criterion_group, criterion_main,
     measurement::Measurement,
 };
+#[cfg(feature = "prost-compare")]
 use prost::Message;
 
 // Your crate
 use codegen_tests::{Test::ProtoType as Test, make_large, make_medium, make_small};
 use protocrap::{ProtobufMut, ProtobufRef, arena};
 
+#[cfg(feature = "prost-compare")]
 mod prost_gen {
     include!(concat!(env!("OUT_DIR"), "/_.rs"));
 }
@@ -30,6 +32,7 @@ fn bench_decoding(
         })
     });
 
+    #[cfg(feature = "prost-compare")]
     group.bench_function(&format!("{}/prost", bench_function_name), |b| {
         b.iter(|| {
             let msg = prost_gen::Test::decode(black_box(data)).unwrap();
@@ -67,9 +70,6 @@ fn bench_encoding(
     bench_function_name: &str,
     protocrap_msg: &Test,
 ) {
-    let data = protocrap_msg.encode_vec::<32>().expect("should encode");
-    let prost_msg = prost_gen::Test::decode(data.as_slice()).unwrap();
-
     c.bench_function(&format!("{}/protocrap", bench_function_name), |b| {
         let mut buf = vec![0u8; 4096];
         b.iter(|| {
@@ -80,14 +80,19 @@ fn bench_encoding(
         })
     });
 
-    c.bench_function(&format!("{}/prost", bench_function_name), |b| {
-        let mut buf = Vec::with_capacity(4096);
-        b.iter(|| {
-            buf.clear();
-            prost_msg.encode(black_box(&mut buf)).unwrap();
-            black_box(buf.len())
-        })
-    });
+    #[cfg(feature = "prost-compare")]
+    {
+        let data = protocrap_msg.encode_vec::<32>().expect("should encode");
+        let prost_msg = prost_gen::Test::decode(data.as_slice()).unwrap();
+        c.bench_function(&format!("{}/prost", bench_function_name), |b| {
+            let mut buf = Vec::with_capacity(4096);
+            b.iter(|| {
+                buf.clear();
+                prost_msg.encode(black_box(&mut buf)).unwrap();
+                black_box(buf.len())
+            })
+        });
+    }
 }
 
 fn bench_encode(c: &mut Criterion) {
