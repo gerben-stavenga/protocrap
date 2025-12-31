@@ -296,8 +296,7 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
                     .find_field_descriptor_by_number(1)
                     .ok_or_else(|| serde::ser::Error::custom("BytesValue missing 'value' field"))?;
                 if let Some(Value::Bytes(b)) = self.get_field(field) {
-                    base64::engine::Engine::encode(&base64::engine::general_purpose::STANDARD, b)
-                        .serialize(serializer)
+                    serializer.serialize_bytes(b)
                 } else {
                     serializer.serialize_none()
                 }
@@ -551,9 +550,11 @@ where
 {
     let visitor = ProtobufVisitor { obj, table, arena };
 
-    // For well-known types, use deserialize_any to accept primitive JSON values
-    if detect_well_known_type(table.descriptor) != WellKnownType::None {
-        return deserializer.deserialize_any(visitor);
+    // For well-known types, use appropriate deserialize method
+    match detect_well_known_type(table.descriptor) {
+        WellKnownType::BytesValue => return deserializer.deserialize_bytes(visitor),
+        WellKnownType::None => {}
+        _ => return deserializer.deserialize_any(visitor),
     }
 
     let fields = table.descriptor.field();
@@ -773,7 +774,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                     );
                 }
                 Type::TYPE_BYTES => {
-                    let v: BytesOrBase64 = map.next_value()?;
+                    let v: BytesBuf = map.next_value()?;
                     let b = crate::containers::Bytes::from_slice(&v.0, arena);
                     entry_obj.set::<crate::containers::Bytes>(
                         value_entry.offset(),
@@ -869,7 +870,7 @@ where
 
     while let Some(key) = map.next_key::<std::string::String>()? {
         if key == "value" {
-            let val: BytesOrBase64 = map.next_value()?;
+            let val: BytesBuf = map.next_value()?;
             let b = crate::containers::Bytes::from_slice(&val.0, arena);
             obj.set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
             return Ok(());
@@ -1095,6 +1096,25 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
         }
     }
 
+    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::BytesValue => {
+                let entry = self
+                    .table
+                    .entry(1)
+                    .ok_or_else(|| E::custom("BytesValue missing field 1"))?;
+                let b = crate::containers::Bytes::from_slice(v, self.arena);
+                self.obj
+                    .set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Bytes(v), &self)),
+        }
+    }
+
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
@@ -1140,21 +1160,6 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .set::<i64>(seconds_entry.offset(), seconds_entry.has_bit_idx(), seconds);
                 self.obj
                     .set::<i32>(nanos_entry.offset(), nanos_entry.has_bit_idx(), nanos);
-                Ok(())
-            }
-            WellKnownType::BytesValue => {
-                // Base64 decode the string
-                use base64::Engine;
-                let bytes = base64::engine::general_purpose::STANDARD
-                    .decode(v)
-                    .map_err(|e| E::custom(format!("Base64 decode error: {}", e)))?;
-                let entry = self
-                    .table
-                    .entry(1)
-                    .ok_or_else(|| E::custom("BytesValue missing field 1"))?;
-                let b = crate::containers::Bytes::from_slice(&bytes, self.arena);
-                self.obj
-                    .set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
                 Ok(())
             }
             _ => Err(E::invalid_type(serde::de::Unexpected::Str(v), &self)),
@@ -1266,7 +1271,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         }
                     }
                     Type::TYPE_BYTES => {
-                        let Some(slice) = map.next_value::<Option<Vec<BytesOrBase64>>>()? else {
+                        let Some(slice) = map.next_value::<Option<Vec<BytesBuf>>>()? else {
                             continue;
                         };
                         for v in slice {
@@ -1365,7 +1370,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         );
                     }
                     Type::TYPE_BYTES => {
-                        let Some(v) = map.next_value::<Option<BytesOrBase64>>()? else {
+                        let Some(v) = map.next_value::<Option<BytesBuf>>()? else {
                             continue;
                         };
                         let b = crate::containers::Bytes::from_slice(&v.0, arena);
@@ -1397,53 +1402,31 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
     }
 }
 
-struct BytesOrBase64(Vec<u8>);
+struct BytesBuf(Vec<u8>);
 
-impl<'de> serde::de::Deserialize<'de> for BytesOrBase64 {
+impl<'de> serde::de::Deserialize<'de> for BytesBuf {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
-        struct BytesOrStringVisitor;
+        struct BytesVisitor;
 
-        impl<'de> serde::de::Visitor<'de> for BytesOrStringVisitor {
-            type Value = BytesOrBase64;
+        impl<'de> serde::de::Visitor<'de> for BytesVisitor {
+            type Value = BytesBuf;
 
             fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-                formatter.write_str("bytes or string")
+                formatter.write_str("bytes")
             }
 
-            fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                Ok(BytesOrBase64(v.to_vec()))
+            fn visit_bytes<E: serde::de::Error>(self, v: &[u8]) -> Result<Self::Value, E> {
+                Ok(BytesBuf(v.to_vec()))
             }
 
-            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                use base64::Engine;
-                base64::engine::general_purpose::STANDARD
-                    .decode(v)
-                    .map(BytesOrBase64)
-                    .map_err(|err| {
-                        serde::de::Error::custom(format!("Invalid base64 string: {}", err))
-                    })
-            }
-
-            fn visit_seq<A>(self, seq: A) -> Result<Self::Value, A::Error>
-            where
-                A: serde::de::SeqAccess<'de>,
-            {
-                let bytes: Vec<u8> = serde::de::Deserialize::deserialize(
-                    serde::de::value::SeqAccessDeserializer::new(seq),
-                )?;
-                Ok(BytesOrBase64(bytes))
+            fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
+                Ok(BytesBuf(v))
             }
         }
 
-        deserializer.deserialize_any(BytesOrStringVisitor)
+        deserializer.deserialize_bytes(BytesVisitor)
     }
 }
