@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [master]
 
-env:
-  CARGO_TERM_COLOR: always
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -18,17 +15,12 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install protoc
-        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      - name: Cache bazel
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/bazel
+          key: bazel-${{ runner.os }}-${{ hashFiles('MODULE.bazel', 'MODULE.bazel.lock', '.bazelrc') }}
+          restore-keys: bazel-${{ runner.os }}-
 
-      - name: Build
-        run: cargo build --workspace --all-targets
-
-      - name: Run tests
-        run: cargo test --workspace
-
-      - name: Build codegen
-        run: cargo build --features codegen
-
-      - name: Run conformance tests
-        run: ./bazelisk.sh test //conformance:conformance_test --test_output=errors
+      - name: Run all tests
+        run: ./bazelisk.sh test //...

@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary", "rust_test")
 load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
 
 exports_files([
@@ -81,5 +81,11 @@ proto_descriptor_set(
         "@protobuf//:descriptor_proto",
     ],
     visibility = ["//visibility:public"],
+)
+
+# Unit tests for the main library
+rust_test(
+    name = "protocrap_test",
+    crate = ":protocrap",
 )
 

@@ -1,2 +1,6 @@
 build --cxxopt=-std=c++17
 build --host_cxxopt=-std=c++17
+
+# Use fastbuild for both host and target to avoid rebuilding protobuf
+build --compilation_mode=fastbuild
+build --host_compilation_mode=fastbuild
