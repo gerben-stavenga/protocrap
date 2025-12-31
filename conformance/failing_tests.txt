@@ -149,13 +149,6 @@ Required.Proto3.JsonInput.IgnoreUnknownJsonObject.ProtobufOutput
 Required.Proto3.JsonInput.IgnoreUnknownJsonString.ProtobufOutput
 Required.Proto3.JsonInput.IgnoreUnknownJsonTrue.ProtobufOutput
 
-# ----------------------------------------------------------------------------
-# JSON exponential notation for integers
-# ----------------------------------------------------------------------------
-Required.Proto2.JsonInput.Int32FieldQuotedExponentialValue.JsonOutput
-Required.Proto2.JsonInput.Int32FieldQuotedExponentialValue.ProtobufOutput
-Required.Proto3.JsonInput.Int32FieldQuotedExponentialValue.JsonOutput
-Required.Proto3.JsonInput.Int32FieldQuotedExponentialValue.ProtobufOutput
 
 # ----------------------------------------------------------------------------
 # JSON double precision edge cases (serde_json serializes with extra digits)

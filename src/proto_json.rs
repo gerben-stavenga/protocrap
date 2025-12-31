@@ -640,12 +640,28 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleIntVisitor<V> {
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
         // Try parsing as i64 first, then u64
         if let Ok(i) = v.parse::<i64>() {
-            self.0.visit_i64(i)
-        } else if let Ok(u) = v.parse::<u64>() {
-            self.0.visit_u64(u)
-        } else {
-            Err(E::custom(format!("cannot parse '{}' as integer", v)))
+            return self.0.visit_i64(i);
         }
+        if let Ok(u) = v.parse::<u64>() {
+            return self.0.visit_u64(u);
+        }
+        // Handle exponential notation like "1e2" - only if contains 'e' or 'E'
+        // (plain overflows should fail, not silently truncate via f64)
+        if v.contains('e') || v.contains('E') {
+            if let Ok(f) = v.parse::<f64>() {
+                if f.fract() != 0.0 {
+                    return Err(E::custom(format!("'{}' is not a whole number", v)));
+                }
+                // Exponential values within f64's exact integer range are safe
+                if f >= i64::MIN as f64 && f <= i64::MAX as f64 {
+                    return self.0.visit_i64(f as i64);
+                }
+                if f >= 0.0 && f <= u64::MAX as f64 {
+                    return self.0.visit_u64(f as u64);
+                }
+            }
+        }
+        Err(E::custom(format!("cannot parse '{}' as integer", v)))
     }
 }
 
