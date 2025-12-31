@@ -32,7 +32,7 @@ fn generate_aux_entries(
             let num_aux = aux_index_map.len();
             aux_index_map.insert(field.number(), num_aux);
             quote! {
-                protocrap::tables::AuxTableEntry {
+                protocrap::generated_code_only::AuxTableEntry {
                     offset: core::mem::offset_of!(ProtoType, #field_offset_name) as u32,
                     child_table: &#child_table::TABLE.table,
                 }
@@ -79,13 +79,13 @@ fn generate_encoding_entries(
                 // Oneof message field - offset points to aux entry
                 let aux_index = *aux_index_map.get(&field.number()).unwrap();
                 quote! {
-                    protocrap::encoding::TableEntry {
+                    protocrap::generated_code_only::EncodeTableEntry {
                         has_bit: #has_bit,
                         kind: #kind,
                         offset: (
-                            core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
-                            #aux_index * core::mem::size_of::<protocrap::tables::AuxTableEntry>() -
-                            core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
+                            core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
+                            #aux_index * core::mem::size_of::<protocrap::generated_code_only::AuxTableEntry>() -
+                            core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
                         ) as u16,
                         encoded_tag: #encoded_tag,
                     }
@@ -93,7 +93,7 @@ fn generate_encoding_entries(
             } else {
                 // Oneof non-message field - offset stores union offset
                 quote! {
-                    protocrap::encoding::TableEntry {
+                    protocrap::generated_code_only::EncodeTableEntry {
                         has_bit: #has_bit,
                         kind: #kind,
                         offset: core::mem::offset_of!(ProtoType, #oneof_field_name) as u16,
@@ -106,13 +106,13 @@ fn generate_encoding_entries(
             let has_bit = has_bit_map.get(&field.number()).copied().unwrap_or(0) as u8;
             // Regular message field - offset points to aux entry
             quote! {
-                protocrap::encoding::TableEntry {
+                protocrap::generated_code_only::EncodeTableEntry {
                     has_bit: #has_bit,
                     kind: #kind,
                     offset: (
-                        core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
-                        #aux_index * core::mem::size_of::<protocrap::tables::AuxTableEntry>() -
-                        core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
+                        core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
+                        #aux_index * core::mem::size_of::<protocrap::generated_code_only::AuxTableEntry>() -
+                        core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
                     ) as u16,
                     encoded_tag: #encoded_tag,
                 }
@@ -121,7 +121,7 @@ fn generate_encoding_entries(
             let field_name = format_ident!("{}", sanitize_field_name(field.name()));
             let has_bit = has_bit_map.get(&field.number()).copied().unwrap_or(0) as u8;
             quote! {
-                protocrap::encoding::TableEntry {
+                protocrap::generated_code_only::EncodeTableEntry {
                     has_bit: #has_bit,
                     kind: #kind,
                     offset: core::mem::offset_of!(ProtoType, #field_name) as u16,
@@ -172,17 +172,17 @@ fn generate_decoding_table(
                 if is_message(field) {
                     // Oneof message field - offset points to aux entry
                     let aux_index = *aux_index_map.get(&field_number).unwrap();
-                    quote! { protocrap::decoding::TableEntry::new(
+                    quote! { protocrap::generated_code_only::DecodeTableEntry::new(
                         #field_kind,
                         #has_bit,
-                        core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
-                        #aux_index * core::mem::size_of::<protocrap::tables::AuxTableEntry>() -
-                        core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
+                        core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
+                        #aux_index * core::mem::size_of::<protocrap::generated_code_only::AuxTableEntry>() -
+                        core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
                     ) }
                 } else {
                     // Oneof non-message field - offset stores union offset
                     quote! {
-                        protocrap::decoding::TableEntry::new(
+                        protocrap::generated_code_only::DecodeTableEntry::new(
                             #field_kind,
                             #has_bit,
                             core::mem::offset_of!(ProtoType, #oneof_field_name)
@@ -192,19 +192,19 @@ fn generate_decoding_table(
             } else if is_message(field) {
                 let aux_index = *aux_index_map.get(&field_number).unwrap();
                 // Regular message field - offset points to aux entry
-                quote! { protocrap::decoding::TableEntry::new(
+                quote! { protocrap::generated_code_only::DecodeTableEntry::new(
                     #field_kind,
                     0,
-                    core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
-                    #aux_index * core::mem::size_of::<protocrap::tables::AuxTableEntry>() -
-                    core::mem::offset_of!(protocrap::tables::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
+                    core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, aux_entries) +
+                    #aux_index * core::mem::size_of::<protocrap::generated_code_only::AuxTableEntry>() -
+                    core::mem::offset_of!(protocrap::generated_code_only::TableWithEntries<#num_encode_entries, #num_decode_entries, #num_aux_entries>, table)
                 ) }
             } else {
                 let field_name = format_ident!("{}", sanitize_field_name(field.name()));
                 let has_bit = has_bit_map.get(&field_number).copied().unwrap_or(0) as u32;
 
                 quote! {
-                    protocrap::decoding::TableEntry::new(
+                    protocrap::generated_code_only::DecodeTableEntry::new(
                         #field_kind,
                         #has_bit,
                         core::mem::offset_of!(ProtoType, #field_name)
@@ -212,7 +212,7 @@ fn generate_decoding_table(
                 }
             }
         } else {
-            quote! { protocrap::decoding::TableEntry(0) }
+            quote! { protocrap::generated_code_only::DecodeTableEntry(0) }
         }
     }).collect();
 
@@ -236,15 +236,15 @@ pub(crate) fn generate_table(
     let num_aux_entries = aux_entries.len();
     Ok(quote! {
         #[allow(clippy::identity_op, clippy::erasing_op)]
-        pub static TABLE: protocrap::tables::TableWithEntries<
+        pub static TABLE: protocrap::generated_code_only::TableWithEntries<
             #num_encode_entries,
             #num_decode_entries,
             #num_aux_entries
-        > = protocrap::tables::TableWithEntries {
+        > = protocrap::generated_code_only::TableWithEntries {
             encode_entries: [
                 #(#encoding_entries),*
             ],
-            table: protocrap::tables::Table {
+            table: protocrap::generated_code_only::Table {
                 num_encode_entries: #num_encode_entries as u16,
                 num_decode_entries: #num_decode_entries as u16,
                 size: core::mem::size_of::<ProtoType>() as u16,
@@ -263,5 +263,5 @@ pub(crate) fn generate_table(
 fn field_kind_tokens(field: &FieldDescriptorProto) -> TokenStream {
     let kind = protocrap::reflection::field_kind_tokens(field);
     let ident = format_ident!("{kind:?}");
-    quote! { protocrap::wire::FieldKind::#ident }
+    quote! { protocrap::generated_code_only::FieldKind::#ident }
 }

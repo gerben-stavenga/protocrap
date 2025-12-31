@@ -14,7 +14,7 @@ pub fn zigzag_encode(n: i64) -> u64 {
 }
 
 #[derive(Clone, Copy)]
-pub struct ReadCursor(pub NonNull<u8>);
+pub(crate) struct ReadCursor(pub NonNull<u8>);
 
 #[inline(never)]
 fn read_varint(ptr: ReadCursor) -> (Option<ReadCursor>, u64) {
@@ -187,7 +187,7 @@ fn varint_size(n: u64) -> isize {
 }
 
 #[derive(Clone, Copy)]
-pub struct WriteCursor(pub NonNull<u8>);
+pub(crate) struct WriteCursor(pub NonNull<u8>);
 
 impl WriteCursor {
     pub fn new(buffer: &mut [u8]) -> (Self, NonNull<u8>) {

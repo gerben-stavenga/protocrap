@@ -202,9 +202,9 @@
 pub mod arena;
 pub mod base;
 pub mod containers;
-pub mod wire;
-
-pub mod utils;
+pub mod reflection;
+#[cfg(feature = "std")]
+pub mod descriptor_pool;
 
 // Re-export Allocator trait - use core on nightly, polyfill on stable
 #[cfg(feature = "nightly")]
@@ -212,12 +212,17 @@ pub use core::alloc::Allocator;
 #[cfg(not(feature = "nightly"))]
 pub use allocator_api2::alloc::Allocator;
 
-pub mod decoding;
-pub mod encoding;
-pub mod reflection;
-#[cfg(feature = "std")]
-pub mod descriptor_pool;
-pub mod tables;
+// Internal modules - only accessible within the crate
+// Types needed by generated code are re-exported via generated_code_only
+pub(crate) mod decoding;
+pub(crate) mod encoding;
+pub(crate) mod tables;
+pub(crate) mod wire;
+pub(crate) mod utils;
+
+/// Internal types for generated code. **Do not use directly.**
+#[doc(hidden)]
+pub mod generated_code_only;
 
 use crate as protocrap;
 include!("descriptor.pc.rs");
@@ -263,7 +268,7 @@ impl<E> From<E> for Error<E> {
 // One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
 // but that is not allowed because Default and Debug are not local to this crate.
 pub trait Protobuf: Default + core::fmt::Debug {
-    fn table() -> &'static tables::Table;
+    fn table() -> &'static generated_code_only::Table;
     fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
         Self::table().descriptor
     }
@@ -280,7 +285,7 @@ pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut base::Object {
 /// Read-only protobuf operations (encode, serialize, inspect).
 /// The lifetime parameter `'pool` refers to the descriptor/table pool lifetime.
 pub trait ProtobufRef<'pool> {
-    fn table(&self) -> &'pool tables::Table;
+    fn table(&self) -> &'pool generated_code_only::Table;
 
     fn descriptor(&self) -> &'pool google::protobuf::DescriptorProto::ProtoType {
         self.table().descriptor
@@ -488,7 +493,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
 
 // Blanket impl for static protobuf types
 impl<T: Protobuf> ProtobufRef<'static> for T {
-    fn table(&self) -> &'static tables::Table {
+    fn table(&self) -> &'static generated_code_only::Table {
         T::table()
     }
 

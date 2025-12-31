@@ -810,7 +810,7 @@ fn generate_accessors(
             let has_bit = if let Some(has_bit) = has_bit_map.get(&field.number()).cloned() {
                 methods.push(quote! {
                     pub const fn #has_name(&self) -> bool {
-                        protocrap::as_object(self).has_bit(#has_bit as u8)
+                        protocrap::generated_code_only::as_object(self).has_bit(#has_bit as u8)
                     }
                 });
                 has_bit as u32
@@ -850,7 +850,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
-                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
@@ -862,7 +862,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
                         }
                     });
@@ -894,7 +894,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
-                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
                         }
 
@@ -906,7 +906,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
                         }
                     });
@@ -954,7 +954,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: #enum_type) {
-                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value.to_i32();
                         }
 
@@ -966,7 +966,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = 0;
                         }
                     });
@@ -1005,7 +1005,7 @@ fn generate_accessors(
                         }
 
                         pub fn #setter_name(&mut self, value: #return_type) {
-                            protocrap::as_object_mut(self).set_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value;
                         }
 
@@ -1017,7 +1017,7 @@ fn generate_accessors(
                         }
 
                         pub fn #clear_name(&mut self) {
-                            protocrap::as_object_mut(self).clear_has_bit(#has_bit);
+                            protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = Default::default();
                         }
                     });
@@ -1058,7 +1058,7 @@ fn build_descriptor_accessor(path: &[usize]) -> TokenStream {
 fn generate_protobuf_impl() -> TokenStream {
     quote! {
         impl protocrap::Protobuf for ProtoType {
-            fn table() -> &'static protocrap::tables::Table {
+            fn table() -> &'static protocrap::generated_code_only::Table {
                 &TABLE.table
             }
         }

@@ -120,7 +120,7 @@ fn test_file_descriptor_serde_serialization() {
 #[cfg(test)]
 mod chunked_tests {
     use super::*;
-    use protocrap::decoding::ResumeableDecode;
+    use protocrap::ProtobufMut;
     use rand::{Rng, SeedableRng, rngs::StdRng};
 
     #[derive(Clone, Copy, Debug)]
@@ -237,26 +237,19 @@ mod chunked_tests {
 
     fn assert_chunked_decode(msg: &TestProto, strategy: ChunkStrategy, chunk_seed: u64) {
         let encoded = msg.encode_vec::<32>().expect("encode should succeed");
-        let chunks = ChunkIter::new(&encoded, strategy, chunk_seed);
+        let mut chunks = ChunkIter::new(&encoded, strategy, chunk_seed);
 
         let mut arena = protocrap::arena::Arena::new(&Global);
         let mut decoded = TestProto::default();
-        let mut decoder = ResumeableDecode::<32>::new(&mut decoded, isize::MAX);
 
-        for chunk in chunks {
-            if !decoder.resume(chunk, &mut arena) {
+        decoded
+            .decode::<()>(&mut arena, &mut || Ok(chunks.next()))
+            .unwrap_or_else(|_| {
                 panic!(
-                    "decode failed at chunk, strategy={:?}, chunk_seed={}",
+                    "decode failed, strategy={:?}, chunk_seed={}",
                     strategy, chunk_seed
-                );
-            }
-        }
-        if !decoder.finish(&mut arena) {
-            panic!(
-                "decode finish failed, strategy={:?}, chunk_seed={}",
-                strategy, chunk_seed
-            );
-        }
+                )
+            });
 
         let reencoded = decoded.encode_vec::<32>().expect("reencode should succeed");
         assert_eq!(
