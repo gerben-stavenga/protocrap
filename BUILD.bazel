@@ -89,3 +89,21 @@ rust_test(
     crate = ":protocrap",
 )
 
+# Test that descriptor.pc.rs is up to date with codegen
+genrule(
+    name = "generate_descriptor_test",
+    srcs = [":descriptor_set"],
+    outs = ["descriptor.pc.rs.generated"],
+    cmd = "$(location :protocrap-codegen) $(location :descriptor_set) $@",
+    tools = [":protocrap-codegen"],
+)
+
+sh_test(
+    name = "descriptor_up_to_date_test",
+    srcs = ["test_descriptor_up_to_date.sh"],
+    data = [
+        ":generate_descriptor_test",
+        "src/descriptor.pc.rs",
+    ],
+)
+
