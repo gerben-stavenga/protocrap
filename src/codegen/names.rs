@@ -1,5 +1,7 @@
 // protocrap-codegen/src/names.rs
 
+use crate::reflection::is_in_oneof;
+
 use super::protocrap;
 use proc_macro2::TokenStream;
 use protocrap::google::protobuf::FieldDescriptorProto::ProtoType as FieldDescriptorProto;
@@ -60,7 +62,12 @@ pub fn rust_field_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     } else if is_message {
         // Singular message field uses typed OptionalMessage<T>
         let msg_type = rust_type_tokens(field);
-        quote! { protocrap::base::OptionalMessage<#msg_type::ProtoType> }
+        if is_in_oneof(field) {
+            // In oneof, use TypedMessage<T> because presence is tracked by the oneof discriminant
+            quote! { protocrap::base::TypedMessage<#msg_type::ProtoType> }
+        } else {
+            quote! { protocrap::base::OptionalMessage<#msg_type::ProtoType> }
+        }
     } else {
         rust_element_type_tokens(field)
     }

@@ -267,13 +267,12 @@ fn generate_message_impl(
                 .map(|f| {
                     let variant_name = format_ident!("{}", sanitize_field_name(f.name()));
                     let variant_type = rust_field_type_tokens(f);
-                    quote! { #variant_name: #variant_type }
+                    quote! { #variant_name: core::mem::ManuallyDrop<#variant_type> }
                 })
                 .collect();
 
             union_defs.push(quote! {
                 #[repr(C)]
-                #[derive(Clone, Copy)]
                 pub union #union_name {
                     #(pub #variants,)*
                 }
@@ -630,7 +629,7 @@ fn generate_accessors(
                     methods.push(quote! {
                         pub fn #field_name(&self) -> &str {
                             if self.#has_name() {
-                                unsafe { self.#oneof_field_name.#field_name.as_str() }
+                                unsafe { (*self.#oneof_field_name.#field_name).as_str() }
                             } else {
                                 ""
                             }
@@ -638,21 +637,22 @@ fn generate_accessors(
 
                         pub fn #optional_name(&self) -> Option<&str> {
                             if self.#has_name() {
-                                Some(unsafe { self.#oneof_field_name.#field_name.as_str() })
+                                Some(unsafe { (*self.#oneof_field_name.#field_name).as_str() })
                             } else {
                                 None
                             }
                         }
 
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
-                            self.metadata[#discriminant_word_idx] = #field_number;
-                            unsafe { self.#oneof_field_name.#field_name.assign(value, arena) };
+                            if !self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = #field_number;
+                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::containers::String::new());
+                            }
+                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
                         pub fn #clear_name(&mut self) {
-                            if self.#has_name() {
-                                self.metadata[#discriminant_word_idx] = 0;
-                            }
+                            self.metadata[#discriminant_word_idx] = 0;
                         }
                     });
                 }
@@ -661,7 +661,7 @@ fn generate_accessors(
                     methods.push(quote! {
                         pub fn #field_name(&self) -> &[u8] {
                             if self.#has_name() {
-                                unsafe { self.#oneof_field_name.#field_name.slice() }
+                                unsafe { (*self.#oneof_field_name.#field_name).slice() }
                             } else {
                                 &[]
                             }
@@ -669,21 +669,22 @@ fn generate_accessors(
 
                         pub fn #optional_name(&self) -> Option<&[u8]> {
                             if self.#has_name() {
-                                Some(unsafe { self.#oneof_field_name.#field_name.slice() })
+                                Some(unsafe { (*self.#oneof_field_name.#field_name).slice() })
                             } else {
                                 None
                             }
                         }
 
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
-                            self.metadata[#discriminant_word_idx] = #field_number;
-                            unsafe { self.#oneof_field_name.#field_name.assign(value, arena) };
+                            if !self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = #field_number;
+                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::containers::Bytes::new());
+                            }
+                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
                         pub fn #clear_name(&mut self) {
-                            if self.#has_name() {
-                                self.metadata[#discriminant_word_idx] = 0;
-                            }
+                            self.metadata[#discriminant_word_idx] = 0;
                         }
                     });
                 }
@@ -693,21 +694,24 @@ fn generate_accessors(
                     methods.push(quote! {
                         pub fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
                             if self.#has_name() {
-                                unsafe { self.#oneof_field_name.#field_name.get() }
+                                use core::ops::Deref;
+                                Some(unsafe { self.#oneof_field_name.#field_name.deref() })
                             } else {
                                 None
                             }
                         }
 
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                            self.metadata[#discriminant_word_idx] = #field_number;
-                            unsafe { self.#oneof_field_name.#field_name.get_or_init(arena) }
+                            if !self.#has_name() {
+                                self.metadata[#discriminant_word_idx] = #field_number;
+                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::base::TypedMessage::<#msg_type::ProtoType>::new_in(arena));
+                            }
+                            use core::ops::DerefMut;
+                            unsafe { self.#oneof_field_name.#field_name.deref_mut() }
                         }
 
                         pub fn #clear_name(&mut self) {
-                            if self.#has_name() {
-                                self.metadata[#discriminant_word_idx] = 0;
-                            }
+                            self.metadata[#discriminant_word_idx] = 0;
                         }
                     });
                 }
@@ -716,7 +720,7 @@ fn generate_accessors(
                     methods.push(quote! {
                         pub fn #field_name(&self) -> Option<#enum_type> {
                             if self.#has_name() {
-                                #enum_type::from_i32(unsafe { self.#oneof_field_name.#field_name })
+                                #enum_type::from_i32(unsafe { *self.#oneof_field_name.#field_name })
                             } else {
                                 None
                             }
@@ -724,13 +728,11 @@ fn generate_accessors(
 
                         pub fn #setter_name(&mut self, value: #enum_type) {
                             self.metadata[#discriminant_word_idx] = #field_number;
-                            self.#oneof_field_name.#field_name = value.to_i32();
+                            self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value.to_i32());
                         }
 
                         pub fn #clear_name(&mut self) {
-                            if self.#has_name() {
-                                self.metadata[#discriminant_word_idx] = 0;
-                            }
+                            self.metadata[#discriminant_word_idx] = 0;
                         }
                     });
                 }
@@ -740,7 +742,7 @@ fn generate_accessors(
                     methods.push(quote! {
                         pub fn #field_name(&self) -> #return_type {
                             if self.#has_name() {
-                                unsafe { self.#oneof_field_name.#field_name }
+                                unsafe { *self.#oneof_field_name.#field_name }
                             } else {
                                 Default::default()
                             }
@@ -748,13 +750,11 @@ fn generate_accessors(
 
                         pub fn #setter_name(&mut self, value: #return_type) {
                             self.metadata[#discriminant_word_idx] = #field_number;
-                            self.#oneof_field_name.#field_name = value;
+                            self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value);
                         }
 
                         pub fn #clear_name(&mut self) {
-                            if self.#has_name() {
-                                self.metadata[#discriminant_word_idx] = 0;
-                            }
+                            self.metadata[#discriminant_word_idx] = 0;
                         }
                     });
                 }

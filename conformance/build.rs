@@ -44,8 +44,8 @@ fn main() {
     let codegen_bin = if let Ok(path) = std::env::var("PROTOCRAP_CODEGEN") {
         PathBuf::from(path)
     } else {
-        let debug_bin = workspace_root.join("target/debug/protocrap-codegen");
-        let release_bin = workspace_root.join("target/release/protocrap-codegen");
+        let debug_bin = workspace_root.join("target/debug/protocrap");
+        let release_bin = workspace_root.join("target/release/protocrap");
 
         if release_bin.exists() {
             release_bin
