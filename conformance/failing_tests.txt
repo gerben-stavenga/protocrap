@@ -12,50 +12,6 @@ Required.Proto3.ProtobufInput.UnknownOrdering.ProtobufOutput
 Required.Proto3.ProtobufInput.UnknownVarint.ProtobufOutput
 
 # ----------------------------------------------------------------------------
-# Oneof not implemented
-# When switching between oneof fields, we don't clear the previous field.
-# This causes both fields to be serialized instead of just the last one set.
-# ----------------------------------------------------------------------------
-Required.Proto2.ProtobufInput.ValidDataOneof.BOOL.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.BYTES.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.DOUBLE.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.ENUM.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.FLOAT.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.MESSAGE.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.STRING.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.JsonOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.ProtobufOutput
-Required.Proto2.ProtobufInput.ValidDataOneof.UINT64.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.BOOL.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.BYTES.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.DOUBLE.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.ENUM.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.FLOAT.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.MESSAGE.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.STRING.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.JsonOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.UINT32.MultipleValuesForDifferentField.ProtobufOutput
-Required.Proto3.ProtobufInput.ValidDataOneof.UINT64.MultipleValuesForDifferentField.JsonOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.BOOL.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.BYTES.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.DOUBLE.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.ENUM.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.FLOAT.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.MESSAGE.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.STRING.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.UINT32.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto2.ProtobufInput.ValidDataOneofBinary.UINT64.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.BOOL.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.BYTES.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.DOUBLE.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.ENUM.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.FLOAT.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.MESSAGE.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.STRING.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.UINT32.MultipleValuesForDifferentField.ProtobufOutput
-Recommended.Proto3.ProtobufInput.ValidDataOneofBinary.UINT64.MultipleValuesForDifferentField.ProtobufOutput
-
-# ----------------------------------------------------------------------------
 # Extensions and MessageSet not supported (by design - CLAUDE.md documents this)
 # Proto2 extensions are silently dropped as unknown fields.
 # ----------------------------------------------------------------------------

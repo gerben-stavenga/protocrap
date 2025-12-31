@@ -378,9 +378,10 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Start with metadata layout (always u32 array, so alignment is 4)
         let mut layout =
             core::alloc::Layout::from_size_align(metadata_size as usize, 4).unwrap();
-        let mut field_offsets = std::vec::Vec::new();
 
-        // First add regular fields (not in oneof)
+        // First pass: calculate offsets for regular fields (not in oneof)
+        // Store in a map by field number
+        let mut regular_field_offsets = std::collections::HashMap::<i32, u32>::new();
         for field in descriptor.field() {
             if is_in_oneof(field) {
                 continue; // Skip oneof fields, handled separately
@@ -392,7 +393,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     .unwrap();
 
             let (new_layout, offset) = layout.extend(field_layout).unwrap();
-            field_offsets.push((*field, offset as u32));
+            regular_field_offsets.insert(field.number(), offset as u32);
             layout = new_layout;
         }
 
@@ -407,18 +408,20 @@ impl<'alloc> DescriptorPool<'alloc> {
             }
         }
 
-        // Add oneof fields with their union offsets
+        // Build field_offsets in proto definition order (matching codegen)
+        let mut field_offsets = std::vec::Vec::new();
         for field in descriptor.field() {
-            if !is_in_oneof(field) {
-                continue;
-            }
-            let oneof_idx = field.oneof_index() as usize;
-            let union_offset = oneof_offsets
-                .iter()
-                .find(|(idx, _)| *idx == oneof_idx)
-                .map(|(_, off)| *off)
-                .unwrap_or(0);
-            field_offsets.push((*field, union_offset));
+            let offset = if is_in_oneof(field) {
+                let oneof_idx = field.oneof_index() as usize;
+                oneof_offsets
+                    .iter()
+                    .find(|(idx, _)| *idx == oneof_idx)
+                    .map(|(_, off)| *off)
+                    .unwrap_or(0)
+            } else {
+                regular_field_offsets[&field.number()]
+            };
+            field_offsets.push((*field, offset));
         }
 
         // Pad to struct alignment
