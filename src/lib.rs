@@ -212,17 +212,13 @@ pub use core::alloc::Allocator;
 #[cfg(not(feature = "nightly"))]
 pub use allocator_api2::alloc::Allocator;
 
-// Internal modules - public for generated code but hidden from docs
-#[doc(hidden)]
-pub mod decoding;
-#[doc(hidden)]
-pub mod encoding;
-#[doc(hidden)]
-pub mod tables;
-#[doc(hidden)]
-pub mod wire;
-#[doc(hidden)]
-pub mod utils;
+// Internal modules - only accessible within the crate
+// Types needed by generated code are re-exported via generated_code_only
+pub(crate) mod decoding;
+pub(crate) mod encoding;
+pub(crate) mod tables;
+pub(crate) mod wire;
+pub(crate) mod utils;
 
 /// Internal types for generated code. **Do not use directly.**
 #[doc(hidden)]
