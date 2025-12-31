@@ -1737,6 +1737,19 @@ impl<'de> serde::de::Deserialize<'de> for BytesBuf {
             fn visit_byte_buf<E: serde::de::Error>(self, v: Vec<u8>) -> Result<Self::Value, E> {
                 Ok(BytesBuf(v))
             }
+
+            // serde_json's deserialize_bytes delegates to deserialize_seq for JSON arrays,
+            // which calls visit_seq instead of visit_bytes. This handles that case.
+            fn visit_seq<A: serde::de::SeqAccess<'de>>(
+                self,
+                mut seq: A,
+            ) -> Result<Self::Value, A::Error> {
+                let mut bytes = Vec::with_capacity(seq.size_hint().unwrap_or(0));
+                while let Some(byte) = seq.next_element::<u8>()? {
+                    bytes.push(byte);
+                }
+                Ok(BytesBuf(bytes))
+            }
         }
 
         deserializer.deserialize_bytes(BytesVisitor)
