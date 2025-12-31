@@ -919,7 +919,7 @@ where
 struct StructKeyVisitor<'a>(&'a std::collections::HashMap<&'static str, usize>);
 
 impl<'de> serde::de::DeserializeSeed<'de> for StructKeyVisitor<'_> {
-    type Value = usize;
+    type Value = Option<usize>;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
     where
@@ -930,20 +930,18 @@ impl<'de> serde::de::DeserializeSeed<'de> for StructKeyVisitor<'_> {
 }
 
 impl<'de> serde::de::Visitor<'de> for StructKeyVisitor<'_> {
-    type Value = usize;
+    type Value = Option<usize>;
 
     fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
-        formatter.write_str("a valid field name")
+        formatter.write_str("a field name")
     }
 
     fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
     where
         E: serde::de::Error,
     {
-        self.0
-            .get(v)
-            .copied()
-            .ok_or_else(|| serde::de::Error::unknown_field(v, &[]))
+        // Return None for unknown fields - they'll be skipped
+        Ok(self.0.get(v).copied())
     }
 }
 
@@ -1683,7 +1681,12 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             field_map.insert(field_name, field_index);
         }
         let mut seen = std::collections::HashSet::new();
-        while let Some(idx) = map.next_key_seed(StructKeyVisitor(&field_map))? {
+        while let Some(idx_opt) = map.next_key_seed(StructKeyVisitor(&field_map))? {
+            // Skip unknown fields
+            let Some(idx) = idx_opt else {
+                map.next_value::<serde::de::IgnoredAny>()?;
+                continue;
+            };
             let field = table.descriptor.field()[idx];
             let entry = table.entry(field.number() as u32).unwrap(); // Safe: field exists in table
             // Reject duplicate fields (oneofs can have null which clears, so skip oneof check for now)
