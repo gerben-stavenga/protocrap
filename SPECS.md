@@ -1,5 +1,55 @@
 # Protocrap Specification
 
+This document defines the design decisions, constraints, and behavior of protocrap.
+
+## Design Principles
+
+1. **No Generics/Macros** - Type erasure at boundaries for smaller binaries and faster compilation
+2. **Table-Driven Codec** - Static lookup tables instead of generated per-message code
+3. **Arena Allocation** - Pointer increment allocation with bulk deallocation
+4. **Push-Based Streaming** - `(state, buffer) -> updated_state` signature for sync/async compatibility
+
+## Memory Layout
+
+### Message Structs
+
+All generated message types use `#[repr(C)]` with a fixed layout:
+
+```rust
+#[repr(C)]
+pub struct Message {
+    metadata: [u32; N],   // Has-bits and oneof discriminants
+    field1: Type1,
+    field2: Type2,
+    // ...
+}
+```
+
+### Metadata Array
+
+- Array of `u32` at offset 0 of every message
+- Stores both has-bits (presence tracking) and oneof discriminants
+- Has-bits: each optional field claims one bit, indexed sequentially
+- Oneof discriminants: stored as u32 values indicating which field is set
+
+### Metadata Index Encoding
+
+Field metadata indices are stored in a `u8`:
+- Bit 7 (MSB): 0 = optional field (has-bit), 1 = oneof field (discriminant)
+- Bits 0-6: index into the appropriate part of the metadata array
+
+This allows up to 127 optional fields and 127 oneofs per message.
+
+### Getters and Defaults
+
+Struct fields store the wire value (or zero if not present). Getter methods return the schema-defined default when the has-bit is not set:
+
+```rust
+pub fn name(&self) -> &str {
+    if self.has_name() { &self.name } else { "default_value" }
+}
+```
+
 ## Wire Format Support
 
 ### Fully Supported
@@ -16,6 +66,7 @@
 | Default values | ✓ | ✓ | Proto2 custom defaults supported |
 | Field merging | ✓ | ✓ | Last value wins for scalars, merge for messages |
 | Groups | ✓ | - | Proto2 only |
+| Oneof | ✓ | ✓ | Discriminant in metadata array |
 
 ### Intentionally Unsupported
 
@@ -31,7 +82,6 @@ These features are **not supported by design** and will not be implemented:
 
 | Feature | Status |
 |---------|--------|
-| Oneof | Fields not cleared when switching between oneof members |
 | Maps | Parsed as repeated key-value pairs, full map semantics pending |
 
 ## Optionality Model
@@ -56,7 +106,7 @@ This is by design - required fields are a proto2 mistake that proto3 removed.
 
 | Restriction | Limit |
 |-------------|-------|
-| Optional fields per message | 64 (has-bits stored in u64) |
+| Optional fields per message | 127 (index stored in u8, MSB distinguishes oneof vs optional) |
 | Struct size | 1KB max |
 | Field numbers | 1..2047 (1-2 byte tags) |
 | Field number gaps | Tolerated but create larger tables |
@@ -86,23 +136,18 @@ Against the official protobuf conformance test suite:
 
 | Metric | Count |
 |--------|-------|
-| Binary successes | 2553 |
-| Expected failures | 234 |
+| Successes | 2685 |
+| Expected failures | 102 |
 | Unexpected failures | 0 |
-| Crashes | 0 |
 
-### Binary Failure Breakdown
+### Failure Breakdown
 
-| Category | Count | Reason |
-|----------|-------|--------|
-| Unknown fields | 4 | By design |
-| Oneof | 38 | Not implemented |
-| Extensions/MessageSet | 5 | By design |
-| Proto3 default omission | 18 | Unified optionality |
-
-### JSON Failures
-
-171 tests related to JSON edge cases, well-known types, and strict validation.
+| Category | Reason |
+|----------|--------|
+| Unknown fields | By design - not preserved |
+| Extensions/MessageSet | By design - not supported |
+| Proto3 default omission | Unified optionality |
+| JSON edge cases | Well-known types, strict validation |
 
 ## Panic Safety
 

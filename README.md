@@ -60,17 +60,18 @@ Our solution: a push API. Both parser and serializer become pure functions with 
 ## Restrictions
 
 Every framework comes with some limits (often unspecified) to where you can push things. For instance template instantiation recursion limits of a c++ compiler. For a serialization framework these involve how many fields can a schema have, etc.. We are very principled here, we support only _sane_ schemas, so no thousands of fields with arbitrary field numbers in the tens of millions. We support
-1) up to 64 optional fields
+1) up to 127 optional fields (and 127 oneofs)
 2) Struct sizes up to 1kb
 3) Field numbers up to 1..2047, these are all 1 or 2 byte tags. 
 
-Field numbers should just be assigned consecutive 1 ... max field. We do tolerate holes, but we do not compress field numbers, assigning a single field struct a field number of 2000. Will lead to a very big table. These restrictions simplify code and allows compression of has bit index and offset of fields into a single 16 bit integer, which makes for compact tables. 
+Field numbers should just be assigned consecutive 1 ... max field. We do tolerate holes, but we do not compress field numbers, assigning a single field struct a field number of 2000. Will lead to a very big table. These restrictions simplify code and allows compression of has bit index and offset of fields into a single 16 bit integer, which makes for compact tables.
+
+See [SPECS.md](SPECS.md) for detailed specifications.
 
 ### Intentionally Unsupported Features
 
 - **Unknown fields**: Discarded during parsing. Round-tripping data through parse+serialize may lose unknown fields—but if you're not modifying the data, why reserialize?
 - **Extensions**: Proto2 extensions are silently dropped. A confusing feature that causes more pain than it solves.
-- **Oneof**: Not yet supported. Fields in a oneof are treated as independent optional fields.
 - **Maps**: Not yet supported. Treated as repeated fields of key/value pairs.
 
 ## Quick Example
@@ -94,6 +95,10 @@ decoded.decode_flat::<32>(&mut arena, &bytes);
 let mut async_msg = MyMessage::default();
 async_msg.decode_from_async_bufread::<32>(&mut arena, &mut async_reader).await?;
 ```
+
+## Examples
+
+See [pc-example](https://github.com/gerben-stavenga/pc-example) for a complete example project using protocrap.
 
 ## Code Generation
 
@@ -186,7 +191,7 @@ cargo +nightly fuzz run decode_fuzz
 🚧 **Alpha** - This library is not yet mature. Expect:
 - **API changes**: The public API may change in breaking ways between versions
 - **Potential bugs**: While tested via conformance tests and fuzzing, edge cases may exist
-- **Missing features**: Oneof, maps, and some proto3 semantics are not implemented
+- **Missing features**: Maps and some proto3 semantics are not implemented
 
 Use in production at your own risk. Bug reports and contributions welcome!
 
@@ -203,7 +208,7 @@ Use in production at your own risk. Bug reports and contributions welcome!
 - [x] Self-hosted (uses own implementation to parse descriptor.proto)
 - [x] Conformance test suite (static + dynamic modes)
 - [x] Fuzz testing
-- [ ] Oneof support
+- [x] Oneof support
 - [ ] Map support
 - [ ] Full documentation
 

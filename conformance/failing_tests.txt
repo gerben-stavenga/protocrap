@@ -3,7 +3,7 @@
 # ============================================================================
 
 # ----------------------------------------------------------------------------
-# Unknown fields not preserved (by design - CLAUDE.md documents this)
+# Unknown fields not preserved (by design - see SPECS.md)
 # We silently discard unknown fields during decoding.
 # ----------------------------------------------------------------------------
 Required.Proto2.ProtobufInput.UnknownOrdering.ProtobufOutput
@@ -12,7 +12,7 @@ Required.Proto3.ProtobufInput.UnknownOrdering.ProtobufOutput
 Required.Proto3.ProtobufInput.UnknownVarint.ProtobufOutput
 
 # ----------------------------------------------------------------------------
-# Extensions and MessageSet not supported (by design - CLAUDE.md documents this)
+# Extensions and MessageSet not supported (by design - see SPECS.md)
 # Proto2 extensions are silently dropped as unknown fields.
 # ----------------------------------------------------------------------------
 Required.Proto2.ProtobufInput.MessageSetEncoding.UnknownExtension.ProtobufOutput
@@ -22,7 +22,7 @@ Recommended.Proto2.ProtobufInput.ValidMessageSetEncoding.SubmessageEncoding.NotU
 Recommended.Proto2.ProtobufInput.ValidMessageSetEncoding.SubmessageEncoding.ProtobufOutput
 
 # ----------------------------------------------------------------------------
-# Proto3 unified optionality (by design - CLAUDE.md documents this)
+# Proto3 unified optionality (by design - see SPECS.md)
 # We serialize fields even when they contain zero/default values.
 # Proto3 spec says to omit default values, but we use unified optionality
 # where all fields have has-bits and are serialized if set.
