@@ -38,6 +38,9 @@ enum WellKnownType {
     BytesValue,
     Timestamp,
     Duration,
+    Value,
+    Struct,
+    ListValue,
     None,
 }
 
@@ -59,6 +62,9 @@ fn detect_well_known_type(
         "BytesValue" => WellKnownType::BytesValue,
         "Timestamp" => WellKnownType::Timestamp,
         "Duration" => WellKnownType::Duration,
+        "Value" => WellKnownType::Value,
+        "Struct" => WellKnownType::Struct,
+        "ListValue" => WellKnownType::ListValue,
         _ => WellKnownType::None,
     }
 }
@@ -431,6 +437,80 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
             }
             WellKnownType::Timestamp => serialize_timestamp(self, serializer),
             WellKnownType::Duration => serialize_duration(self, serializer),
+            WellKnownType::Value => {
+                // Value oneof: null_value(1), number_value(2), string_value(3),
+                // bool_value(4), struct_value(5), list_value(6)
+                if let Some(f) = self.find_field_descriptor_by_number(1) {
+                    if self.get_field(f).is_some() {
+                        return serializer.serialize_none();
+                    }
+                }
+                if let Some(f) = self.find_field_descriptor_by_number(2) {
+                    if let Some(Value::Double(d)) = self.get_field(f) {
+                        return serializer.serialize_f64(d);
+                    }
+                }
+                if let Some(f) = self.find_field_descriptor_by_number(3) {
+                    if let Some(Value::String(s)) = self.get_field(f) {
+                        return serializer.serialize_str(s);
+                    }
+                }
+                if let Some(f) = self.find_field_descriptor_by_number(4) {
+                    if let Some(Value::Bool(b)) = self.get_field(f) {
+                        return serializer.serialize_bool(b);
+                    }
+                }
+                if let Some(f) = self.find_field_descriptor_by_number(5) {
+                    if let Some(Value::Message(m)) = self.get_field(f) {
+                        return m.serialize(serializer);
+                    }
+                }
+                if let Some(f) = self.find_field_descriptor_by_number(6) {
+                    if let Some(Value::Message(m)) = self.get_field(f) {
+                        return m.serialize(serializer);
+                    }
+                }
+                serializer.serialize_none()
+            }
+            WellKnownType::Struct => {
+                use serde::ser::SerializeMap;
+                // Struct has map<string, Value> fields (field 1)
+                let entries = self
+                    .find_field_descriptor_by_number(1)
+                    .and_then(|f| self.get_field(f));
+                let Some(Value::RepeatedMessage(arr)) = entries else {
+                    return serializer.serialize_map(Some(0))?.end();
+                };
+                let mut map = serializer.serialize_map(Some(arr.object.len()))?;
+                for i in 0..arr.object.len() {
+                    let entry = arr.get(i);
+                    let key = entry
+                        .find_field_descriptor_by_number(1)
+                        .and_then(|f| entry.get_field(f));
+                    let val = entry
+                        .find_field_descriptor_by_number(2)
+                        .and_then(|f| entry.get_field(f));
+                    if let (Some(Value::String(k)), Some(Value::Message(v))) = (key, val) {
+                        map.serialize_entry(k, &v)?;
+                    }
+                }
+                map.end()
+            }
+            WellKnownType::ListValue => {
+                use serde::ser::SerializeSeq;
+                // ListValue has repeated Value values (field 1)
+                let entries = self
+                    .find_field_descriptor_by_number(1)
+                    .and_then(|f| self.get_field(f));
+                let Some(Value::RepeatedMessage(arr)) = entries else {
+                    return serializer.serialize_seq(Some(0))?.end();
+                };
+                let mut seq = serializer.serialize_seq(Some(arr.object.len()))?;
+                for i in 0..arr.object.len() {
+                    seq.serialize_element(&arr.get(i))?;
+                }
+                seq.end()
+            }
             WellKnownType::None => {
                 // Regular message serialization
                 // Count fields first
@@ -1256,7 +1336,36 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 self.obj.set::<bool>(entry.offset(), entry.has_bit_idx(), v);
                 Ok(())
             }
+            WellKnownType::Value => {
+                // Value.bool_value is field 4
+                let entry = self
+                    .table
+                    .entry(4)
+                    .ok_or_else(|| E::custom("Value missing field 4"))?;
+                self.obj
+                    .set_oneof(entry.offset(), entry.has_bit_idx() & 0x7F, 4, v);
+                Ok(())
+            }
             _ => Err(E::invalid_type(serde::de::Unexpected::Bool(v), &self)),
+        }
+    }
+
+    fn visit_unit<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        match detect_well_known_type(self.table.descriptor) {
+            WellKnownType::Value => {
+                // Value.null_value is field 1 (enum NullValue = 0)
+                let entry = self
+                    .table
+                    .entry(1)
+                    .ok_or_else(|| E::custom("Value missing field 1"))?;
+                self.obj
+                    .set_oneof(entry.offset(), entry.has_bit_idx() & 0x7F, 1, 0i32);
+                Ok(())
+            }
+            _ => Err(E::invalid_type(serde::de::Unexpected::Unit, &self)),
         }
     }
 
@@ -1297,7 +1406,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             WellKnownType::UInt64Value => self.visit_u64(v as u64),
             WellKnownType::UInt32Value => self.visit_u32(v as u32),
             WellKnownType::FloatValue => self.visit_f32(v as f32),
-            WellKnownType::DoubleValue => self.visit_f64(v as f64),
+            WellKnownType::DoubleValue | WellKnownType::Value => self.visit_f64(v as f64),
             _ => Err(E::invalid_type(serde::de::Unexpected::Signed(v), &self)),
         }
     }
@@ -1339,7 +1448,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             WellKnownType::Int64Value => self.visit_i64(v as i64),
             WellKnownType::Int32Value => self.visit_i32(v as i32),
             WellKnownType::FloatValue => self.visit_f32(v as f32),
-            WellKnownType::DoubleValue => self.visit_f64(v as f64),
+            WellKnownType::DoubleValue | WellKnownType::Value => self.visit_f64(v as f64),
             _ => Err(E::invalid_type(serde::de::Unexpected::Unsigned(v), &self)),
         }
     }
@@ -1378,6 +1487,16 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 Ok(())
             }
             WellKnownType::FloatValue => self.visit_f32(v as f32),
+            WellKnownType::Value => {
+                // Value.number_value is field 2
+                let entry = self
+                    .table
+                    .entry(2)
+                    .ok_or_else(|| E::custom("Value missing field 2"))?;
+                self.obj
+                    .set_oneof(entry.offset(), entry.has_bit_idx() & 0x7F, 2, v);
+                Ok(())
+            }
             _ => Err(E::invalid_type(serde::de::Unexpected::Float(v), &self)),
         }
     }
@@ -1456,6 +1575,17 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 let n: u64 = v.parse().map_err(E::custom)?;
                 self.visit_u64(n)
             }
+            WellKnownType::Value => {
+                // Value.string_value is field 3
+                let entry = self
+                    .table
+                    .entry(3)
+                    .ok_or_else(|| E::custom("Value missing field 3"))?;
+                let s = crate::containers::String::from_str(v, self.arena);
+                self.obj
+                    .set_oneof(entry.offset(), entry.has_bit_idx() & 0x7F, 3, s);
+                Ok(())
+            }
             _ => Err(E::invalid_type(serde::de::Unexpected::Str(v), &self)),
         }
     }
@@ -1481,7 +1611,68 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             WellKnownType::BytesValue => return deserialize_wrapper_bytes(obj, table, arena, map),
             WellKnownType::Timestamp => return deserialize_timestamp(obj, table, map),
             WellKnownType::Duration => return deserialize_duration(obj, table, map),
-            WellKnownType::None => {
+            WellKnownType::Struct => {
+                // Struct has map<string, Value> fields (field 1)
+                let entry = table
+                    .entry(1)
+                    .ok_or_else(|| serde::de::Error::custom("Struct missing field 1"))?;
+                let AuxTableEntry {
+                    offset,
+                    child_table,
+                } = table.aux_entry_decode(entry);
+                let child_table = unsafe { &*child_table };
+                let rf = obj
+                    .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(offset);
+                // Each map entry is a message with key(1)=string, value(2)=Value
+                while let Some(key) = map.next_key::<std::string::String>()? {
+                    let entry_obj = Object::create(child_table.size as u32, arena);
+                    // Set key (field 1)
+                    let key_entry = child_table.entry(1).ok_or_else(|| {
+                        serde::de::Error::custom("Struct entry missing key field")
+                    })?;
+                    let s = crate::containers::String::from_str(&key, arena);
+                    entry_obj.set::<crate::containers::String>(
+                        key_entry.offset(),
+                        key_entry.has_bit_idx(),
+                        s,
+                    );
+                    // Set value (field 2) - this is a Value message
+                    let value_entry = child_table.entry(2).ok_or_else(|| {
+                        serde::de::Error::custom("Struct entry missing value field")
+                    })?;
+                    let value_aux = child_table.aux_entry_decode(value_entry);
+                    let value_table = unsafe { &*value_aux.child_table };
+                    let value_obj = Object::create(value_table.size as u32, arena);
+                    let seed = ProtobufVisitor {
+                        obj: value_obj,
+                        table: value_table,
+                        arena,
+                    };
+                    map.next_value_seed(seed)?;
+                    *entry_obj.ref_mut::<crate::base::Message>(value_aux.offset) =
+                        crate::base::Message(value_obj);
+                    rf.push(crate::base::Message(entry_obj as *mut Object), arena);
+                }
+                return Ok(());
+            }
+            WellKnownType::Value => {
+                // Value.struct_value is field 5
+                let entry = table
+                    .entry(5)
+                    .ok_or_else(|| serde::de::Error::custom("Value missing field 5"))?;
+                let aux = table.aux_entry_decode(entry);
+                let struct_table = unsafe { &*aux.child_table };
+                let struct_obj = Object::create(struct_table.size as u32, arena);
+                let visitor = ProtobufVisitor {
+                    obj: struct_obj,
+                    table: struct_table,
+                    arena,
+                };
+                visitor.visit_map(map)?;
+                obj.set_oneof(aux.offset, entry.has_bit_idx() & 0x7F, 5, crate::base::Message(struct_obj));
+                return Ok(());
+            }
+            WellKnownType::ListValue | WellKnownType::None => {
                 // Continue with regular deserialization
             }
         }
@@ -1491,9 +1682,15 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             let field_name = field.json_name();
             field_map.insert(field_name, field_index);
         }
+        let mut seen = std::collections::HashSet::new();
         while let Some(idx) = map.next_key_seed(StructKeyVisitor(&field_map))? {
             let field = table.descriptor.field()[idx];
             let entry = table.entry(field.number() as u32).unwrap(); // Safe: field exists in table
+            // Reject duplicate fields (oneofs can have null which clears, so skip oneof check for now)
+            let has_bit_idx = entry.has_bit_idx();
+            if has_bit_idx & 0x80 == 0 && !seen.insert(idx) {
+                return Err(serde::de::Error::custom("duplicate field"));
+            }
             match field.label().unwrap() {
                 Label::LABEL_REPEATED => match field.r#type().unwrap() {
                     Type::TYPE_BOOL => {
@@ -1683,21 +1880,30 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         set_field(obj, entry, field.number(), b);
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                        // TODO handle null
                         let AuxTableEntry {
                             offset,
                             child_table,
                         } = table.aux_entry_decode(entry);
                         let child_table = unsafe { &*child_table };
                         let child_obj = Object::create(child_table.size as u32, arena);
-                        let seed = Optional(ProtobufVisitor {
-                            obj: child_obj,
-                            table: child_table,
-                            arena,
-                        });
-                        if map.next_value_seed(seed)?.is_none() {
-                            continue;
-                        };
+                        // Value type: null is a valid value, don't wrap with Optional
+                        if detect_well_known_type(child_table.descriptor) == WellKnownType::Value {
+                            let seed = ProtobufVisitor {
+                                obj: child_obj,
+                                table: child_table,
+                                arena,
+                            };
+                            map.next_value_seed(seed)?;
+                        } else {
+                            let seed = Optional(ProtobufVisitor {
+                                obj: child_obj,
+                                table: child_table,
+                                arena,
+                            });
+                            if map.next_value_seed(seed)?.is_none() {
+                                continue;
+                            };
+                        }
                         // For oneof message fields, set the discriminant
                         let has_bit_idx = entry.has_bit_idx();
                         if has_bit_idx & 0x80 != 0 {
@@ -1711,6 +1917,62 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
             }
         }
         Ok(())
+    }
+
+    fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
+    where
+        A: serde::de::SeqAccess<'de>,
+    {
+        let ProtobufVisitor { obj, table, arena } = self;
+
+        match detect_well_known_type(table.descriptor) {
+            WellKnownType::ListValue => {
+                // ListValue has repeated Value values (field 1)
+                let entry = table
+                    .entry(1)
+                    .ok_or_else(|| serde::de::Error::custom("ListValue missing field 1"))?;
+                let aux = table.aux_entry_decode(entry);
+                let value_table = unsafe { &*aux.child_table };
+                let rf = obj
+                    .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(aux.offset);
+                while {
+                    let value_obj = Object::create(value_table.size as u32, arena);
+                    let seed = ProtobufVisitor {
+                        obj: value_obj,
+                        table: value_table,
+                        arena,
+                    };
+                    if seq.next_element_seed(seed)?.is_some() {
+                        rf.push(crate::base::Message(value_obj as *mut Object), arena);
+                        true
+                    } else {
+                        false
+                    }
+                } {}
+                Ok(())
+            }
+            WellKnownType::Value => {
+                // Value.list_value is field 6
+                let entry = table
+                    .entry(6)
+                    .ok_or_else(|| serde::de::Error::custom("Value missing field 6"))?;
+                let aux = table.aux_entry_decode(entry);
+                let list_table = unsafe { &*aux.child_table };
+                let list_obj = Object::create(list_table.size as u32, arena);
+                let visitor = ProtobufVisitor {
+                    obj: list_obj,
+                    table: list_table,
+                    arena,
+                };
+                visitor.visit_seq(seq)?;
+                obj.set_oneof(aux.offset, entry.has_bit_idx() & 0x7F, 6, crate::base::Message(list_obj));
+                Ok(())
+            }
+            _ => Err(serde::de::Error::invalid_type(
+                serde::de::Unexpected::Seq,
+                &"a message",
+            )),
+        }
     }
 }
 

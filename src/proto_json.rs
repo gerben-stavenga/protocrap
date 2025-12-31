@@ -64,7 +64,8 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
     }
 
     fn serialize_i64(self, v: i64) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_i64(v)
+        // Proto JSON spec: int64 as string for JavaScript precision
+        self.inner.serialize_str(&v.to_string())
     }
 
     fn serialize_u8(self, v: u8) -> Result<Self::Ok, Self::Error> {
@@ -80,7 +81,8 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_u64(v)
+        // Proto JSON spec: uint64 as string for JavaScript precision
+        self.inner.serialize_str(&v.to_string())
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok, Self::Error> {
@@ -439,7 +441,7 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
     }
 
     fn deserialize_f32<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_any(FlexibleFloatVisitor(visitor))
+        self.inner.deserialize_any(FlexibleF32Visitor(visitor))
     }
 
     fn deserialize_f64<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
@@ -628,7 +630,10 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleIntVisitor<V> {
     }
 
     fn visit_f64<E: serde::de::Error>(self, v: f64) -> Result<Self::Value, E> {
-        // JSON numbers can be floats, convert to int
+        // JSON numbers can be floats, but must be whole numbers for int fields
+        if v.fract() != 0.0 {
+            return Err(E::custom("expected integer, got non-integer float"));
+        }
         self.0.visit_i64(v as i64)
     }
 
@@ -678,6 +683,44 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleFloatVisitor<V> {
     }
 }
 
+struct FlexibleF32Visitor<V>(V);
+
+impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleF32Visitor<V> {
+    type Value = V::Value;
+
+    fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
+        self.0.expecting(formatter)
+    }
+
+    fn visit_f64<E: serde::de::Error>(self, v: f64) -> Result<Self::Value, E> {
+        // Check f32 range for finite values
+        if v.is_finite() && (v > f32::MAX as f64 || v < f32::MIN as f64) {
+            return Err(E::custom("float value out of range for f32"));
+        }
+        self.0.visit_f32(v as f32)
+    }
+
+    fn visit_i64<E: serde::de::Error>(self, v: i64) -> Result<Self::Value, E> {
+        self.0.visit_f32(v as f32)
+    }
+
+    fn visit_u64<E: serde::de::Error>(self, v: u64) -> Result<Self::Value, E> {
+        self.0.visit_f32(v as f32)
+    }
+
+    fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+        match v {
+            "NaN" => self.0.visit_f32(f32::NAN),
+            "Infinity" => self.0.visit_f32(f32::INFINITY),
+            "-Infinity" => self.0.visit_f32(f32::NEG_INFINITY),
+            _ => match v.parse::<f64>() {
+                Ok(f) => self.visit_f64(f),
+                Err(_) => Err(E::custom(format!("cannot parse '{}' as float", v))),
+            },
+        }
+    }
+}
+
 struct FlexibleBytesVisitor<V>(V);
 
 impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleBytesVisitor<V> {
@@ -696,11 +739,22 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleBytesVisitor<V> {
     }
 
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
-        // Base64 decode
-        match base64::engine::general_purpose::STANDARD.decode(v) {
-            Ok(bytes) => self.0.visit_byte_buf(bytes),
-            Err(e) => Err(E::custom(format!("invalid base64: {}", e))),
+        use base64::Engine;
+        use base64::engine::{GeneralPurpose, GeneralPurposeConfig, DecodePaddingMode};
+        // Lenient base64 decoder: accepts standard or URL-safe, with or without padding
+        let config = GeneralPurposeConfig::new()
+            .with_decode_padding_mode(DecodePaddingMode::Indifferent)
+            .with_decode_allow_trailing_bits(true);
+        // Try standard alphabet first, then URL-safe
+        let standard = GeneralPurpose::new(&base64::alphabet::STANDARD, config);
+        if let Ok(bytes) = standard.decode(v) {
+            return self.0.visit_byte_buf(bytes);
         }
+        let url_safe = GeneralPurpose::new(&base64::alphabet::URL_SAFE, config);
+        if let Ok(bytes) = url_safe.decode(v) {
+            return self.0.visit_byte_buf(bytes);
+        }
+        Err(E::custom("invalid base64"))
     }
 
     fn visit_seq<A: SeqAccess<'de>>(self, seq: A) -> Result<Self::Value, A::Error> {
@@ -808,3 +862,4 @@ impl<'de, T: DeserializeSeed<'de>> DeserializeSeed<'de> for ProtoJsonDeserialize
         self.0.deserialize(ProtoJsonDeserializer::new(deserializer))
     }
 }
+

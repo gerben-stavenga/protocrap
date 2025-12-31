@@ -108,30 +108,8 @@ Recommended.Proto3.FieldMaskPathsDontRoundTrip.JsonOutput
 Recommended.Proto3.FieldMaskTooManyUnderscore.JsonOutput
 
 # ----------------------------------------------------------------------------
-# Struct/Value/ListValue types not implemented
+# Struct/Value/ListValue edge cases not fully implemented
 # ----------------------------------------------------------------------------
-Required.Proto3.JsonInput.RepeatedListValue.JsonOutput
-Required.Proto3.JsonInput.RepeatedListValue.ProtobufOutput
-Required.Proto3.JsonInput.RepeatedValue.JsonOutput
-Required.Proto3.JsonInput.RepeatedValue.ProtobufOutput
-Required.Proto3.JsonInput.Struct.JsonOutput
-Required.Proto3.JsonInput.Struct.ProtobufOutput
-Required.Proto3.JsonInput.StructWithEmptyListValue.JsonOutput
-Required.Proto3.JsonInput.StructWithEmptyListValue.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptBool.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptBool.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptFloat.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptFloat.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptInteger.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptInteger.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptList.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptList.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptNull.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptNull.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptObject.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptObject.ProtobufOutput
-Required.Proto3.JsonInput.ValueAcceptString.JsonOutput
-Required.Proto3.JsonInput.ValueAcceptString.ProtobufOutput
 Recommended.Proto3.ValueRejectInfNumberValue.JsonOutput
 Recommended.Proto3.ValueRejectNanNumberValue.JsonOutput
 Recommended.Proto3.JsonInput.NullValueInOtherOneofNewFormat.Validator
@@ -140,16 +118,6 @@ Recommended.Proto3.JsonInput.NullValueInOtherOneofOldFormat.Validator
 # ----------------------------------------------------------------------------
 # JSON validation not strict enough (missing range/format checks)
 # ----------------------------------------------------------------------------
-Required.Proto2.JsonInput.FloatFieldTooLarge
-Required.Proto2.JsonInput.FloatFieldTooSmall
-Required.Proto2.JsonInput.Int32FieldNotInteger
-Required.Proto2.JsonInput.Uint32FieldNotInteger
-Required.Proto3.JsonInput.FloatFieldTooLarge
-Required.Proto3.JsonInput.FloatFieldTooSmall
-Required.Proto3.JsonInput.Int32FieldNotInteger
-Required.Proto3.JsonInput.Uint32FieldNotInteger
-Recommended.Proto2.JsonInput.FieldNameDuplicate
-Recommended.Proto3.JsonInput.FieldNameDuplicate
 
 # ----------------------------------------------------------------------------
 # JSON field name handling issues
@@ -160,7 +128,7 @@ Required.Proto3.JsonInput.OriginalProtoFieldName.JsonOutput
 Required.Proto3.JsonInput.OriginalProtoFieldName.ProtobufOutput
 
 # ----------------------------------------------------------------------------
-# JSON oneof duplicate detection not implemented
+# JSON oneof duplicate detection (null clears field, complicates detection)
 # ----------------------------------------------------------------------------
 Required.Proto2.JsonInput.OneofFieldDuplicate
 Required.Proto3.JsonInput.OneofFieldDuplicate
@@ -190,7 +158,7 @@ Required.Proto3.JsonInput.Int32FieldQuotedExponentialValue.JsonOutput
 Required.Proto3.JsonInput.Int32FieldQuotedExponentialValue.ProtobufOutput
 
 # ----------------------------------------------------------------------------
-# JSON double precision edge cases
+# JSON double precision edge cases (serde_json serializes with extra digits)
 # ----------------------------------------------------------------------------
 Required.Proto2.JsonInput.DoubleFieldMaxNegativeValue.JsonOutput
 Required.Proto2.JsonInput.DoubleFieldMaxNegativeValue.ProtobufOutput
@@ -200,22 +168,6 @@ Required.Proto3.JsonInput.DoubleFieldMaxNegativeValue.JsonOutput
 Required.Proto3.JsonInput.DoubleFieldMaxNegativeValue.ProtobufOutput
 Required.Proto3.JsonInput.DoubleFieldMinPositiveValue.JsonOutput
 Required.Proto3.JsonInput.DoubleFieldMinPositiveValue.ProtobufOutput
-
-# ----------------------------------------------------------------------------
-# JSON int64/uint64 should output as strings
-# ----------------------------------------------------------------------------
-Recommended.Proto2.JsonInput.Int64FieldBeString.Validator
-Recommended.Proto2.JsonInput.Uint64FieldBeString.Validator
-Recommended.Proto3.JsonInput.Int64FieldBeString.Validator
-Recommended.Proto3.JsonInput.Uint64FieldBeString.Validator
-
-# ----------------------------------------------------------------------------
-# JSON base64url encoding for bytes
-# ----------------------------------------------------------------------------
-Recommended.Proto2.JsonInput.BytesFieldBase64Url.JsonOutput
-Recommended.Proto2.JsonInput.BytesFieldBase64Url.ProtobufOutput
-Recommended.Proto3.JsonInput.BytesFieldBase64Url.JsonOutput
-Recommended.Proto3.JsonInput.BytesFieldBase64Url.ProtobufOutput
 
 # ----------------------------------------------------------------------------
 # Proto3 unified optionality affects JSON output (we output default values)
