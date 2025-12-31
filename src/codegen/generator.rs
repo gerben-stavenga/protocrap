@@ -102,7 +102,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     // when multiple files share the same package
     let file_descriptor = if file.name() == "proto/descriptor.proto" {
         // Special case: generate FileDescriptorProto static
-        let mut pool = protocrap::reflection::DescriptorPool::new(&Global);
+        let mut pool = protocrap::descriptor_pool::DescriptorPool::new(&Global);
         pool.add_file(file);
         let serialized = file.encode_vec::<100>()?;
         let mut arena = protocrap::arena::Arena::new(&Global);
