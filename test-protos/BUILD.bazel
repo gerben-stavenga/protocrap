@@ -1,0 +1,60 @@
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust_prost//:defs.bzl", "rust_prost_library")
+load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
+
+# Local test proto
+proto_library(
+    name = "test_proto",
+    srcs = ["proto/test.proto"],
+)
+
+# Prost-generated code for benchmark comparison
+rust_prost_library(
+    name = "test_proto_prost",
+    proto = ":test_proto",
+    visibility = ["//visibility:public"],
+)
+
+# Conformance and test messages descriptor set from @protobuf + local test.proto
+proto_descriptor_set(
+    name = "descriptor_set",
+    deps = [
+        ":test_proto",
+        "@protobuf//conformance:conformance_proto",
+        "@protobuf//conformance/test_protos:test_messages_proto2_proto",
+        "@protobuf//conformance/test_protos:test_messages_proto3_proto",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# Generate Rust code from descriptor set
+genrule(
+    name = "generated",
+    srcs = [":descriptor_set"],
+    outs = ["src/generated.pc.rs"],
+    cmd = "$(execpath //:protocrap-codegen) $(location :descriptor_set) $@",
+    tools = ["//:protocrap-codegen"],
+)
+
+# Test protos library
+rust_library(
+    name = "test_protos",
+    srcs = [
+        "src/lib.rs",
+        ":generated",
+    ],
+    compile_data = [":descriptor_set"],
+    crate_name = "test_protos",
+    edition = "2024",
+    rustc_env = {
+        "TEST_PROTOS_DESCRIPTOR_SET": "$(execpath :descriptor_set)",
+    },
+    rustc_flags = ["--cfg=bazel"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//:protocrap",
+        "@crates//:allocator-api2",
+        "@crates//:serde",
+    ],
+)

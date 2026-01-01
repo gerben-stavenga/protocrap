@@ -2,28 +2,21 @@
 
 Compares protocrap encoding/decoding performance against prost.
 
-## Running with Cargo (includes prost comparison)
+## Running
 
 ```bash
-# Full benchmark
-cargo bench -p protocrap-benchmarks
+# Build optimized benchmark binary
+bazel build -c opt //benchmark:bench
 
-# Quick test run
-cargo bench -p protocrap-benchmarks -- --test
+# Run full benchmark
+./bazel-bin/benchmark/bench
 
-# Specific benchmark
-cargo bench -p protocrap-benchmarks -- decode
+# Quick test run (verify benchmarks work)
+./bazel-bin/benchmark/bench --test
+
+# Specific benchmark group
+./bazel-bin/benchmark/bench decode
+./bazel-bin/benchmark/bench encode
 ```
 
-## Running with Bazel (protocrap only)
-
-```bash
-# Full benchmark (use -c opt for release optimizations)
-bazel run -c opt //benchmark:bench
-
-# Quick test run
-bazel run -c opt //benchmark:bench -- --test
-
-# Specific benchmark
-bazel run -c opt //benchmark:bench -- decode
-```
+Note: Run the binary directly instead of `bazel run` to get actual benchmark measurements (Criterion needs a TTY).

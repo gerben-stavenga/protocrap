@@ -3,8 +3,10 @@ module(
     version = "0.1.0",
 )
 
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "protobuf", version = "30.0")
 bazel_dep(name = "rules_rust", version = "0.68.1")
+bazel_dep(name = "rules_rust_prost", version = "0.68.1")
 
 # Use main branch - it doesn't have the rules_ruby issue
 git_override(
@@ -24,15 +26,36 @@ rust.toolchain(
 use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 
-# Crate universe for cargo dependencies
+# Custom prost toolchain using our crate.spec prost
+register_toolchains("//bazel:prost_toolchain")
+
+# Direct crate dependencies
 crate = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
-crate.from_cargo(
-    name = "crates",
-    cargo_lockfile = "//:Cargo.lock",
-    cargo_config = "//:.cargo/config.toml",
-    manifests = ["//:Cargo.toml"],
-    generate_binaries = False,
-    generate_build_scripts = True,
-)
+
+crate.spec(package = "allocator-api2", version = "0.2")
+crate.spec(package = "anyhow", version = "1.0")
+crate.spec(package = "base64", version = "0.22")
+crate.spec(package = "byteorder", version = "1.5")
+crate.spec(package = "criterion", version = "0.5")
+crate.spec(package = "futures", version = "0.3")
+crate.spec(package = "prettyplease", version = "0.2")
+crate.spec(package = "proc-macro2", version = "1.0")
+crate.spec(package = "quote", version = "1.0")
+crate.spec(package = "rand", version = "0.8")
+crate.spec(package = "serde", version = "1.0", features = ["derive"])
+crate.spec(package = "serde_json", version = "1.0")
+crate.spec(package = "syn", version = "2.0", features = ["full", "parsing"])
+crate.spec(package = "time", version = "0.3", features = ["formatting", "parsing", "macros"])
+
+# Prost for benchmark comparison
+crate.spec(package = "prost", version = "0.13")
+crate.spec(package = "prost-types", version = "0.13")
+crate.annotation(crate = "protoc-gen-prost", gen_binaries = ["protoc-gen-prost"])
+crate.spec(package = "protoc-gen-prost", version = "0.4")
+
+# Bootstrap: published protocrap for verifying codegen compatibility
+crate.spec(package = "protocrap", version = "0.1")
+
+crate.from_specs(name = "crates")
 
 use_repo(crate, "crates")

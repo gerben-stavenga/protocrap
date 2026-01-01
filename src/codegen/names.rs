@@ -1,8 +1,7 @@
 // protocrap-codegen/src/names.rs
 
-use crate::reflection::is_in_oneof;
-
 use super::protocrap;
+use protocrap::reflection::is_in_oneof;
 use proc_macro2::TokenStream;
 use protocrap::google::protobuf::FieldDescriptorProto::ProtoType as FieldDescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::Type;

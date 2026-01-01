@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary", "rust_test")
 load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
 
@@ -99,12 +100,50 @@ genrule(
     tools = [":protocrap-codegen"],
 )
 
-sh_test(
+diff_test(
     name = "descriptor_up_to_date_test",
-    srcs = ["test_descriptor_up_to_date.sh"],
-    data = [
-        ":generate_descriptor_test",
-        "src/descriptor.pc.rs",
+    file1 = ":generate_descriptor_test",
+    file2 = "src/descriptor.pc.rs",
+)
+
+# Bootstrap codegen binary (uses published protocrap from crates.io)
+rust_binary(
+    name = "protocrap-codegen-bootstrap",
+    srcs = ["src/main.rs"] + glob(["src/codegen/*.rs"]),
+    aliases = {"@crates//:protocrap": "bootcrap"},
+    crate_features = [
+        "std",
+        "codegen",
+        "bootstrap",
+        "bazel",
     ],
+    edition = "2024",
+    deps = [
+        "@crates//:allocator-api2",
+        "@crates//:anyhow",
+        "@crates//:prettyplease",
+        "@crates//:proc-macro2",
+        "@crates//:protocrap",
+        "@crates//:quote",
+        "@crates//:serde",
+        "@crates//:serde_json",
+        "@crates//:syn",
+    ],
+)
+
+# Generate descriptor using bootstrap binary
+genrule(
+    name = "generate_descriptor_bootstrap",
+    srcs = [":descriptor_set"],
+    outs = ["descriptor.pc.rs.bootstrap"],
+    cmd = "$(location :protocrap-codegen-bootstrap) $(location :descriptor_set) $@",
+    tools = [":protocrap-codegen-bootstrap"],
+)
+
+# Verify bootstrap and normal codegen produce identical output
+diff_test(
+    name = "bootstrap_matches_test",
+    file1 = ":generate_descriptor_test",
+    file2 = ":generate_descriptor_bootstrap",
 )
 

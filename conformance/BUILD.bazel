@@ -1,9 +1,6 @@
 # Conformance Test Runner
 
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library")
-load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
-
-exports_files(["Cargo.toml"])
 
 alias(
     name = "conformance_test_runner",
@@ -11,47 +8,19 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-# Merged descriptor set using protos from @protobuf
-proto_descriptor_set(
-    name = "conformance_descriptor_set",
-    deps = [
-        "@protobuf//conformance:conformance_proto",
-        "@protobuf//conformance/test_protos:test_messages_proto2_proto",
-        "@protobuf//conformance/test_protos:test_messages_proto3_proto",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-# Generate Rust code from descriptor set
-genrule(
-    name = "conformance_generated",
-    srcs = [":conformance_descriptor_set"],
-    outs = ["src/conformance_all.pc.rs"],
-    cmd = "$(execpath //:protocrap-codegen) $(location :conformance_descriptor_set) $@",
-    tools = ["//:protocrap-codegen"],
-)
-
-# Conformance library with generated code
+# Conformance library - uses test_protos for all generated code
 rust_library(
     name = "conformance_lib",
-    srcs = [
-        "src/lib.rs",
-        ":conformance_generated",
-    ],
-    compile_data = [":conformance_descriptor_set"],
+    srcs = ["src/lib.rs"],
     crate_name = "protocrap_conformance",
     edition = "2024",
-    rustc_env = {
-        "CONFORMANCE_DESCRIPTOR_SET": "$(execpath :conformance_descriptor_set)",
-    },
     rustc_flags = ["--cfg=bazel"],
     visibility = ["//visibility:public"],
     deps = [
         "//:protocrap",
+        "//test-protos:test_protos",
         "@crates//:allocator-api2",
         "@crates//:anyhow",
-        "@crates//:serde",
-        "@crates//:serde_json",
     ],
 )
 
@@ -64,6 +33,7 @@ rust_binary(
     deps = [
         ":conformance_lib",
         "//:protocrap",
+        "//test-protos:test_protos",
         "@crates//:allocator-api2",
         "@crates//:anyhow",
         "@crates//:byteorder",
