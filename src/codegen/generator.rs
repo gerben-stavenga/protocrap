@@ -111,10 +111,16 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
             &serialized,
             &mut arena,
         )?;
-        super::static_gen::generate_static_dynamic(&dyn_file_descriptor)?
+        super::static_gen::generate_static_dynamic(
+            &dyn_file_descriptor,
+            "google.protobuf.FileDescriptorProto",
+        )?
     } else {
         let dynamic_file = protocrap::reflection::DynamicMessageRef::new(file);
-        super::static_gen::generate_static_dynamic(&dynamic_file)?
+        super::static_gen::generate_static_dynamic(
+            &dynamic_file,
+            "google.protobuf.FileDescriptorProto",
+        )?
     };
 
     // Create a unique module name based on the proto filename (without path and extension)

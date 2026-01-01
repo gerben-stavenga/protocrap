@@ -9,38 +9,23 @@ use protocrap::{
 };
 use quote::{ToTokens, format_ident, quote};
 
-fn full_name(name: &str) -> Vec<proc_macro2::Ident> {
-    // HACK: Manually do name resolution to fully qualified type path
-    let mut path_parts = Vec::new();
-    path_parts.extend(
-        ["google", "protobuf"]
-            .iter()
-            .map(|s| format_ident!("{}", s)),
-    );
-    if name == "ExtensionRange" {
-        path_parts.push(format_ident!("DescriptorProto"));
-    }
-    if name == "ReservedRange" {
-        path_parts.push(format_ident!("DescriptorProto"));
-    }
-    if name == "EditionDefault" {
-        path_parts.push(format_ident!("FieldOptions"));
-    }
-    if name == "FeatureSupport" {
-        path_parts.push(format_ident!("FieldOptions"));
-    }
-    if name == "Declaration" {
-        path_parts.push(format_ident!("ExtensionRangeOptions"));
-    }
-    if name == "EnumReservedRange" {
-        path_parts.push(format_ident!("EnumDescriptorProto"));
-    }
-    path_parts.push(format_ident!("{}", name));
-    path_parts
+/// Convert a fully qualified proto type name to Rust path tokens.
+/// Input: ".google.protobuf.FileDescriptorProto" or "google.protobuf.FileDescriptorProto"
+/// Output: [google, protobuf, FileDescriptorProto]
+fn resolve_type_path(type_name: &str) -> Vec<proc_macro2::Ident> {
+    type_name
+        .trim_start_matches('.')
+        .split('.')
+        .map(|s| format_ident!("{}", s))
+        .collect()
 }
 
-/// Generate static initializer for any proto message using runtime reflection
-pub(crate) fn generate_static_dynamic(value: &DynamicMessageRef) -> Result<TokenStream> {
+/// Generate static initializer for any proto message using runtime reflection.
+/// `type_name` should be the fully qualified proto type name like "google.protobuf.FileDescriptorProto"
+pub(crate) fn generate_static_dynamic(
+    value: &DynamicMessageRef,
+    type_name: &str,
+) -> Result<TokenStream> {
     // Calculate has_bits
     let has_bits = calculate_has_bits(&value);
     let has_bits_tokens = generate_has_bits_array(&has_bits);
@@ -49,7 +34,7 @@ pub(crate) fn generate_static_dynamic(value: &DynamicMessageRef) -> Result<Token
     let field_inits = generate_field_initializers(value)?;
 
     // Parse type path
-    let path_parts: Vec<_> = full_name(value.descriptor().name());
+    let path_parts = resolve_type_path(type_name);
 
     Ok(quote! {
         {
@@ -102,9 +87,9 @@ fn generate_field_initializers(value: &DynamicMessageRef) -> Result<Vec<TokenStr
     fields.sort_by_key(|f| f.number());
 
     for field in fields {
-        let value = value.get_field(field.as_ref());
-        let init = if let Some(field_value) = value {
-            generate_field_value(field_value)?.0
+        let field_value = value.get_field(field.as_ref());
+        let init = if let Some(val) = field_value {
+            generate_field_value(val, field.as_ref())?.0
         } else {
             generate_default_value(field.as_ref())
         };
@@ -142,7 +127,10 @@ fn generate_repeated_scalar<T: Copy + ToTokens>(
     ))
 }
 
-fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
+fn generate_field_value(
+    value: Value,
+    field: &FieldDescriptorProto,
+) -> Result<(TokenStream, TokenStream)> {
     match value {
         Value::Bool(b) => Ok((quote! { #b }, quote! { bool })),
         Value::Int32(v) => {
@@ -185,7 +173,8 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
             ))
         }
         Value::Message(msg) => {
-            let static_ref = generate_nested_message(&msg)?;
+            let type_name = field.type_name();
+            let static_ref = generate_nested_message(&msg, type_name)?;
             Ok((
                 quote! { protocrap::base::OptionalMessage::from_static(#static_ref) },
                 quote! { protocrap::base::OptionalMessage },
@@ -243,13 +232,11 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
             ))
         }
         Value::RepeatedMessage(list) => {
+            let type_name = field.type_name();
+            let path_parts = resolve_type_path(type_name);
             let mut elements = Vec::new();
-            let mut path_parts = Vec::new();
             for msg in list.iter() {
-                if path_parts.is_empty() {
-                    path_parts = full_name(msg.descriptor().name());
-                }
-                let static_ref = generate_nested_message(&msg)?;
+                let static_ref = generate_nested_message(&msg, type_name)?;
                 elements.push(quote! { protocrap::base::TypedMessage::from_static(#static_ref) });
             }
             let len = elements.len();
@@ -268,9 +255,9 @@ fn generate_field_value(value: Value) -> Result<(TokenStream, TokenStream)> {
     }
 }
 
-fn generate_nested_message(msg: &DynamicMessageRef) -> Result<TokenStream> {
-    let nested_initializer = generate_static_dynamic(msg)?;
-    let path_parts: Vec<_> = full_name(msg.descriptor().name());
+fn generate_nested_message(msg: &DynamicMessageRef, type_name: &str) -> Result<TokenStream> {
+    let nested_initializer = generate_static_dynamic(msg, type_name)?;
+    let path_parts = resolve_type_path(type_name);
 
     Ok(quote! {
         {
