@@ -128,6 +128,26 @@ use protocrap;
 include!("my_types.pc.rs");
 ```
 
+### Embedding Static Data
+
+Embed protobuf data as compile-time constants - no lazy init, no mutex, just a const:
+
+```bash
+# From binary .pb file
+protocrap descriptor.bin --embed config.pb:my.package.Config -o config.pc.rs
+
+# From JSON (easier to maintain in version control)
+protocrap descriptor.bin --embed config.json:my.package.Config -o config.pc.rs
+```
+
+Use in your code:
+
+```rust
+const CONFIG: my::package::Config::ProtoType = include!("config.pc.rs");
+```
+
+The data goes straight to `.rodata` - zero runtime overhead.
+
 For working on protocrap itself (regenerating descriptor.pc.rs):
 
 ```bash
@@ -209,6 +229,7 @@ Use in production at your own risk. Bug reports and contributions welcome!
 - [x] Conformance test suite (static + dynamic modes)
 - [x] Fuzz testing
 - [x] Oneof support
+- [x] Static data embedding (const protobuf from .pb/.json)
 - [ ] Map support
 - [ ] Full documentation
 
