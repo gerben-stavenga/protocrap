@@ -744,6 +744,7 @@ dependencies = [
  "protocrap 0.1.18",
  "quote",
  "serde",
+ "serde_json",
  "syn",
  "time",
 ]

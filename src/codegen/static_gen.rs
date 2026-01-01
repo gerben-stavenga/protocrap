@@ -20,25 +20,38 @@ fn resolve_type_path(type_name: &str) -> Vec<proc_macro2::Ident> {
         .collect()
 }
 
+/// Generate the crate prefix token stream (e.g., "protocrap::" or empty for local)
+fn crate_prefix(crate_path: &str) -> TokenStream {
+    if crate_path.is_empty() {
+        quote! {}
+    } else {
+        let crate_ident = format_ident!("{}", crate_path);
+        quote! { #crate_ident:: }
+    }
+}
+
 /// Generate static initializer for any proto message using runtime reflection.
 /// `type_name` should be the fully qualified proto type name like "google.protobuf.FileDescriptorProto"
+/// `crate_path` specifies the module prefix (e.g., "protocrap" or "" for local types)
 pub(crate) fn generate_static_dynamic(
     value: &DynamicMessageRef,
     type_name: &str,
+    crate_path: &str,
 ) -> Result<TokenStream> {
     // Calculate has_bits
     let has_bits = calculate_has_bits(&value);
     let has_bits_tokens = generate_has_bits_array(&has_bits);
 
     // Generate field initializers
-    let field_inits = generate_field_initializers(value)?;
+    let field_inits = generate_field_initializers(value, crate_path)?;
 
     // Parse type path
     let path_parts = resolve_type_path(type_name);
+    let prefix = crate_prefix(crate_path);
 
     Ok(quote! {
         {
-            protocrap::#(#path_parts)::* ::ProtoType::from_static(
+            #prefix #(#path_parts)::* ::ProtoType::from_static(
                 #has_bits_tokens,
                 #(#field_inits),*
             )
@@ -80,7 +93,7 @@ fn generate_has_bits_array(has_bits: &[u32]) -> TokenStream {
     quote! { [#(#values),*] }
 }
 
-fn generate_field_initializers(value: &DynamicMessageRef) -> Result<Vec<TokenStream>> {
+fn generate_field_initializers(value: &DynamicMessageRef, crate_path: &str) -> Result<Vec<TokenStream>> {
     let mut inits = Vec::new();
 
     let mut fields = Vec::from(value.descriptor().field());
@@ -89,7 +102,7 @@ fn generate_field_initializers(value: &DynamicMessageRef) -> Result<Vec<TokenStr
     for field in fields {
         let field_value = value.get_field(field.as_ref());
         let init = if let Some(val) = field_value {
-            generate_field_value(val, field.as_ref())?.0
+            generate_field_value(val, field.as_ref(), crate_path)?.0
         } else {
             generate_default_value(field.as_ref())
         };
@@ -130,7 +143,9 @@ fn generate_repeated_scalar<T: Copy + ToTokens>(
 fn generate_field_value(
     value: Value,
     field: &FieldDescriptorProto,
+    crate_path: &str,
 ) -> Result<(TokenStream, TokenStream)> {
+    let prefix = crate_prefix(crate_path);
     match value {
         Value::Bool(b) => Ok((quote! { #b }, quote! { bool })),
         Value::Int32(v) => {
@@ -174,7 +189,7 @@ fn generate_field_value(
         }
         Value::Message(msg) => {
             let type_name = field.type_name();
-            let static_ref = generate_nested_message(&msg, type_name)?;
+            let static_ref = generate_nested_message(&msg, type_name, crate_path)?;
             Ok((
                 quote! { protocrap::base::OptionalMessage::from_static(#static_ref) },
                 quote! { protocrap::base::OptionalMessage },
@@ -236,32 +251,33 @@ fn generate_field_value(
             let path_parts = resolve_type_path(type_name);
             let mut elements = Vec::new();
             for msg in list.iter() {
-                let static_ref = generate_nested_message(&msg, type_name)?;
+                let static_ref = generate_nested_message(&msg, type_name, crate_path)?;
                 elements.push(quote! { protocrap::base::TypedMessage::from_static(#static_ref) });
             }
             let len = elements.len();
             Ok((
                 quote! {
                     {
-                        static ELEMENTS: [protocrap::base::TypedMessage<protocrap::#(#path_parts)::* ::ProtoType>; #len] = [
+                        static ELEMENTS: [protocrap::base::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>; #len] = [
                             #(#elements),*
                         ];
                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                     }
                 },
-                quote! { protocrap::containers::RepeatedField<protocrap::base::TypedMessage<protocrap::#(#path_parts)::* ::ProtoType>> },
+                quote! { protocrap::containers::RepeatedField<protocrap::base::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>> },
             ))
         }
     }
 }
 
-fn generate_nested_message(msg: &DynamicMessageRef, type_name: &str) -> Result<TokenStream> {
-    let nested_initializer = generate_static_dynamic(msg, type_name)?;
+fn generate_nested_message(msg: &DynamicMessageRef, type_name: &str, crate_path: &str) -> Result<TokenStream> {
+    let nested_initializer = generate_static_dynamic(msg, type_name, crate_path)?;
     let path_parts = resolve_type_path(type_name);
+    let prefix = crate_prefix(crate_path);
 
     Ok(quote! {
         {
-            static PROTO_TYPE: protocrap::#(#path_parts)::* ::ProtoType = #nested_initializer;
+            static PROTO_TYPE: #prefix #(#path_parts)::* ::ProtoType = #nested_initializer;
             &PROTO_TYPE
         }
     })

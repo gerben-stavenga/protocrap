@@ -1,0 +1,8 @@
+{
+  "x": 42,
+  "z": "hello world",
+  "nestedMessage": [
+    {"x": 100},
+    {"x": 200}
+  ]
+}

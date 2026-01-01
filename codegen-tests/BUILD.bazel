@@ -24,12 +24,25 @@ genrule(
     tools = ["//:protocrap-codegen"],
 )
 
+# Generate embedded const from JSON test data
+genrule(
+    name = "test_embed_generated",
+    srcs = [
+        ":test_descriptor_set",
+        "test_data.json",
+    ],
+    outs = ["src/test_embed.pc.rs"],
+    cmd = "$(execpath //:protocrap-codegen) $(location :test_descriptor_set) --embed $(location test_data.json):Test --crate-path '' -o $@",
+    tools = ["//:protocrap-codegen"],
+)
+
 # Codegen tests library
 rust_library(
     name = "codegen_tests_lib",
     srcs = [
         "src/lib.rs",
         ":test_generated",
+        ":test_embed_generated",
     ],
     crate_name = "codegen_tests",
     edition = "2024",

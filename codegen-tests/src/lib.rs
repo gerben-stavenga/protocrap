@@ -11,6 +11,12 @@ include!(concat!(env!("OUT_DIR"), "/test.pc.rs"));
 #[cfg(bazel)]
 include!("test.pc.rs");
 
+// Embedded const from JSON test data
+#[cfg(not(bazel))]
+const EMBEDDED_TEST: Test::ProtoType = include!(concat!(env!("OUT_DIR"), "/test_embed.pc.rs"));
+#[cfg(bazel)]
+const EMBEDDED_TEST: Test::ProtoType = include!("test_embed.pc.rs");
+
 use Test::ProtoType as TestProto;
 
 pub fn make_small() -> TestProto {
@@ -357,4 +363,17 @@ fn test_defaults() {
     assert_eq!(msg2.port(), 8080);
     assert!(!msg2.has_port());
     assert_eq!(msg2.get_port(), None);
+}
+
+#[test]
+fn test_embedded_const() {
+    // Verify the embedded const from JSON was parsed correctly
+    assert_eq!(EMBEDDED_TEST.x(), 42);
+    assert_eq!(EMBEDDED_TEST.z(), "hello world");
+
+    // Check nested messages
+    let nested = EMBEDDED_TEST.nested_message();
+    assert_eq!(nested.len(), 2);
+    assert_eq!(nested[0].x(), 100);
+    assert_eq!(nested[1].x(), 200);
 }

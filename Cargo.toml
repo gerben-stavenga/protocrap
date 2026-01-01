@@ -21,6 +21,7 @@ allocator-api2 = { version = "0.2", default-features = false }
 base64 = { version = "0.22.1", optional = true }
 futures = { version = "0.3.31", optional = true }
 serde = { version = "1.0.228", optional = true }
+serde_json = { version = "1.0", optional = true }
 time = { version = "0.3", features = ["formatting", "parsing", "macros"], optional = true }
 
 # Codegen dependencies (optional)
@@ -38,7 +39,7 @@ default = ["std", "serde_support"]
 serde_support = ["std", "serde", "base64", "time"]
 std = ["futures", "allocator-api2/alloc"]
 nightly = []
-codegen = ["std", "anyhow", "quote", "syn", "proc-macro2", "prettyplease"]
+codegen = ["std", "serde_support", "anyhow", "quote", "syn", "proc-macro2", "prettyplease", "serde_json"]
 bootstrap = ["codegen", "bootcrap"]
 bazel = []
 

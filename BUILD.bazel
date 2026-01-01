@@ -29,7 +29,7 @@ rust_library(
     ],
 )
 
-# Main protocrap library
+# Main protocrap library with codegen
 rust_library(
     name = "protocrap-with-codegen",
     srcs = glob(
@@ -48,6 +48,7 @@ rust_library(
         "@crates//:base64",
         "@crates//:futures",
         "@crates//:serde",
+        "@crates//:serde_json",
         "@crates//:time",
         "@crates//:anyhow",
         "@crates//:prettyplease",
