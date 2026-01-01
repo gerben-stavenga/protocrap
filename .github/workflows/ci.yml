@@ -14,6 +14,11 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: thumbv7m-none-eabi
+
+      - name: Build no-std test
+        run: cargo build -p no-std-test --target thumbv7m-none-eabi
 
       - name: Cache bazel
         uses: actions/cache@v4
