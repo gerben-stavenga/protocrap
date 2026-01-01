@@ -18,30 +18,7 @@
 
 ## High Priority
 
-### Conformance Tests
-- [ ] **Complete conformance test setup** (95% done - ready to run!)
-  - ✅ Test protocol implementation (parse → serialize roundtrip)
-  - ✅ Varint read/write for test runner protocol
-  - ✅ Binary compiled and runs
-  - ✅ Package deduplication fixed - test messages compile
-  - ✅ Generated code uses proper module structure
-  - ❌ Need to download/build Google's conformance_test_runner
-  - ❌ Need to run actual conformance tests
-  - Location: `conformance/` directory, binary at `target/debug/conformance-protocrap`
-
-- [ ] **Proto Package → Rust Crate Design** (architectural decision needed)
-  - Option 1: Create `protocrap-types` crate for Google well-known types (recommended)
-  - Option 2: Merge packages in codegen (current blocker fix)
-  - Option 3: One crate per package root (too many crates)
-  - Option 4: External types flag `--external-types protocrap_types`
-  - See discussion: impedance mismatch between proto packages and Rust crates
-  - Recommendation: Short-term fix #2, long-term implement #1 + #4
-
 ### Code Quality & Completeness
-- [ ] **Enum default values** (`codegen/src/generator.rs:428`)
-  - Implement support for enum default values in code generation
-  - Currently returns `None` for enum defaults
-
 - [ ] **Better error handling** (`src/containers.rs:72`)
   - Replace panic on allocation failure with proper error propagation
   - Consider using Result types or custom error handling strategy
@@ -120,6 +97,16 @@
   - Publishing to crates.io checklist
 
 ## Completed ✓
+- [x] Conformance tests passing (2025-01) - ~75 expected failures, all design decisions or JSON
+  - INT32/ENUM sign-extension fixed
+  - Oneof field clearing fixed
+  - Integrated into CI via Bazel
+- [x] Enum default values in codegen (tested in codegen-tests)
+- [x] DynamicMessage Ref/Mut split (reflection.rs) - removes debug_message transmute
+- [x] Fuzz testing in CI (2025-01)
+  - decode_raw and decode_chunked fuzz targets
+  - Runs on every PR
+- [x] No-std build verification in CI (2025-01)
 - [x] Fix codegen package/module deduplication (2024-12-23)
   - Implemented package tree structure for hierarchical packages
   - Fixed duplicate module errors in conformance tests
