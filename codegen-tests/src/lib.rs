@@ -6,10 +6,7 @@ use protocrap::{self, containers::Bytes};
 #[cfg(test)]
 use protocrap::{Protobuf, ProtobufRef};
 
-#[cfg(not(bazel))]
-include!(concat!(env!("OUT_DIR"), "/test.pc.rs"));
-#[cfg(bazel)]
-include!("test.pc.rs");
+use test_protos::{DefaultsTest, Status, Test};
 
 // Embedded const from JSON test data
 #[cfg(not(bazel))]
@@ -376,4 +373,43 @@ fn test_embedded_const() {
     assert_eq!(nested.len(), 2);
     assert_eq!(nested[0].x(), 100);
     assert_eq!(nested[1].x(), 200);
+}
+
+#[cfg(test)]
+mod table_tests {
+    use protocrap::descriptor_pool::test_util::compare_tables_rec;
+    use protocrap::descriptor_pool::DescriptorPool;
+    use protocrap::ProtobufMut;
+    use std::collections::HashSet;
+
+    use super::Global;
+
+    #[test]
+    fn test_static_vs_dynamic_tables() {
+        let mut pool = DescriptorPool::new(&Global);
+
+        // Load descriptor set
+        let mut fds = protocrap::google::protobuf::FileDescriptorSet::ProtoType::default();
+        assert!(fds.decode_flat::<32>(&mut pool.arena, test_protos::DESCRIPTOR_BYTES));
+        let fds = pool.arena.place(fds);
+
+        for file in fds.file() {
+            pool.add_file(file.as_ref());
+        }
+
+        // Test all message types
+        let mut seen = HashSet::new();
+
+        let static_table = <test_protos::protobuf_test_messages::proto3::TestAllTypesProto3::ProtoType as protocrap::Protobuf>::table();
+        let dynamic_table = pool
+            .get_table("protobuf_test_messages.proto3.TestAllTypesProto3")
+            .expect("TestAllTypesProto3 not found");
+        compare_tables_rec(static_table, dynamic_table, &mut seen);
+
+        let static_table = <test_protos::protobuf_test_messages::proto2::TestAllTypesProto2::ProtoType as protocrap::Protobuf>::table();
+        let dynamic_table = pool
+            .get_table("protobuf_test_messages.proto2.TestAllTypesProto2")
+            .expect("TestAllTypesProto2 not found");
+        compare_tables_rec(static_table, dynamic_table, &mut seen);
+    }
 }

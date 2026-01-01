@@ -539,33 +539,11 @@ impl<'alloc> DescriptorPool<'alloc> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+pub mod test_util {
     use crate::tables::Table;
-    use crate::Protobuf;
-    use allocator_api2::alloc::Global;
     use std::collections::HashSet;
 
-    #[test]
-    fn test_static_vs_dynamic_tables() {
-        let mut pool = DescriptorPool::new(&Global);
-        let file_descriptor =
-            crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
-        pool.add_file(file_descriptor);
-
-        // FileDescriptorSet recurses through all descriptor.proto message types
-        let static_table =
-            <crate::google::protobuf::FileDescriptorSet::ProtoType as Protobuf>::table();
-        let dynamic_table = pool
-            .get_table("google.protobuf.FileDescriptorSet")
-            .expect("FileDescriptorSet not found in pool");
-
-        let mut seen = HashSet::new();
-        compare_tables_rec(static_table, dynamic_table, &mut seen);
-    }
-
-    fn compare_tables_rec(
+    pub fn compare_tables_rec(
         static_table: &Table,
         dynamic_table: &Table,
         seen: &mut HashSet<*const Table>,
@@ -626,5 +604,30 @@ mod tests {
                 seen,
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Protobuf;
+    use allocator_api2::alloc::Global;
+    use std::collections::HashSet;
+
+    #[test]
+    fn test_static_vs_dynamic_tables() {
+        let mut pool = DescriptorPool::new(&Global);
+        let file_descriptor =
+            crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
+        pool.add_file(file_descriptor);
+
+        let static_table =
+            <crate::google::protobuf::FileDescriptorSet::ProtoType as Protobuf>::table();
+        let dynamic_table = pool
+            .get_table("google.protobuf.FileDescriptorSet")
+            .expect("FileDescriptorSet not found in pool");
+
+        let mut seen = HashSet::new();
+        test_util::compare_tables_rec(static_table, dynamic_table, &mut seen);
     }
 }

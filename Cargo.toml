@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "codegen-tests", "benchmark", "conformance", "fuzz", "no-std-test"]
+members = [".", "fuzz", "no-std-test"]
 exclude = ["fuzz", ".rustup"]
 resolver = "2"
 

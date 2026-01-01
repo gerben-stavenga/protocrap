@@ -6,14 +6,11 @@ use criterion::{
 #[cfg(feature = "prost-compare")]
 use prost::Message;
 
-// Your crate
-use codegen_tests::{Test::ProtoType as Test, make_large, make_medium, make_small};
+use test_protos::{Test::ProtoType as Test, make_large, make_medium, make_small};
 use protocrap::{ProtobufMut, ProtobufRef, arena};
 
 #[cfg(feature = "prost-compare")]
-mod prost_gen {
-    include!(concat!(env!("OUT_DIR"), "/_.rs"));
-}
+use test_proto as prost_gen;
 
 fn bench_decoding(
     group: &mut BenchmarkGroup<'_, impl Measurement>,

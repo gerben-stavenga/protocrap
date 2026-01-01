@@ -3,11 +3,11 @@ use protocrap::proto_json::{ProtoJsonDeserializer, ProtoJsonSerializer};
 use protocrap::descriptor_pool::DescriptorPool;
 use protocrap::reflection::DynamicMessageRef;
 use protocrap::{ProtobufMut, ProtobufRef};
-use protocrap_conformance::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
-use protocrap_conformance::protobuf_test_messages::proto2::TestAllTypesProto2;
-use protocrap_conformance::protobuf_test_messages::proto3::TestAllTypesProto3;
 use protocrap_conformance::{GLOBAL_ALLOC, load_descriptor_pool};
 use serde::Serialize;
+use test_protos::conformance::{ConformanceRequest, ConformanceResponse, WireFormat};
+use test_protos::protobuf_test_messages::proto2::TestAllTypesProto2;
+use test_protos::protobuf_test_messages::proto3::TestAllTypesProto3;
 use std::io::{self, Read, Write};
 
 const TEST_JSON: bool = true;
