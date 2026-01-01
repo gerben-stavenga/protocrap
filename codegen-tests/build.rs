@@ -77,5 +77,28 @@ fn main() -> Result<()> {
         panic!("protocrap-codegen failed");
     }
 
+    // Generate embedded const from JSON test data
+    let json_file = PathBuf::from(&manifest_dir).join("test_data.json");
+    println!("cargo:rerun-if-changed={}", json_file.display());
+
+    let embed_out_file = format!("{}/test_embed.pc.rs", out_dir);
+    let embed_arg = format!("{}:Test", json_file.display());
+    let status = std::process::Command::new(&codegen_bin)
+        .args([
+            desc_file.to_str().unwrap(),
+            "--embed",
+            &embed_arg,
+            "-o",
+            &embed_out_file,
+            "--crate-path",
+            "",  // Use local types, not protocrap::
+        ])
+        .status()
+        .expect("Failed to run protocrap-codegen --embed");
+
+    if !status.success() {
+        panic!("protocrap-codegen --embed failed");
+    }
+
     Ok(())
 }

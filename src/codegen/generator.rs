@@ -114,12 +114,14 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         super::static_gen::generate_static_dynamic(
             &dyn_file_descriptor,
             "google.protobuf.FileDescriptorProto",
+            "protocrap",
         )?
     } else {
         let dynamic_file = protocrap::reflection::DynamicMessageRef::new(file);
         super::static_gen::generate_static_dynamic(
             &dynamic_file,
             "google.protobuf.FileDescriptorProto",
+            "protocrap",
         )?
     };
 
