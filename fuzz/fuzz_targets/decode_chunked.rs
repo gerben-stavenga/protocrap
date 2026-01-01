@@ -3,7 +3,7 @@
 use allocator_api2::alloc::Global;
 use arbitrary::Arbitrary;
 use libfuzzer_sys::fuzz_target;
-use protocrap::decoding::ResumeableDecode;
+use protocrap::ProtobufMut;
 
 #[derive(Arbitrary, Debug)]
 struct ChunkedInput {
@@ -14,12 +14,14 @@ struct ChunkedInput {
 fuzz_target!(|input: ChunkedInput| {
     let mut arena = protocrap::arena::Arena::new(&Global);
     let mut msg = protocrap::google::protobuf::FileDescriptorProto::ProtoType::default();
-    let mut decoder = ResumeableDecode::<32>::new(&mut msg, isize::MAX);
 
     let mut pos = 0;
     let mut chunk_idx = 0;
 
-    while pos < input.data.len() {
+    let mut provider = || -> Result<Option<&[u8]>, ()> {
+        if pos >= input.data.len() {
+            return Ok(None);
+        }
         let size = input
             .chunk_sizes
             .get(chunk_idx)
@@ -28,14 +30,10 @@ fuzz_target!(|input: ChunkedInput| {
             .max(1) as usize;
         let end = (pos + size).min(input.data.len());
         let chunk = &input.data[pos..end];
-
-        if !decoder.resume(chunk, &mut arena) {
-            return; // Decode error is fine for fuzz testing
-        }
-
         pos = end;
         chunk_idx += 1;
-    }
+        Ok(Some(chunk))
+    };
 
-    let _ = decoder.finish(&mut arena);
+    let _ = msg.decode(&mut arena, &mut provider);
 });
