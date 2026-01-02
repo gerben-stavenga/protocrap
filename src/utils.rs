@@ -11,13 +11,6 @@ pub use core::hint::likely;
 #[inline(always)]
 pub const fn likely(b: bool) -> bool { b }
 
-#[cfg(feature = "nightly")]
-pub use core::hint::unlikely;
-
-#[cfg(not(feature = "nightly"))]
-#[inline(always)]
-pub const fn unlikely(b: bool) -> bool { b }
-
 #[repr(C)]
 pub(crate) struct Stack<T> {
     pub sp: usize,

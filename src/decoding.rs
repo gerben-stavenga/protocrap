@@ -1,7 +1,6 @@
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
 
-use crate::ProtobufMut;
 use crate::base::Object;
 use crate::containers::{Bytes, RepeatedField};
 use crate::tables::{AuxTableEntry, Table};
@@ -1103,9 +1102,8 @@ pub struct ResumeableDecode<'a, const STACK_DEPTH: usize> {
 }
 
 impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
-    pub fn new<'pool: 'a, T: ProtobufMut<'pool> + ?Sized>(obj: &'a mut T, limit: isize) -> Self {
-        let table = obj.table();
-        let object = DecodeObject::Message(obj.as_object_mut(), table);
+    pub fn new<'pool: 'a>(msg: crate::reflection::DynamicMessage<'pool, 'a>, limit: isize) -> Self {
+        let object = DecodeObject::Message(msg.object, msg.table);
         Self {
             state: MaybeUninit::new(ResumeableState {
                 limit,

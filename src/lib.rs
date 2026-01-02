@@ -274,30 +274,16 @@ pub trait Protobuf: Default + core::fmt::Debug {
     }
 }
 
-pub const fn as_object<T: Protobuf>(msg: &T) -> &base::Object {
-    unsafe { &*(msg as *const T as *const base::Object) }
-}
-
-pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut base::Object {
-    unsafe { &mut *(msg as *mut T as *mut base::Object) }
-}
-
 /// Read-only protobuf operations (encode, serialize, inspect).
 /// The lifetime parameter `'pool` refers to the descriptor/table pool lifetime.
 pub trait ProtobufRef<'pool> {
-    fn table(&self) -> &'pool generated_code_only::Table;
-
-    fn descriptor(&self) -> &'pool google::protobuf::DescriptorProto::ProtoType {
-        self.table().descriptor
-    }
-
-    fn as_object(&self) -> &base::Object;
+    fn as_dyn<'msg>(&'msg self) -> reflection::DynamicMessageRef<'pool, 'msg>;
 
     fn encode_flat<'a, const STACK_DEPTH: usize>(
         &self,
         buffer: &'a mut [u8],
     ) -> Result<&'a [u8], Error> {
-        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
+        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self.as_dyn());
         let encoding::ResumeResult::Done(buf) = resumeable_encode
             .resume_encode(buffer)
             .ok_or(Error::TreeTooDeep)?
@@ -311,7 +297,7 @@ pub trait ProtobufRef<'pool> {
     fn encode_vec<const STACK_DEPTH: usize>(&self) -> Result<Vec<u8>, Error> {
         let mut buffer = vec![0u8; 1024];
         let mut stack = Vec::new();
-        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self);
+        let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self.as_dyn());
         loop {
             match resumeable_encode
                 .resume_encode(&mut buffer)
@@ -342,7 +328,7 @@ pub trait ProtobufRef<'pool> {
 /// Mutable protobuf operations (decode, deserialize).
 /// Extends ProtobufRef with mutation capabilities.
 pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
-    fn as_object_mut(&mut self) -> &mut base::Object;
+    fn as_dyn_mut<'msg>(&'msg mut self) -> reflection::DynamicMessage<'pool, 'msg>;
 
     #[must_use]
     fn decode_flat<const STACK_DEPTH: usize>(
@@ -350,7 +336,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         arena: &mut crate::arena::Arena,
         buf: &[u8],
     ) -> bool {
-        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self, isize::MAX);
+        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
         if !decoder.resume(buf, arena) {
             return false;
         }
@@ -362,7 +348,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         arena: &mut crate::arena::Arena,
         provider: &'a mut impl FnMut() -> Result<Option<&'a [u8]>, E>,
     ) -> Result<(), Error<E>> {
-        let mut decoder = decoding::ResumeableDecode::<32>::new(self, isize::MAX);
+        let mut decoder = decoding::ResumeableDecode::<32>::new(self.as_dyn_mut(), isize::MAX);
         loop {
             let Some(buffer) = provider().map_err(Error::Io)? else {
                 break;
@@ -386,7 +372,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         F: core::future::Future<Output = Result<Option<&'a [u8]>, E>> + 'a,
     {
         async move {
-            let mut decoder = decoding::ResumeableDecode::<32>::new(self, isize::MAX);
+            let mut decoder = decoding::ResumeableDecode::<32>::new(self.as_dyn_mut(), isize::MAX);
             loop {
                 let Some(buffer) = provider().await.map_err(Error::Io)? else {
                     break;
@@ -408,7 +394,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         arena: &mut crate::arena::Arena,
         reader: &mut impl std::io::BufRead,
     ) -> Result<(), Error<std::io::Error>> {
-        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self, isize::MAX);
+        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
         loop {
             let buffer = reader.fill_buf().map_err(Error::Io)?;
             let len = buffer.len();
@@ -445,7 +431,7 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         use futures::io::AsyncBufReadExt;
 
         async move {
-            let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self, isize::MAX);
+            let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
             loop {
                 let buffer = reader.fill_buf().await.map_err(Error::Io)?;
                 let len = buffer.len();
@@ -486,25 +472,20 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
     where
         D: ::serde::Deserializer<'de>,
     {
-        let table = self.table();
-        serde::serde_deserialize_struct(self.as_object_mut(), table, arena, deserializer)
+        serde::serde_deserialize_struct(self.as_dyn_mut(), arena, deserializer)
     }
 }
 
 // Blanket impl for static protobuf types
 impl<T: Protobuf> ProtobufRef<'static> for T {
-    fn table(&self) -> &'static generated_code_only::Table {
-        T::table()
-    }
-
-    fn as_object(&self) -> &base::Object {
-        as_object(self)
+    fn as_dyn<'msg>(&'msg self) -> reflection::DynamicMessageRef<'static, 'msg> {
+        reflection::DynamicMessageRef::new(self)
     }
 }
 
 impl<T: Protobuf> ProtobufMut<'static> for T {
-    fn as_object_mut(&mut self) -> &mut base::Object {
-        as_object_mut(self)
+    fn as_dyn_mut<'msg>(&'msg mut self) -> reflection::DynamicMessage<'static, 'msg> {
+        reflection::DynamicMessage::new(self)
     }
 }
 

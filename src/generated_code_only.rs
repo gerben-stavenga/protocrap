@@ -16,5 +16,11 @@ pub use crate::wire::FieldKind;
 // Re-export type-erased message types
 pub use crate::base::{Message, Object};
 
-// Re-export helper functions for generated code
-pub use crate::{as_object, as_object_mut};
+pub const fn as_object<T: crate::Protobuf>(msg: &T) -> &crate::base::Object {
+    unsafe { &*(msg as *const T as *const crate::base::Object) }
+}
+
+pub const fn as_object_mut<T: crate::Protobuf>(msg: &mut T) -> &mut crate::base::Object {
+    unsafe { &mut *(msg as *mut T as *mut crate::base::Object) }
+}
+
