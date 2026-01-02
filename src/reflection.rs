@@ -1,5 +1,5 @@
 use crate::{
-    Protobuf, ProtobufMut, ProtobufRef,
+    ProtobufMut, ProtobufRef,
     base::{Message, Object},
     containers::{Bytes, String},
     google::protobuf::{
@@ -132,14 +132,6 @@ pub fn default_value<'a>(field: &'a FieldDescriptorProto) -> Option<Value<'a, 'a
     }
 }
 
-pub fn debug_message<'msg, T: Protobuf>(
-    msg: &'msg T,
-    f: &mut core::fmt::Formatter<'_>,
-) -> core::fmt::Result {
-    let dynamic_msg = DynamicMessageRef::new(msg);
-    core::fmt::Debug::fmt(&dynamic_msg, f)
-}
-
 /// Read-only view of a dynamic protobuf message.
 /// Used for Debug, Serialize, encode, and field inspection.
 pub struct DynamicMessageRef<'pool, 'msg> {
@@ -150,8 +142,8 @@ pub struct DynamicMessageRef<'pool, 'msg> {
 /// Mutable view of a dynamic protobuf message.
 /// Used for deserialization and modification.
 pub struct DynamicMessage<'pool, 'msg> {
-    pub object: &'msg mut Object,
-    pub table: &'pool Table,
+    pub(crate) object: &'msg mut Object,
+    pub(crate) table: &'pool Table,
 }
 
 // Deref allows DynamicMessage to use all DynamicMessageRef methods
@@ -189,14 +181,11 @@ impl<'pool, 'msg> core::fmt::Debug for DynamicMessage<'pool, 'msg> {
 impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
     pub fn new<T>(msg: &'msg T) -> Self
     where
-        T: crate::Protobuf,
+        T: crate::generated_code_only::Protobuf,
     {
-        DynamicMessageRef {
-            object: crate::generated_code_only::as_object(msg),
-            table: T::table(),
-        }
+        msg.as_dyn()
     }
-
+    
     pub fn descriptor(&self) -> &'pool DescriptorProto {
         self.table.descriptor
     }
@@ -383,12 +372,9 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
 impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
     pub fn new<T>(msg: &'msg mut T) -> Self
     where
-        T: crate::Protobuf,
+        T: crate::generated_code_only::Protobuf,
     {
-        DynamicMessage {
-            object: crate::generated_code_only::as_object_mut(msg),
-            table: T::table(),
-        }
+        msg.as_dyn_mut()
     }
 
     pub fn as_ref(&self) -> &DynamicMessageRef<'pool, 'msg> {

@@ -81,7 +81,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -246,7 +246,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -990,7 +990,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -1198,7 +1198,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -1373,7 +1373,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -2109,7 +2109,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -2416,7 +2416,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -3810,7 +3810,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -4388,7 +4388,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -4558,7 +4558,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -4708,7 +4708,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -5085,7 +5085,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -5297,7 +5297,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -5540,7 +5540,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -5946,7 +5946,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -8062,7 +8062,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -9484,7 +9484,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -9643,7 +9643,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -10068,7 +10068,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -11778,7 +11778,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -12975,7 +12975,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -14301,7 +14301,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -15630,7 +15630,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -16884,7 +16884,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -18170,7 +18170,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -18334,7 +18334,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -18773,7 +18773,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -18983,7 +18983,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -19430,7 +19430,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -19663,7 +19663,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -19896,7 +19896,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -20135,7 +20135,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {
@@ -20296,7 +20296,7 @@ pub mod google {
                         &self,
                         f: &mut core::fmt::Formatter<'_>,
                     ) -> core::fmt::Result {
-                        protocrap::reflection::debug_message(self, f)
+                        protocrap::generated_code_only::debug_message(self, f)
                     }
                 }
                 impl ProtoType {
@@ -20559,7 +20559,7 @@ pub mod google {
             }
             impl core::fmt::Debug for ProtoType {
                 fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                    protocrap::reflection::debug_message(self, f)
+                    protocrap::generated_code_only::debug_message(self, f)
                 }
             }
             impl ProtoType {

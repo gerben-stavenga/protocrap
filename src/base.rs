@@ -39,9 +39,9 @@ use core::marker::PhantomData;
 use core::ops::{Deref, DerefMut};
 
 use crate::{
-    Protobuf,
     arena::Arena,
     containers::{Bytes, RepeatedField},
+    generated_code_only::Protobuf,
 };
 
 /// Type-erased message pointer for table-driven code.

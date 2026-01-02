@@ -394,7 +394,7 @@ fn generate_message_impl(
 
         impl core::fmt::Debug for ProtoType {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                protocrap::reflection::debug_message(self, f)
+                protocrap::generated_code_only::debug_message(self, f)
             }
         }
 

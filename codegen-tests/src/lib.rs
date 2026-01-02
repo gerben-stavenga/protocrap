@@ -4,7 +4,7 @@ use allocator_api2::alloc::Global;
 use protocrap::tests::assert_roundtrip;
 use protocrap::{self, containers::Bytes};
 #[cfg(test)]
-use protocrap::{generated_code_only::Protobuf, ProtobufRef};
+use protocrap::ProtobufRef;
 
 use test_protos::{DefaultsTest, Status, Test};
 
@@ -56,20 +56,22 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
 }
 
 #[cfg(test)]
-fn assert_json_roundtrip<T: Protobuf>(msg: &T) {
-    let serialized = serde_json::to_string(&protocrap::reflection::DynamicMessageRef::new(msg))
+fn assert_json_roundtrip<'a, T: protocrap::ProtobufMut<'a> + Default>(msg: &T) {
+    let serialized = serde_json::to_string(&msg.as_dyn())
         .expect("should serialize");
 
     println!("Serialized JSON: {}", serialized);
 
     let mut arena = protocrap::arena::Arena::new(&Global);
-    let roundtrip_msg = {
+    let mut roundtrip_msg = T::default();
+    {
         let mut deserializer = serde_json::Deserializer::from_str(&serialized);
-        let seed = protocrap::serde::SerdeDeserialize::<T>::new(&mut arena);
-        use serde::de::DeserializeSeed;
-        seed.deserialize(&mut deserializer)
-            .expect("should deserialize")
-    };
+        protocrap::serde::serde_deserialize_struct(
+            roundtrip_msg.as_dyn_mut(),
+            &mut arena,
+            &mut deserializer,
+        ).expect("should deserialize");
+    }
     let data = msg.encode_vec::<100>().expect("msg should encode");
     let roundtrip_data = roundtrip_msg
         .encode_vec::<100>()

@@ -1,7 +1,6 @@
 use anyhow::{Context, Result, bail};
 use protocrap::proto_json::{ProtoJsonDeserializer, ProtoJsonSerializer};
 use protocrap::descriptor_pool::DescriptorPool;
-use protocrap::reflection::DynamicMessageRef;
 use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap_conformance::{GLOBAL_ALLOC, load_descriptor_pool};
 use serde::Serialize;
@@ -12,12 +11,12 @@ use std::io::{self, Read, Write};
 
 const TEST_JSON: bool = true;
 
-fn roundtrip_proto<T: protocrap::generated_code_only::Protobuf + 'static>(
+fn roundtrip_proto<'pool, T: protocrap::ProtobufMut<'pool>>(
+    msg: &mut T,
     arena: &mut protocrap::arena::Arena,
     request: &ConformanceRequest::ProtoType,
 ) -> ConformanceResponse::ProtoType {
     let mut response = ConformanceResponse::ProtoType::default();
-    let msg = arena.place(T::default());
     // Decode input
     if let Some(data) = request.get_protobuf_payload() {
         if !msg.decode_flat::<32>(arena, data) {
@@ -25,7 +24,7 @@ fn roundtrip_proto<T: protocrap::generated_code_only::Protobuf + 'static>(
             response.set_parse_error(
                 &format!(
                     "Failed to decode message of type '{}'",
-                    T::table().descriptor.name()
+                    msg.descriptor().name()
                 ),
                 arena,
             );
@@ -68,7 +67,7 @@ fn roundtrip_proto<T: protocrap::generated_code_only::Protobuf + 'static>(
                 return response;
             }
             let mut inner = serde_json::Serializer::new(Vec::new());
-            let dynamic_msg = DynamicMessageRef::new(msg);
+            let dynamic_msg = msg.as_dyn();
             match dynamic_msg.serialize(ProtoJsonSerializer::new(&mut inner)) {
                 Ok(()) => {
                     let vec = inner.into_inner();
@@ -115,69 +114,7 @@ fn do_test_dynamic(
             return response;
         }
     };
-    if let Some(data) = request.get_protobuf_payload() {
-        if !msg.decode_flat::<32>(arena, data) {
-            response.set_parse_error(
-                &format!("Failed to decode message of type '{}'", message_type),
-                arena,
-            );
-            return response;
-        }
-    } else if let Some(data) = request.get_json_payload() {
-        if !TEST_JSON {
-            response.set_skipped("Json format input not supported", arena);
-            return response;
-        }
-        let mut inner = serde_json::Deserializer::from_str(data);
-        if let Err(e) = msg.serde_deserialize(arena, ProtoJsonDeserializer::new(&mut inner))
-        {
-            response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena);
-            return response;
-        }
-    } else {
-        response.set_skipped("Input format not supported", arena);
-        return response;
-    };
-
-    eprint!("Decoded msg");
-
-    match request.requested_output_format() {
-        Some(WireFormat::PROTOBUF) => match msg.encode_vec::<32>() {
-            Ok(bytes) => {
-                response.set_protobuf_payload(&bytes, arena);
-            }
-            Err(e) => {
-                response.set_serialize_error(&format!("Encode error: {:?}", e), arena);
-            }
-        },
-        Some(WireFormat::JSON) => {
-            if !TEST_JSON {
-                response.set_skipped("Json format output not supported", arena);
-                return response;
-            }
-            let mut inner = serde_json::Serializer::new(Vec::new());
-            match msg.serialize(ProtoJsonSerializer::new(&mut inner)) {
-                Ok(()) => {
-                    let vec = inner.into_inner();
-                    let json_str = String::from_utf8(vec).unwrap_or_default();
-                    response.set_json_payload(&json_str, arena);
-                }
-                Err(e) => {
-                    response.set_serialize_error(&format!("JSON serialize error: {:?}", e), arena);
-                }
-            }
-        }
-        Some(WireFormat::TEXT_FORMAT) => {
-            response.set_skipped("Text format output not supported", arena);
-        }
-        Some(WireFormat::JSPB) => {
-            response.set_skipped("JSPB output not supported", arena);
-        }
-        None | Some(WireFormat::UNSPECIFIED) => {
-            response.set_skipped("Output format unspecified", arena);
-        }
-    };
-    response
+    roundtrip_proto(&mut msg, arena, request)
 }
 
 fn do_test(
@@ -190,7 +127,8 @@ fn do_test(
     let is_proto3 = message_type.contains("Proto3") || message_type.is_empty();
 
     if is_proto3 {
-        roundtrip_proto::<TestAllTypesProto3::ProtoType>(arena, request)
+        let mut msg = TestAllTypesProto3::ProtoType::default();
+        roundtrip_proto::<TestAllTypesProto3::ProtoType>(&mut msg, arena, request)
     } else {
         if message_type != "protobuf_test_messages.proto2.TestAllTypesProto2" {
             response.set_skipped(
@@ -199,7 +137,8 @@ fn do_test(
             );
             return response;
         }
-        roundtrip_proto::<TestAllTypesProto2::ProtoType>(arena, request)
+        let mut msg = TestAllTypesProto2::ProtoType::default();
+        roundtrip_proto::<TestAllTypesProto2::ProtoType>(&mut msg, arena, request)
     }
 }
 

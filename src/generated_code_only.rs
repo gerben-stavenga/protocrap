@@ -3,6 +3,7 @@
 //! This module re-exports implementation details that generated code needs access to.
 //! These are not part of the stable public API and may change without notice.
 
+use crate::ProtobufRef;
 // Re-export table types
 pub use crate::tables::{AuxTableEntry, Table, TableWithEntries};
 
@@ -29,3 +30,9 @@ pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut crate::base::Object
     unsafe { &mut *(msg as *mut T as *mut crate::base::Object) }
 }
 
+pub fn debug_message<T: Protobuf>(
+    msg: &T,
+    f: &mut core::fmt::Formatter<'_>,
+) -> core::fmt::Result {
+    core::fmt::Debug::fmt(&msg.as_dyn(), f)
+}
