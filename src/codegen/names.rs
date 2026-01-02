@@ -63,9 +63,9 @@ pub fn rust_field_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
         let msg_type = rust_type_tokens(field);
         if is_in_oneof(field) {
             // In oneof, use TypedMessage<T> because presence is tracked by the oneof discriminant
-            quote! { protocrap::base::TypedMessage<#msg_type::ProtoType> }
+            quote! { protocrap::TypedMessage<#msg_type::ProtoType> }
         } else {
-            quote! { protocrap::base::OptionalMessage<#msg_type::ProtoType> }
+            quote! { protocrap::generated_code_only::OptionalMessage<#msg_type::ProtoType> }
         }
     } else {
         rust_element_type_tokens(field)
@@ -76,7 +76,7 @@ pub fn rust_element_type_tokens(field: &FieldDescriptorProto) -> TokenStream {
     match field.r#type().unwrap() {
         Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
             let msg_type = rust_type_tokens(field);
-            quote! { protocrap::base::TypedMessage<#msg_type::ProtoType> }
+            quote! { protocrap::TypedMessage<#msg_type::ProtoType> }
         }
         Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 => quote! { i32 },
         Type::TYPE_INT64 | Type::TYPE_SINT64 | Type::TYPE_SFIXED64 => quote! { i64 },

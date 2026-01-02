@@ -4,7 +4,7 @@ use allocator_api2::alloc::Global;
 use protocrap::tests::assert_roundtrip;
 use protocrap::{self, containers::Bytes};
 #[cfg(test)]
-use protocrap::{Protobuf, ProtobufRef};
+use protocrap::{generated_code_only::Protobuf, ProtobufRef};
 
 use test_protos::{DefaultsTest, Status, Test};
 
@@ -400,13 +400,13 @@ mod table_tests {
         // Test all message types
         let mut seen = HashSet::new();
 
-        let static_table = <test_protos::protobuf_test_messages::proto3::TestAllTypesProto3::ProtoType as protocrap::Protobuf>::table();
+        let static_table = <test_protos::protobuf_test_messages::proto3::TestAllTypesProto3::ProtoType as protocrap::generated_code_only::Protobuf>::table();
         let dynamic_table = pool
             .get_table("protobuf_test_messages.proto3.TestAllTypesProto3")
             .expect("TestAllTypesProto3 not found");
         compare_tables_rec(static_table, dynamic_table, &mut seen);
 
-        let static_table = <test_protos::protobuf_test_messages::proto2::TestAllTypesProto2::ProtoType as protocrap::Protobuf>::table();
+        let static_table = <test_protos::protobuf_test_messages::proto2::TestAllTypesProto2::ProtoType as protocrap::generated_code_only::Protobuf>::table();
         let dynamic_table = pool
             .get_table("protobuf_test_messages.proto2.TestAllTypesProto2")
             .expect("TestAllTypesProto2 not found");

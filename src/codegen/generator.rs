@@ -211,7 +211,7 @@ fn generate_message(
         pub mod #name {
             use super::protocrap;
             #[allow(unused_imports)]
-            use protocrap::Protobuf;
+            use protocrap::generated_code_only::Protobuf;
             #msg
         }
     })
@@ -420,7 +420,7 @@ fn generate_message_impl(
                 &#file_descriptor_path
             }
 
-            const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
+            pub const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                 #message_descriptor_accessor
             }
 
@@ -712,7 +712,7 @@ fn generate_accessors(
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
-                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::base::TypedMessage::<#msg_type::ProtoType>::new_in(arena));
+                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena));
                             }
                             use core::ops::DerefMut;
                             unsafe { self.#oneof_field_name.#field_name.deref_mut() }
@@ -782,16 +782,16 @@ fn generate_accessors(
                 let field_name_mut = format_ident!("{}_mut", field_name);
                 let add_field_name = format_ident!("add_{}", field_name);
                 methods.push(quote! {
-                    pub const fn #field_name(&self) -> &[protocrap::base::TypedMessage<#msg_type::ProtoType>] {
+                    pub const fn #field_name(&self) -> &[protocrap::TypedMessage<#msg_type::ProtoType>] {
                         self.#field_name.slice()
                     }
 
-                    pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<protocrap::base::TypedMessage<#msg_type::ProtoType>> {
+                    pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<protocrap::TypedMessage<#msg_type::ProtoType>> {
                         &mut self.#field_name
                     }
 
                     pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                        let msg = protocrap::base::TypedMessage::<#msg_type::ProtoType>::new_in(arena);
+                        let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena);
                         self.#field_name.push(msg, arena);
                         self.#field_name.last_mut().unwrap()
                     }
@@ -1065,7 +1065,7 @@ fn build_descriptor_accessor(path: &[usize]) -> TokenStream {
 
 fn generate_protobuf_impl() -> TokenStream {
     quote! {
-        impl protocrap::Protobuf for ProtoType {
+        impl protocrap::generated_code_only::Protobuf for ProtoType {
             fn table() -> &'static protocrap::generated_code_only::Table {
                 &TABLE.table
             }

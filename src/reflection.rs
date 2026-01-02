@@ -143,8 +143,8 @@ pub fn debug_message<'msg, T: Protobuf>(
 /// Read-only view of a dynamic protobuf message.
 /// Used for Debug, Serialize, encode, and field inspection.
 pub struct DynamicMessageRef<'pool, 'msg> {
-    pub object: &'msg Object,
-    pub table: &'pool Table,
+    pub(crate) object: &'msg Object,
+    pub(crate) table: &'pool Table,
 }
 
 /// Mutable view of a dynamic protobuf message.
@@ -192,13 +192,9 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
         T: crate::Protobuf,
     {
         DynamicMessageRef {
-            object: crate::as_object(msg),
+            object: crate::generated_code_only::as_object(msg),
             table: T::table(),
         }
-    }
-
-    pub fn table(&self) -> &'pool Table {
-        self.table
     }
 
     pub fn descriptor(&self) -> &'pool DescriptorProto {
@@ -390,7 +386,7 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
         T: crate::Protobuf,
     {
         DynamicMessage {
-            object: crate::as_object_mut(msg),
+            object: crate::generated_code_only::as_object_mut(msg),
             table: T::table(),
         }
     }
@@ -406,36 +402,36 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
 
 // ProtobufRef implementation for DynamicMessageRef
 impl<'pool, 'msg> ProtobufRef<'pool> for DynamicMessageRef<'pool, 'msg> {
-    fn table(&self) -> &'pool crate::tables::Table {
-        self.table
-    }
-
-    fn as_object(&self) -> &crate::base::Object {
-        self.object
+    fn as_dyn<'a>(&'a self) -> DynamicMessageRef<'pool, 'a> {
+        DynamicMessageRef {
+            object: self.object,
+            table: self.table,
+        }
     }
 }
 
-// ProtobufRef implementation for DynamicMessage (delegates via Deref)
 impl<'pool, 'msg> ProtobufRef<'pool> for DynamicMessage<'pool, 'msg> {
-    fn table(&self) -> &'pool crate::tables::Table {
-        self.table
-    }
-
-    fn as_object(&self) -> &crate::base::Object {
-        self.object
+    fn as_dyn<'a>(&'a self) -> DynamicMessageRef<'pool, 'a> {
+        DynamicMessageRef {
+            object: self.object,
+            table: self.table,
+        }
     }
 }
 
 // ProtobufMut implementation for DynamicMessage
 impl<'pool, 'msg> ProtobufMut<'pool> for DynamicMessage<'pool, 'msg> {
-    fn as_object_mut(&mut self) -> &mut crate::base::Object {
-        self.object
+    fn as_dyn_mut<'a>(&'a mut self) -> DynamicMessage<'pool, 'a> {
+        DynamicMessage {
+            object: self.object,
+            table: self.table,
+        }
     }
 }
 
 pub struct DynamicMessageArray<'pool, 'msg> {
-    pub object: &'msg [Message],
-    pub table: &'pool Table,
+    pub(crate) object: &'msg [Message],
+    pub(crate) table: &'pool Table,
 }
 
 impl<'pool, 'msg> core::fmt::Debug for DynamicMessageArray<'pool, 'msg> {

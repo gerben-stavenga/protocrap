@@ -14,7 +14,18 @@ pub use crate::encoding::TableEntry as EncodeTableEntry;
 pub use crate::wire::FieldKind;
 
 // Re-export type-erased message types
-pub use crate::base::{Message, Object};
+pub use crate::base::{Object, OptionalMessage};
 
-// Re-export helper functions for generated code
-pub use crate::{as_object, as_object_mut};
+/// Marker trait for generated protobuf message types.
+pub trait Protobuf: Default + core::fmt::Debug {
+    fn table() -> &'static Table;
+}
+
+pub const fn as_object<T: Protobuf>(msg: &T) -> &crate::base::Object {
+    unsafe { &*(msg as *const T as *const crate::base::Object) }
+}
+
+pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut crate::base::Object {
+    unsafe { &mut *(msg as *mut T as *mut crate::base::Object) }
+}
+
