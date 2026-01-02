@@ -12,7 +12,7 @@ use std::io::{self, Read, Write};
 
 const TEST_JSON: bool = true;
 
-fn roundtrip_proto<T: protocrap::Protobuf + 'static>(
+fn roundtrip_proto<T: protocrap::generated_code_only::Protobuf + 'static>(
     arena: &mut protocrap::arena::Arena,
     request: &ConformanceRequest::ProtoType,
 ) -> ConformanceResponse::ProtoType {

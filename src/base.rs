@@ -45,10 +45,9 @@ use crate::{
 };
 
 /// Type-erased message pointer for table-driven code.
-/// Used internally by the codec; prefer `OptionalMessage<T>` in generated code.
 #[derive(Debug, Default, Clone, Copy)]
 #[repr(C)]
-pub struct Message(pub *mut Object);
+pub(crate) struct Message(pub *mut Object);
 
 unsafe impl Send for Message {}
 unsafe impl Sync for Message {}
@@ -56,6 +55,24 @@ unsafe impl Sync for Message {}
 impl Message {
     pub const fn new<T>(msg: &T) -> Self {
         Message(msg as *const T as *mut T as *mut Object)
+    }
+
+    pub const fn null() -> Self {
+        Message(core::ptr::null_mut())
+    }
+
+    pub const fn is_null(&self) -> bool {
+        self.0.is_null()
+    }
+
+    pub const fn as_ref<T>(&self) -> &T {
+        debug_assert!(!self.0.is_null());
+        unsafe { &*(self.0 as *const T) }
+    }
+
+    pub fn as_mut<T>(&mut self) -> &mut T {
+        debug_assert!(!self.0.is_null());
+        unsafe { &mut *(self.0 as *mut T) }
     }
 }
 
@@ -66,13 +83,10 @@ impl Message {
 /// table-driven codec that treats it as `*mut Object`.
 #[repr(transparent)]
 pub struct TypedMessage<T: Protobuf> {
-    ptr: *mut Object,
+    msg: Message,
     _marker: PhantomData<T>,
 }
 
-// Safety: TypedMessage is just a pointer, safe to send/sync like Message
-unsafe impl<T: Protobuf> Send for TypedMessage<T> {}
-unsafe impl<T: Protobuf> Sync for TypedMessage<T> {}
 
 impl<T: Protobuf> Clone for TypedMessage<T> {
     fn clone(&self) -> Self {
@@ -94,15 +108,13 @@ impl<T: Protobuf> Deref for TypedMessage<T> {
     type Target = T;
 
     fn deref(&self) -> &T {
-        // Safety: TypedMessage invariant - ptr is always valid and non-null
-        unsafe { &*(self.ptr as *const T) }
+        self.msg.as_ref()
     }
 }
 
 impl<T: Protobuf> DerefMut for TypedMessage<T> {
     fn deref_mut(&mut self) -> &mut T {
-        // Safety: TypedMessage invariant - ptr is always valid and non-null
-        unsafe { &mut *(self.ptr as *mut T) }
+        self.msg.as_mut()
     }
 }
 
@@ -111,27 +123,22 @@ impl<T: Protobuf> TypedMessage<T> {
     pub fn new_in(arena: &mut Arena) -> Self {
         let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
         Self {
-            ptr: obj,
+            msg: Message(obj as *mut Object),
             _marker: PhantomData,
         }
     }
 
     /// Create from a static reference (for static initializers).
-    pub const fn from_static(msg: &'static T) -> Self {
+    pub const fn from_static(r: &'static T) -> Self {
         Self {
-            ptr: msg as *const T as *mut T as *mut Object,
+            msg: Message::new(r),
             _marker: PhantomData,
         }
     }
 
-    /// Convert to type-erased Message for table-driven code.
-    pub const fn as_message(&self) -> Message {
-        Message(self.ptr as *mut Object)
-    }
-
     /// Get a reference to the underlying message (const-compatible).
     pub const fn as_ref(&self) -> &T {
-        unsafe { &*(self.ptr as *const T) }
+        self.msg.as_ref()
     }
 }
 
@@ -141,13 +148,10 @@ impl<T: Protobuf> TypedMessage<T> {
 /// table-driven codec that treats it as `*mut Object`.
 #[repr(transparent)]
 pub struct OptionalMessage<T: Protobuf> {
-    ptr: *mut Object,
+    msg: Message,
     _marker: PhantomData<T>,
 }
 
-// Safety: OptionalMessage is just a pointer, safe to send/sync like Message
-unsafe impl<T: Protobuf> Send for OptionalMessage<T> {}
-unsafe impl<T: Protobuf> Sync for OptionalMessage<T> {}
 
 impl<T: Protobuf> Clone for OptionalMessage<T> {
     fn clone(&self) -> Self {
@@ -176,66 +180,58 @@ impl<T: Protobuf> OptionalMessage<T> {
     /// Create an empty (None) optional message.
     pub const fn none() -> Self {
         Self {
-            ptr: core::ptr::null_mut(),
+            msg: Message::null(),
             _marker: PhantomData,
         }
     }
 
     /// Create from a static reference (for static initializers).
-    pub const fn from_static(msg: &'static T) -> Self {
+    pub const fn from_static(r: &'static T) -> Self {
         Self {
-            ptr: msg as *const T as *mut T as *mut Object,
+            msg: Message::new(r),
             _marker: PhantomData,
         }
     }
 
     /// Check if the message is present.
     pub const fn is_some(&self) -> bool {
-        !self.ptr.is_null()
+        !self.msg.is_null()
     }
 
     /// Check if the message is absent.
     pub const fn is_none(&self) -> bool {
-        self.ptr.is_null()
+        self.msg.is_null()
     }
 
     /// Get a reference to the message if present.
     pub const fn get(&self) -> Option<&T> {
-        if self.ptr.is_null() {
+        if self.msg.is_null() {
             None
         } else {
-            // Safety: ptr is non-null and points to a valid T allocated in arena
-            Some(unsafe { &*(self.ptr as *const T) })
+            Some(self.msg.as_ref())
         }
     }
 
     /// Get a mutable reference to the message if present.
     pub fn get_mut(&mut self) -> Option<&mut T> {
-        if self.ptr.is_null() {
+        if self.msg.is_null() {
             None
         } else {
-            // Safety: ptr is non-null and points to a valid T allocated in arena
-            Some(unsafe { &mut *(self.ptr as *mut T) })
+            Some(self.msg.as_mut())
         }
     }
 
     pub fn get_or_init(&mut self, arena: &mut Arena) -> &mut T {
-        if self.ptr.is_null() {
+        if self.msg.is_null() {
             let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
-            self.ptr = obj;
+            self.msg = Message(obj as *mut Object);
         }
-        // Safety: ptr is now non-null and points to a valid T allocated in arena
-        unsafe { &mut *(self.ptr as *mut T) }
+        self.msg.as_mut()
     }
 
     /// Clear the message (set to None).
     pub fn clear(&mut self) {
-        self.ptr = core::ptr::null_mut();
-    }
-
-    /// Convert to type-erased Message for table-driven code.
-    pub const fn as_message(&self) -> Message {
-        Message(self.ptr as *mut Object)
+        self.msg = Message::null();
     }
 }
 

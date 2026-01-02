@@ -85,7 +85,7 @@
 //! Inspect messages dynamically without compile-time knowledge of the schema:
 //!
 //! ```
-//! use protocrap::{Protobuf, ProtobufRef, arena::Arena};
+//! use protocrap::{ProtobufRef, arena::Arena};
 //! use protocrap::google::protobuf::{FileDescriptorProto, DescriptorProto};
 //! use protocrap::descriptor_pool::DescriptorPool;
 //! use allocator_api2::alloc::Global;
@@ -163,9 +163,9 @@
 //! ## Modules
 //!
 //! - [`arena`]: Arena allocator for message data
-//! - [`base`]: Core message wrapper types ([`base::TypedMessage`], [`base::OptionalMessage`])
 //! - [`containers`]: Collection types ([`containers::RepeatedField`], [`containers::String`], [`containers::Bytes`])
 //! - [`reflection`]: Runtime message inspection and dynamic decoding
+//! - [`TypedMessage`]: Wrapper for repeated message elements
 //!
 //! ## Feature Flags
 //!
@@ -200,9 +200,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub mod arena;
-pub mod base;
+pub(crate) mod base;
 pub mod containers;
 pub mod reflection;
+
+// Re-export user-facing types at crate root
+pub use base::TypedMessage;
 #[cfg(feature = "std")]
 pub mod descriptor_pool;
 
@@ -265,14 +268,8 @@ impl<E> From<E> for Error<E> {
     }
 }
 
-// One would like to implement Default and Debug for all T: Protobuf via a blanket impl,
-// but that is not allowed because Default and Debug are not local to this crate.
-pub trait Protobuf: Default + core::fmt::Debug {
-    fn table() -> &'static generated_code_only::Table;
-    fn descriptor_proto() -> &'static google::protobuf::DescriptorProto::ProtoType {
-        Self::table().descriptor
-    }
-}
+// Re-export Protobuf trait for internal use
+pub(crate) use generated_code_only::Protobuf;
 
 /// Read-only protobuf operations (encode, serialize, inspect).
 /// The lifetime parameter `'pool` refers to the descriptor/table pool lifetime.

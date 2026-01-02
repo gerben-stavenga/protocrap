@@ -430,8 +430,8 @@ impl<'pool, 'msg> ProtobufMut<'pool> for DynamicMessage<'pool, 'msg> {
 }
 
 pub struct DynamicMessageArray<'pool, 'msg> {
-    pub object: &'msg [Message],
-    pub table: &'pool Table,
+    pub(crate) object: &'msg [Message],
+    pub(crate) table: &'pool Table,
 }
 
 impl<'pool, 'msg> core::fmt::Debug for DynamicMessageArray<'pool, 'msg> {

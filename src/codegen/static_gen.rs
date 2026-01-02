@@ -191,8 +191,8 @@ fn generate_field_value(
             let type_name = field.type_name();
             let static_ref = generate_nested_message(&msg, type_name, crate_path)?;
             Ok((
-                quote! { protocrap::base::OptionalMessage::from_static(#static_ref) },
-                quote! { protocrap::base::OptionalMessage },
+                quote! { protocrap::generated_code_only::OptionalMessage::from_static(#static_ref) },
+                quote! { protocrap::generated_code_only::OptionalMessage },
             ))
         }
         Value::RepeatedBool(list) => generate_repeated_scalar(list),
@@ -252,19 +252,19 @@ fn generate_field_value(
             let mut elements = Vec::new();
             for msg in list.iter() {
                 let static_ref = generate_nested_message(&msg, type_name, crate_path)?;
-                elements.push(quote! { protocrap::base::TypedMessage::from_static(#static_ref) });
+                elements.push(quote! { protocrap::TypedMessage::from_static(#static_ref) });
             }
             let len = elements.len();
             Ok((
                 quote! {
                     {
-                        static ELEMENTS: [protocrap::base::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>; #len] = [
+                        static ELEMENTS: [protocrap::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>; #len] = [
                             #(#elements),*
                         ];
                         protocrap::containers::RepeatedField::from_static(&ELEMENTS)
                     }
                 },
-                quote! { protocrap::containers::RepeatedField<protocrap::base::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>> },
+                quote! { protocrap::containers::RepeatedField<protocrap::TypedMessage<#prefix #(#path_parts)::* ::ProtoType>> },
             ))
         }
     }
@@ -292,7 +292,7 @@ fn generate_default_value(field: &FieldDescriptorProto) -> TokenStream {
         Type::TYPE_STRING => quote! { protocrap::containers::String::new() },
         Type::TYPE_BYTES => quote! { protocrap::containers::Bytes::new() },
         Type::TYPE_MESSAGE | Type::TYPE_GROUP => quote! {
-            protocrap::base::OptionalMessage::none()
+            protocrap::generated_code_only::OptionalMessage::none()
         },
         Type::TYPE_BOOL => quote! { false },
         Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 | Type::TYPE_ENUM => {
