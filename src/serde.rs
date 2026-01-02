@@ -1,6 +1,6 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
 
-use crate::{Protobuf, ProtobufMut};
+use crate::ProtobufMut;
 use crate::base::Object;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
 use crate::reflection::{DynamicMessage, DynamicMessageArray, DynamicMessageRef, Value, default_value};
@@ -732,7 +732,7 @@ impl<'arena, 'alloc, T> SerdeDeserialize<'arena, 'alloc, T> {
     }
 }
 
-impl<'de, 'arena, 'alloc, T: Protobuf + 'alloc> serde::de::DeserializeSeed<'de>
+impl<'de, 'arena, 'alloc, T: crate::generated_code_only::Protobuf + 'alloc> serde::de::DeserializeSeed<'de>
     for SerdeDeserialize<'arena, 'alloc, T>
 {
     type Value = T;

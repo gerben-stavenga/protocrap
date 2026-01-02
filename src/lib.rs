@@ -273,6 +273,10 @@ impl<E> From<E> for Error<E> {
 pub trait ProtobufRef<'pool> {
     fn as_dyn<'msg>(&'msg self) -> reflection::DynamicMessageRef<'pool, 'msg>;
 
+    fn descriptor(&self) -> &'pool crate::google::protobuf::DescriptorProto::ProtoType {
+        self.as_dyn().descriptor()
+    }
+
     fn encode_flat<'a, const STACK_DEPTH: usize>(
         &self,
         buffer: &'a mut [u8],
@@ -471,28 +475,34 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
 }
 
 // Blanket impl for static protobuf types
-impl<T: Protobuf> ProtobufRef<'static> for T {
+impl<T: generated_code_only::Protobuf> ProtobufRef<'static> for T {
     fn as_dyn<'msg>(&'msg self) -> reflection::DynamicMessageRef<'static, 'msg> {
-        reflection::DynamicMessageRef::new(self)
+        reflection::DynamicMessageRef {
+            object: crate::generated_code_only::as_object(self),
+            table: T::table(),
+        }
     }
 }
 
-impl<T: Protobuf> ProtobufMut<'static> for T {
+impl<T: generated_code_only::Protobuf> ProtobufMut<'static> for T {
     fn as_dyn_mut<'msg>(&'msg mut self) -> reflection::DynamicMessage<'static, 'msg> {
-        reflection::DynamicMessage::new(self)
+        reflection::DynamicMessage {
+            object: crate::generated_code_only::as_object_mut(self),
+            table: T::table(),
+        }
     }
 }
 
 #[cfg(feature = "std")]
 pub mod tests {
-    use crate::{Protobuf, ProtobufMut, ProtobufRef};
+    use crate::ProtobufMut;
 
     #[cfg(feature = "nightly")]
     use std::alloc::Global;
     #[cfg(not(feature = "nightly"))]
     use allocator_api2::alloc::Global;
 
-    pub fn assert_roundtrip<T: Protobuf>(msg: &T) {
+    pub fn assert_roundtrip<'a, T: ProtobufMut<'a> + Default>(msg: &T) {
         let data = msg.encode_vec::<32>().expect("msg should encode");
 
         let mut arena = crate::arena::Arena::new(&Global);
@@ -501,7 +511,7 @@ pub mod tests {
 
         println!(
             "Encoded {} ({} bytes)",
-            T::table().descriptor.name(),
+            msg.as_dyn().descriptor().name(),
             data.len()
         );
         // println!("Roundtrip message: {:#?}", roundtrip_msg);
@@ -513,7 +523,6 @@ pub mod tests {
 
     #[test]
     fn descriptor_accessors() {
-        use crate::Protobuf;
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
         let message_descriptor =
@@ -536,6 +545,7 @@ pub mod tests {
 
     #[test]
     fn dynamic_file_descriptor_roundtrip() {
+        use crate::ProtobufRef;
         let mut pool = crate::descriptor_pool::DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();

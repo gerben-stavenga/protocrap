@@ -610,7 +610,7 @@ pub mod test_util {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Protobuf;
+    use crate::generated_code_only::Protobuf;
     use allocator_api2::alloc::Global;
     use std::collections::HashSet;
 
