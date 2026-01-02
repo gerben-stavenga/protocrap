@@ -1,6 +1,7 @@
 // protocrap-codegen/src/static_gen.rs
 
 use super::protocrap;
+
 use anyhow::Result;
 use proc_macro2::{Literal, TokenStream};
 use protocrap::{

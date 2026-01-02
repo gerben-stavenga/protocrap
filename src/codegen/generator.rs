@@ -1,9 +1,10 @@
 // protocrap-codegen/src/generator.rs
 
+use super::protocrap;
+
 use std::panic;
 
 use allocator_api2::alloc::Global;
-use super::protocrap;
 use super::names::*;
 use super::tables;
 use anyhow::Result;

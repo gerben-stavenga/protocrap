@@ -216,7 +216,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 name = "no-std-test"
 version = "0.1.0"
 dependencies = [
- "protocrap 0.1.20",
+ "protocrap",
 ]
 
 [[package]]
@@ -272,24 +272,10 @@ dependencies = [
  "futures",
  "prettyplease",
  "proc-macro2",
- "protocrap 0.1.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote",
  "serde",
  "serde_json",
  "syn",
- "time",
-]
-
-[[package]]
-name = "protocrap"
-version = "0.1.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "771831fa08649aa333660ac908cd73d2a3a4d6faa3d8f8768825387f1f479f88"
-dependencies = [
- "allocator-api2",
- "base64",
- "futures",
- "serde",
  "time",
 ]
 
@@ -300,7 +286,7 @@ dependencies = [
  "allocator-api2",
  "arbitrary",
  "libfuzzer-sys",
- "protocrap 0.1.20",
+ "protocrap",
 ]
 
 [[package]]

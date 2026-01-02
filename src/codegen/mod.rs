@@ -1,13 +1,9 @@
 // protocrap codegen module
 
+use super::protocrap;
+
 use allocator_api2::alloc::Global;
 use anyhow::Result;
-
-#[cfg(feature = "bootstrap")]
-use bootcrap as protocrap;
-#[cfg(not(feature = "bootstrap"))]
-use crate as protocrap;
-
 use protocrap::ProtobufMut;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
 

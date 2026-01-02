@@ -30,49 +30,22 @@ rust_library(
     ],
 )
 
-# Main protocrap library with codegen
-rust_library(
-    name = "protocrap-with-codegen",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/main.rs"],
-    ),
-    crate_features = [
-        "std",
-        "serde_support",
-        "codegen",
-    ],
-    edition = "2024",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@crates//:allocator-api2",
-        "@crates//:base64",
-        "@crates//:futures",
-        "@crates//:serde",
-        "@crates//:serde_json",
-        "@crates//:time",
-        "@crates//:anyhow",
-        "@crates//:prettyplease",
-        "@crates//:proc-macro2",
-        "@crates//:quote",
-        "@crates//:syn",
-    ],
-)
-
 # Protocrap codegen binary
 rust_binary(
     name = "protocrap-codegen",
     srcs = ["src/main.rs"] + glob(["src/codegen/*.rs"]),
-    crate_features = [
-        "std",
-        "codegen",
-        "bazel",
-    ],
+    crate_features = ["bazel"],
     edition = "2024",
     visibility = ["//visibility:public"],
     deps = [
-        ":protocrap-with-codegen",
+        ":protocrap",
+        "@crates//:allocator-api2",
         "@crates//:anyhow",
+        "@crates//:prettyplease",
+        "@crates//:proc-macro2",
+        "@crates//:quote",
+        "@crates//:serde_json",
+        "@crates//:syn",
     ],
 )
 
@@ -110,13 +83,8 @@ diff_test(
 rust_binary(
     name = "protocrap-codegen-bootstrap",
     srcs = ["src/main.rs"] + glob(["src/codegen/*.rs"]),
-    aliases = {"@crates//:protocrap": "bootcrap"},
-    crate_features = [
-        "std",
-        "codegen",
-        "bootstrap",
-        "bazel",
-    ],
+    aliases = {"@crates//:protocrap": "protocrap"},
+    crate_features = ["bazel"],
     edition = "2024",
     deps = [
         "@crates//:allocator-api2",
@@ -125,7 +93,6 @@ rust_binary(
         "@crates//:proc-macro2",
         "@crates//:protocrap",
         "@crates//:quote",
-        "@crates//:serde",
         "@crates//:serde_json",
         "@crates//:syn",
     ],

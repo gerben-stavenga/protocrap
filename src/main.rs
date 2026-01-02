@@ -1,9 +1,5 @@
-#[cfg(feature = "bootstrap")]
+use protocrap;
 mod codegen;
-#[cfg(all(not(feature = "bootstrap"), feature = "bazel"))]
-use protocrap_with_codegen::codegen;
-#[cfg(all(not(feature = "bootstrap"), not(feature = "bazel")))]
-use protocrap::codegen;
 
 use std::fs;
 use std::io::{self, Read, Write};
