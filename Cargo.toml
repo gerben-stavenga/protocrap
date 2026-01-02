@@ -5,7 +5,7 @@ resolver = "2"
 
 [package]
 name = "protocrap"
-version = "0.1.20"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.91"
 description = "A small, efficient, and flexible protobuf implementation"

@@ -144,6 +144,8 @@ impl RawVec {
     }
 }
 
+/// Like `Vec<T>` but arena-allocated and never drops elements.
+/// Only suitable for trivial (Copy) types.
 #[repr(C)]
 pub struct RepeatedField<T> {
     buf: RawVec,
@@ -335,8 +337,10 @@ impl<T> DerefMut for RepeatedField<T> {
     }
 }
 
+/// Alias for `RepeatedField<u8>`, used for protobuf `bytes` fields.
 pub type Bytes = RepeatedField<u8>;
 
+/// Arena-allocated UTF-8 string for protobuf `string` fields.
 #[repr(C)]
 #[derive(Default, PartialEq, Eq)]
 pub struct String(Bytes);
