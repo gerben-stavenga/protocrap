@@ -28,4 +28,3 @@ pub const fn as_object<T: Protobuf>(msg: &T) -> &crate::base::Object {
 pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut crate::base::Object {
     unsafe { &mut *(msg as *mut T as *mut crate::base::Object) }
 }
-

@@ -268,9 +268,6 @@ impl<E> From<E> for Error<E> {
     }
 }
 
-// Re-export Protobuf trait for internal use
-pub(crate) use generated_code_only::Protobuf;
-
 /// Read-only protobuf operations (encode, serialize, inspect).
 /// The lifetime parameter `'pool` refers to the descriptor/table pool lifetime.
 pub trait ProtobufRef<'pool> {
