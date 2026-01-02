@@ -236,6 +236,7 @@ pub mod proto_json;
 #[cfg(feature = "codegen")]
 pub mod codegen;
 
+/// Errors that can occur during protobuf encoding/decoding operations.
 #[derive(Debug)]
 pub enum Error<E = ()> {
     TreeTooDeep,
@@ -266,14 +267,16 @@ impl<E> From<E> for Error<E> {
 }
 
 /// Read-only protobuf operations (encode, serialize, inspect).
-/// The lifetime parameter `'pool` refers to the descriptor/table pool lifetime.
 pub trait ProtobufRef<'pool> {
+    /// Get a dynamic view of this message for reflection.
     fn as_dyn<'msg>(&'msg self) -> reflection::DynamicMessageRef<'pool, 'msg>;
 
+    /// Get the message's descriptor (schema metadata).
     fn descriptor(&self) -> &'pool crate::google::protobuf::DescriptorProto::ProtoType {
         self.as_dyn().descriptor()
     }
 
+    /// Encode to a fixed buffer. Returns the encoded slice or an error.
     fn encode_flat<'a, const STACK_DEPTH: usize>(
         &self,
         buffer: &'a mut [u8],
@@ -288,6 +291,7 @@ pub trait ProtobufRef<'pool> {
         Ok(buf)
     }
 
+    /// Encode to a new Vec, growing as needed.
     #[cfg(feature = "std")]
     fn encode_vec<const STACK_DEPTH: usize>(&self) -> Result<Vec<u8>, Error> {
         let mut buffer = vec![0u8; 1024];
@@ -321,10 +325,11 @@ pub trait ProtobufRef<'pool> {
 }
 
 /// Mutable protobuf operations (decode, deserialize).
-/// Extends ProtobufRef with mutation capabilities.
 pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
+    /// Get a mutable dynamic view of this message.
     fn as_dyn_mut<'msg>(&'msg mut self) -> reflection::DynamicMessage<'pool, 'msg>;
 
+    /// Decode from a byte slice. Returns true on success.
     #[must_use]
     fn decode_flat<const STACK_DEPTH: usize>(
         &mut self,

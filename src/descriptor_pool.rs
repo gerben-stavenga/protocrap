@@ -1,3 +1,40 @@
+//! Dynamic message pool for runtime schema handling.
+//!
+//! The [`DescriptorPool`] allows decoding and encoding protobuf messages when the
+//! schema is only known at runtime. It builds lookup tables from `FileDescriptorProto`
+//! messages, enabling dynamic operations without generated code.
+//!
+//! # Use Cases
+//!
+//! - Generic protobuf processors (proxies, loggers, transformers)
+//! - Schema-driven tools that load `.proto` definitions at runtime
+//! - Testing and debugging tools
+//!
+//! # Example
+//!
+//! ```
+//! use protocrap::{ProtobufRef, arena::Arena, descriptor_pool::DescriptorPool};
+//! use protocrap::google::protobuf::FileDescriptorProto;
+//! use allocator_api2::alloc::Global;
+//!
+//! // Build pool from file descriptors
+//! let mut pool = DescriptorPool::new(&Global);
+//! let file_desc = FileDescriptorProto::ProtoType::file_descriptor();
+//! pool.add_file(file_desc);
+//!
+//! // Decode a message dynamically
+//! let bytes = file_desc.encode_vec::<32>().unwrap();
+//! let mut arena = Arena::new(&Global);
+//! let msg = pool.decode_message(
+//!     "google.protobuf.FileDescriptorProto",
+//!     &bytes,
+//!     &mut arena,
+//! ).unwrap();
+//!
+//! // Inspect fields
+//! println!("{:?}", msg);
+//! ```
+
 use crate::{
     arena::Arena,
     base::{Message, Object},
@@ -13,12 +50,18 @@ use crate::{
     tables::Table,
 };
 
+/// A registry of message types for dynamic protobuf operations.
+///
+/// Maintains an internal arena for table storage and a map from fully-qualified
+/// message names to their encoding/decoding tables.
 pub struct DescriptorPool<'alloc> {
+    /// Arena used for allocating message data during decode operations.
     pub arena: Arena<'alloc>,
     tables: std::collections::HashMap<std::string::String, &'alloc mut Table>,
 }
 
 impl<'alloc> DescriptorPool<'alloc> {
+    /// Create a new empty descriptor pool with the given allocator.
     pub fn new(alloc: &'alloc dyn crate::Allocator) -> Self {
         DescriptorPool {
             arena: Arena::new(alloc),
@@ -143,6 +186,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         self.tables.get(message_type).map(|t| &**t)
     }
 
+    /// Create an empty message of the given type, allocated in the arena.
     pub fn create_message<'pool, 'msg>(
         &'pool self,
         message_type: &str,

@@ -1,3 +1,35 @@
+//! Runtime reflection for protobuf messages.
+//!
+//! This module provides dynamic access to protobuf messages without compile-time
+//! knowledge of their schema. Use reflection when you need to:
+//!
+//! - Inspect message fields at runtime
+//! - Implement generic message processing (logging, diff, transform)
+//! - Work with messages whose types are only known at runtime
+//!
+//! # Key Types
+//!
+//! - [`DynamicMessageRef`]: Read-only view of a message for inspection and encoding
+//! - [`DynamicMessage`]: Mutable view for decoding and modification
+//! - [`Value`]: Enum representing any protobuf field value
+//!
+//! # Example
+//!
+//! ```
+//! use protocrap::ProtobufRef;
+//! use protocrap::google::protobuf::FileDescriptorProto;
+//!
+//! let file_desc = FileDescriptorProto::ProtoType::file_descriptor();
+//!
+//! // Access dynamically via reflection
+//! let dynamic = file_desc.as_dyn();
+//! for field in dynamic.descriptor().field() {
+//!     if let Some(value) = dynamic.get_field(field.as_ref()) {
+//!         println!("{}: {:?}", field.name(), value);
+//!     }
+//! }
+//! ```
+
 use crate::{
     ProtobufMut, ProtobufRef,
     base::{Message, Object},
@@ -132,15 +164,27 @@ pub fn default_value<'a>(field: &'a FieldDescriptorProto) -> Option<Value<'a, 'a
     }
 }
 
-/// Read-only view of a dynamic protobuf message.
-/// Used for Debug, Serialize, encode, and field inspection.
+/// Read-only view of a protobuf message for dynamic inspection.
+///
+/// Provides access to message fields without knowing the concrete type at compile time.
+/// Obtained via [`ProtobufRef::as_dyn()`](crate::ProtobufRef::as_dyn) or from a
+/// [`DescriptorPool`](crate::descriptor_pool::DescriptorPool).
+///
+/// # Lifetimes
+///
+/// - `'pool`: Lifetime of the descriptor/table data (often `'static` for generated types)
+/// - `'msg`: Lifetime of the message data being inspected
 pub struct DynamicMessageRef<'pool, 'msg> {
     pub(crate) object: &'msg Object,
     pub(crate) table: &'pool Table,
 }
 
-/// Mutable view of a dynamic protobuf message.
-/// Used for deserialization and modification.
+/// Mutable view of a protobuf message for dynamic modification.
+///
+/// Extends [`DynamicMessageRef`] with mutation capabilities. Use for decoding
+/// messages or setting field values dynamically.
+///
+/// Implements `Deref<Target = DynamicMessageRef>` so all read methods are available.
 pub struct DynamicMessage<'pool, 'msg> {
     pub(crate) object: &'msg mut Object,
     pub(crate) table: &'pool Table,
@@ -509,6 +553,30 @@ impl<'pool, 'msg> IntoIterator for &DynamicMessageArray<'pool, 'msg> {
     }
 }
 
+/// A dynamically-typed protobuf field value.
+///
+/// Returned by [`DynamicMessageRef::get_field()`] to represent any field value
+/// without compile-time type knowledge. Variants cover all protobuf scalar types,
+/// messages, and their repeated versions.
+///
+/// # Example
+///
+/// ```
+/// use protocrap::ProtobufRef;
+/// use protocrap::reflection::Value;
+/// use protocrap::google::protobuf::FileDescriptorProto;
+///
+/// let file_desc = FileDescriptorProto::ProtoType::file_descriptor();
+/// let dynamic = file_desc.as_dyn();
+///
+/// // Find and inspect the "name" field
+/// if let Some(field) = dynamic.find_field_descriptor("name") {
+///     match dynamic.get_field(field) {
+///         Some(Value::String(s)) => println!("name = {}", s),
+///         _ => println!("name not set"),
+///     }
+/// }
+/// ```
 pub enum Value<'pool, 'msg> {
     Int32(i32),
     Int64(i64),
