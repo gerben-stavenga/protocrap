@@ -1,6 +1,3 @@
-// When bootstrap feature is enabled, the library is empty (uses bootcrap from crates.io)
-#![cfg(not(feature = "bootstrap"))]
-
 //! # Protocrap
 //!
 //! A small, efficient, and flexible protobuf implementation for Rust.

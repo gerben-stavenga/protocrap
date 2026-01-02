@@ -31,22 +31,18 @@ syn = { version = "2.0", features = ["full", "parsing"], optional = true }
 proc-macro2 = { version = "1.0", optional = true }
 prettyplease = { version = "0.2", optional = true }
 
-# Bootstrap: use published protocrap for codegen
-bootcrap = { package = "protocrap", version = "0.1", optional = true }
-
 [features]
 default = ["std", "serde_support"]
 serde_support = ["std", "serde", "base64", "time"]
 std = ["futures", "allocator-api2/alloc"]
 nightly = []
-codegen = ["std", "serde_support", "anyhow", "quote", "syn", "proc-macro2", "prettyplease", "serde_json"]
-bootstrap = ["codegen", "bootcrap"]
-bazel = []
+codegen-deps = ["std", "serde_support", "anyhow", "quote", "syn", "proc-macro2", "prettyplease", "serde_json"]
+codegen = ["codegen-deps"]
 
 [[bin]]
 name = "protocrap-codegen"
 path = "src/main.rs"
-required-features = ["codegen"]
+required-features = ["codegen-deps"]
 
 [profile.dev]
 panic = 'abort'
