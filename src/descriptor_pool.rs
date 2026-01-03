@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```
-//! use protocrap::{ProtobufRef, arena::Arena, descriptor_pool::DescriptorPool};
+//! use protocrap::{ProtobufRef, ProtobufMut, arena::Arena, descriptor_pool::DescriptorPool};
 //! use protocrap::google::protobuf::FileDescriptorProto;
 //! use allocator_api2::alloc::Global;
 //!
@@ -25,11 +25,11 @@
 //! // Decode a message dynamically
 //! let bytes = file_desc.encode_vec::<32>().unwrap();
 //! let mut arena = Arena::new(&Global);
-//! let msg = pool.decode_message(
+//! let mut msg = pool.create_message(
 //!     "google.protobuf.FileDescriptorProto",
-//!     &bytes,
 //!     &mut arena,
 //! ).unwrap();
+//! msg.decode_flat::<32>(&mut arena, &bytes);
 //!
 //! // Inspect fields
 //! println!("{:?}", msg);
@@ -312,7 +312,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             } else {
                 regular_field_offsets[&field.number()]
             };
-            field_offsets.push((*field, offset));
+            field_offsets.push((field, offset));
         }
 
         // Pad to struct alignment
@@ -339,12 +339,13 @@ impl<'alloc> DescriptorPool<'alloc> {
             .unwrap();
 
         let base_ptr = self.arena.alloc_raw(layout).as_ptr();
-        let encode_ptr = base_ptr as *mut encoding::TableEntry;
-        let table_ptr = unsafe { base_ptr.add(table_offset) as *mut Table };
-        let decode_ptr = unsafe { base_ptr.add(decode_offset) as *mut decoding::TableEntry };
-        let aux_ptr = unsafe { base_ptr.add(aux_offset) as *mut AuxTableEntry };
 
         unsafe {
+            let encode_ptr = base_ptr as *mut encoding::TableEntry;
+            let table_ptr = base_ptr.add(table_offset) as *mut Table;
+            let decode_ptr = base_ptr.add(decode_offset) as *mut decoding::TableEntry;
+            let aux_ptr = base_ptr.add(aux_offset) as *mut AuxTableEntry;
+
             // Initialize Table header
             (*table_ptr).num_encode_entries = num_fields as u16;
             (*table_ptr).num_decode_entries = num_decode_entries as u16;
@@ -475,7 +476,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             }
 
             // Build aux entries for message fields
-            for (aux_index, &(field, offset)) in field_offsets
+            for (aux_index, (field, offset)) in field_offsets
                 .iter()
                 .filter(|(f, _)| is_message(&**f))
                 .enumerate()
@@ -488,7 +489,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                     .unwrap_or(core::ptr::null_mut());
 
                 aux_ptr.add(aux_index).write(AuxTableEntry {
-                    offset,
+                    offset: *offset,
                     child_table: child_table_ptr,
                 });
             }

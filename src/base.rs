@@ -45,7 +45,7 @@ use crate::{
 };
 
 /// Type-erased message pointer for table-driven code.
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default)]
 #[repr(C)]
 pub(crate) struct Message(pub *mut Object);
 
@@ -87,14 +87,6 @@ pub struct TypedMessage<T: Protobuf> {
     _marker: PhantomData<T>,
 }
 
-
-impl<T: Protobuf> Clone for TypedMessage<T> {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-
-impl<T: Protobuf> Copy for TypedMessage<T> {}
 
 // Note: No Default impl - TypedMessage must always point to a valid message
 
@@ -152,14 +144,6 @@ pub struct OptionalMessage<T: Protobuf> {
     _marker: PhantomData<T>,
 }
 
-
-impl<T: Protobuf> Clone for OptionalMessage<T> {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-
-impl<T: Protobuf> Copy for OptionalMessage<T> {}
 
 impl<T: Protobuf> Default for OptionalMessage<T> {
     fn default() -> Self {

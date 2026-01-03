@@ -22,10 +22,13 @@ impl Table {
         }
     }
 
-    pub(crate) fn aux_entry(&self, offset: usize) -> AuxTableEntry {
+    pub(crate) fn aux_entry(&self, offset: usize) -> (u32, &Table) {
         unsafe {
             let ptr = (self as *const Self as *const u8).add(offset);
-            *(ptr as *const AuxTableEntry)
+            debug_assert!(ptr as usize % core::mem::align_of::<AuxTableEntry>() == 0);
+            let AuxTableEntry { offset, child_table } = *(ptr as *const AuxTableEntry);
+            debug_assert!(!child_table.is_null());
+            (offset, &*child_table)
         }
     }
 

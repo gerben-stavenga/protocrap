@@ -364,6 +364,7 @@ impl String {
     }
 
     pub const fn as_str(&self) -> &str {
+        debug_assert!(core::str::from_utf8(self.0.slice()).is_ok());
         unsafe { core::str::from_utf8_unchecked(self.0.slice()) }
     }
 

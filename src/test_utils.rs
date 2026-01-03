@@ -84,10 +84,10 @@ pub fn compare_tables_rec(
     for offset in aux_offsets {
         let dyn_aux = dynamic_table.aux_entry(offset);
         let static_aux = static_table.aux_entry(offset);
-        assert_eq!(dyn_aux.offset, static_aux.offset, "{} aux@{}", type_name, offset);
+        assert_eq!(dyn_aux.0, static_aux.0, "{} aux@{}", type_name, offset);
         compare_tables_rec(
-            unsafe { &*static_aux.child_table },
-            unsafe { &*dyn_aux.child_table },
+            static_aux.1,
+            dyn_aux.1,
             seen,
         );
     }

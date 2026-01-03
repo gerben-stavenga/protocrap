@@ -4,7 +4,11 @@ use crate::ProtobufMut;
 use crate::base::Object;
 use crate::google::protobuf::FieldDescriptorProto::{Label, Type};
 use crate::reflection::{DynamicMessage, DynamicMessageArray, DynamicMessageRef, Value, default_value};
-use crate::tables::{AuxTableEntry, Table};
+use crate::tables::Table;
+
+fn unbound_lifetime<'a, T: ?Sized>(t: &T) -> &'a T {
+    unsafe { &*(t as *const T) }
+}
 
 /// Helper to set a field value, handling both regular fields and oneof fields.
 /// For oneof fields (has_bit_idx & 0x80 != 0), sets the discriminant to field_number.
@@ -526,8 +530,7 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
                         continue;
                     };
                     // Transmute needed due to serialize_field requiring 'static
-                    let json_name: &'static str =
-                        unsafe { std::mem::transmute(field.json_name()) };
+                    let json_name: &'static str = unbound_lifetime(field.json_name());
 
                     // Check if this is an enum field - use wrapper that respects is_human_readable
                     if field.r#type() == Some(Type::TYPE_ENUM) {
@@ -539,13 +542,7 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
                                     type_name,
                                     value: int_val,
                                 };
-                                unsafe {
-                                    let enum_val = std::mem::transmute::<
-                                        EnumValue<'_>,
-                                        EnumValue<'static>,
-                                    >(enum_val);
-                                    struct_serializer.serialize_field(json_name, &enum_val)?;
-                                }
+                                struct_serializer.serialize_field(json_name, &enum_val)?;
                             }
                             Value::RepeatedInt32(list) => {
                                 let enum_vals = RepeatedEnumValue {
@@ -553,26 +550,15 @@ impl<'pool, 'msg> serde::Serialize for DynamicMessageRef<'pool, 'msg> {
                                     type_name,
                                     values: list,
                                 };
-                                unsafe {
-                                    let enum_vals = std::mem::transmute::<
-                                        RepeatedEnumValue<'_>,
-                                        RepeatedEnumValue<'static>,
-                                    >(enum_vals);
-                                    struct_serializer.serialize_field(json_name, &enum_vals)?;
-                                }
+                                struct_serializer.serialize_field(json_name, &enum_vals)?;
                             }
                             _ => {
-                                // Shouldn't happen, but serialize as-is
-                                unsafe {
-                                    let value =
-                                        std::mem::transmute::<Value<'_, '_>, Value<'static, 'msg>>(
-                                            v,
-                                        );
-                                    struct_serializer.serialize_field(json_name, &value)?;
-                                }
+                                // Can't happen
+                                unreachable!("Enum field with non-int32 value");
                             }
                         }
                     } else {
+                        // TODO analyze why this is needed
                         unsafe {
                             let value =
                                 std::mem::transmute::<Value<'_, '_>, Value<'static, 'msg>>(v);
@@ -906,18 +892,11 @@ where
         _ => return deserializer.deserialize_any(visitor),
     }
 
-    let descriptor_static = unsafe {
-        std::mem::transmute::<
-            &crate::google::protobuf::DescriptorProto::ProtoType,
-            &'static crate::google::protobuf::DescriptorProto::ProtoType,
-        >(descriptor)
-    };
+    let descriptor_static = unbound_lifetime(descriptor);
     let fields = descriptor_static.field();
     let field_names: Vec<&str> = fields.iter().map(|f| f.name()).collect();
     let field_names_slice = field_names.as_slice();
-    let field_names_static = unsafe {
-        std::mem::transmute::<&[&'static str], &'static [&'static str]>(field_names_slice)
-    };
+    let field_names_static = unbound_lifetime(field_names_slice);
     deserializer.deserialize_struct(descriptor_static.name(), field_names_static, visitor)
 }
 
@@ -952,7 +931,7 @@ impl<'de> serde::de::Visitor<'de> for StructKeyVisitor<'_> {
 
 struct ProtobufArrayfVisitor<'arena, 'alloc, 'b> {
     rf: &'b mut crate::containers::RepeatedField<crate::base::Message>,
-    table: &'static Table,
+    table: &'b Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
 }
 
@@ -1005,7 +984,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
 
 struct ProtobufMapVisitor<'arena, 'alloc, 'b> {
     rf: &'b mut crate::containers::RepeatedField<crate::base::Message>,
-    table: &'static Table,
+    table: &'b Table,
     arena: &'arena mut crate::arena::Arena<'alloc>,
 }
 
@@ -1038,8 +1017,8 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
     {
         let ProtobufMapVisitor { rf, table, arena } = self;
 
-        let key_field = table.descriptor.field()[0];
-        let value_field = table.descriptor.field()[1];
+        let key_field = &table.descriptor.field()[0];
+        let value_field = &table.descriptor.field()[1];
         let key_entry = table
             .entry(1)
             .ok_or_else(|| serde::de::Error::custom("Map entry missing key field in table"))?;
@@ -1143,15 +1122,14 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                     );
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                    let value_aux = table.aux_entry_decode(value_entry);
-                    let value_child_table = unsafe { &*value_aux.child_table };
-                    let child_obj = Object::create(value_child_table.size as u32, arena);
+                    let (offset, child_table) = table.aux_entry_decode(value_entry);
+                    let child_obj = Object::create(child_table.size as u32, arena);
                     let seed = ProtobufVisitor {
-                        msg: DynamicMessage { object: child_obj, table: value_child_table },
+                        msg: DynamicMessage { object: child_obj, table: child_table },
                         arena,
                     };
                     map.next_value_seed(seed)?;
-                    *entry_obj.ref_mut::<crate::base::Message>(value_aux.offset) =
+                    *entry_obj.ref_mut::<crate::base::Message>(offset) =
                         crate::base::Message(child_obj);
                 }
             }
@@ -1632,11 +1610,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 let entry = msg.table
                     .entry(1)
                     .ok_or_else(|| serde::de::Error::custom("Struct missing field 1"))?;
-                let AuxTableEntry {
-                    offset,
-                    child_table,
-                } = msg.table.aux_entry_decode(entry);
-                let child_table = unsafe { &*child_table };
+                let (offset, child_table) = msg.table.aux_entry_decode(entry);
                 let rf = msg.object
                     .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(offset);
                 // Each map entry is a message with key(1)=string, value(2)=Value
@@ -1656,16 +1630,15 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     let value_entry = child_table.entry(2).ok_or_else(|| {
                         serde::de::Error::custom("Struct entry missing value field")
                     })?;
-                    let value_aux = child_table.aux_entry_decode(value_entry);
-                    let value_table = unsafe { &*value_aux.child_table };
-                    let value_obj = Object::create(value_table.size as u32, arena);
+                    let (offset, child_table) = child_table.aux_entry_decode(value_entry);
+                    let child_obj = Object::create(child_table.size as u32, arena);
                     let seed = ProtobufVisitor {
-                        msg: DynamicMessage { object: value_obj,  table: value_table },
+                        msg: DynamicMessage { object: child_obj, table: child_table },
                         arena,
                     };
                     map.next_value_seed(seed)?;
-                    *entry_obj.ref_mut::<crate::base::Message>(value_aux.offset) =
-                        crate::base::Message(value_obj);
+                    *entry_obj.ref_mut::<crate::base::Message>(offset) =
+                        crate::base::Message(child_obj);
                     rf.push(crate::base::Message(entry_obj as *mut Object), arena);
                 }
                 return Ok(());
@@ -1675,15 +1648,14 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 let entry = msg.table
                     .entry(5)
                     .ok_or_else(|| serde::de::Error::custom("Value missing field 5"))?;
-                let aux = msg.table.aux_entry_decode(entry);
-                let struct_table = unsafe { &*aux.child_table };
-                let struct_obj = Object::create(struct_table.size as u32, arena);
+                let (offset, child_table) = msg.table.aux_entry_decode(entry);
+                let child_obj = Object::create(child_table.size as u32, arena);
                 let visitor = ProtobufVisitor {
-                    msg: DynamicMessage { object: struct_obj, table: struct_table },
+                    msg: DynamicMessage { object: child_obj, table: child_table },
                     arena,
                 };
                 visitor.visit_map(map)?;
-                msg.object.set_oneof(aux.offset, entry.has_bit_idx() & 0x7F, 5, crate::base::Message(struct_obj));
+                msg.object.set_oneof(offset, entry.has_bit_idx() & 0x7F, 5, crate::base::Message(child_obj));
                 return Ok(());
             }
             WellKnownType::ListValue | WellKnownType::None => {
@@ -1704,7 +1676,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 map.next_value::<serde::de::IgnoredAny>()?;
                 continue;
             };
-            let field = msg.table.descriptor.field()[idx];
+            let field = &msg.table.descriptor.field()[idx];
             let entry = msg.table.entry(field.number() as u32).unwrap(); // Safe: field exists in table
             // Reject duplicate fields (oneofs can have null which clears, so skip oneof check for now)
             let has_bit_idx = entry.has_bit_idx();
@@ -1800,11 +1772,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         }
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                        let AuxTableEntry {
-                            offset,
-                            child_table,
-                        } = msg.table.aux_entry_decode(entry);
-                        let child_table = unsafe { &*child_table };
+                        let (offset, child_table) = msg.table.aux_entry_decode(entry);
                         let rf = msg.object
                             .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(
                                 offset,
@@ -1900,11 +1868,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         set_field(msg.object, entry, field.number(), b);
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                        let AuxTableEntry {
-                            offset,
-                            child_table,
-                        } = msg.table.aux_entry_decode(entry);
-                        let child_table = unsafe { &*child_table };
+                        let (offset, child_table) = msg.table.aux_entry_decode(entry);
                         let child_obj = Object::create(child_table.size as u32, arena);
                         // Value type: null is a valid value, don't wrap with Optional
                         if detect_well_known_type(child_table.descriptor) == WellKnownType::Value {
@@ -1949,14 +1913,13 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 let entry = msg.table
                     .entry(1)
                     .ok_or_else(|| serde::de::Error::custom("ListValue missing field 1"))?;
-                let aux = msg.table.aux_entry_decode(entry);
-                let value_table = unsafe { &*aux.child_table };
+                let (offset, child_table) = msg.table.aux_entry_decode(entry);
                 let rf = msg.object
-                    .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(aux.offset);
+                    .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(offset);
                 while {
-                    let value_obj = Object::create(value_table.size as u32, arena);
+                    let value_obj = Object::create(child_table.size as u32, arena);
                     let seed = ProtobufVisitor {
-                        msg: DynamicMessage { object: value_obj, table: value_table },
+                        msg: DynamicMessage { object: value_obj, table: child_table },
                         arena,
                     };
                     if seq.next_element_seed(seed)?.is_some() {
@@ -1973,15 +1936,14 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                 let entry = msg.table
                     .entry(6)
                     .ok_or_else(|| serde::de::Error::custom("Value missing field 6"))?;
-                let aux = msg.table.aux_entry_decode(entry);
-                let list_table = unsafe { &*aux.child_table };
-                let list_obj = Object::create(list_table.size as u32, arena);
+                let (offset, child_table) = msg.table.aux_entry_decode(entry);
+                let list_obj = Object::create(child_table.size as u32, arena);
                 let visitor = ProtobufVisitor {
-                    msg: DynamicMessage { object: list_obj, table: list_table },
+                    msg: DynamicMessage { object: list_obj, table: child_table },
                     arena,
                 };
                 visitor.visit_seq(seq)?;
-                msg.object.set_oneof(aux.offset, entry.has_bit_idx() & 0x7F, 6, crate::base::Message(list_obj));
+                msg.object.set_oneof(offset, entry.has_bit_idx() & 0x7F, 6, crate::base::Message(list_obj));
                 Ok(())
             }
             _ => Err(serde::de::Error::invalid_type(

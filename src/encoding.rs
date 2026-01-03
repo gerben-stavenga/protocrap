@@ -3,7 +3,7 @@ use core::{mem::MaybeUninit, ptr::NonNull};
 use crate::{
     base::Object,
     containers::Bytes,
-    tables::{AuxTableEntry, Table},
+    tables::Table,
     utils::{Stack, StackWithStorage},
     wire::{FieldKind, SLOP_SIZE, WriteCursor, zigzag_encode},
 };
@@ -380,25 +380,21 @@ fn encode_loop<'a>(
                 if has_bit & 0x80 != 0 && !obj_state.is_field_set(has_bit, tag) {
                     // Skip - not the active oneof field
                 } else {
-                    let AuxTableEntry {
-                        offset,
-                        child_table,
-                    } = Table::table(obj_state.table).aux_entry(offset);
+                    let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
                     let child_ptr = obj_state.get::<*const Object>(offset as usize);
                     if !child_ptr.is_null() {
                         obj_state.field_idx -= 1;
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                         obj_state =
-                            ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
+                            ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
                         continue 'out; // Continue with child message
                     }
                 }
             }
             FieldKind::Group => {
-                let AuxTableEntry {
-                    offset,
+                let (offset,
                     child_table,
-                } = Table::table(obj_state.table).aux_entry(offset);
+                 ) = Table::table(obj_state.table).aux_entry(offset);
                 let child_ptr = obj_state.get::<*const Object>(offset as usize);
                 if !child_ptr.is_null() {
                     if cursor <= begin {
@@ -411,7 +407,7 @@ fn encode_loop<'a>(
                     obj_state.field_idx -= 1;
                     obj_state.push(tag, -1, stack)?;
                     obj_state =
-                        ObjectEncodeState::new(unsafe { &*child_ptr }, unsafe { &*child_table });
+                        ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
                     continue 'out; // Continue with child group
                 }
             }
@@ -695,10 +691,7 @@ fn encode_loop<'a>(
                 }
             }
             FieldKind::RepeatedMessage => {
-                let AuxTableEntry {
-                    offset,
-                    child_table,
-                } = Table::table(obj_state.table).aux_entry(offset);
+                let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
                 let slice = obj_state.get_slice::<*const Object>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
@@ -711,16 +704,13 @@ fn encode_loop<'a>(
                     obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                     obj_state = ObjectEncodeState::new(
                         unsafe { &*slice[obj_state.rep_field_idx] },
-                        unsafe { &*child_table },
+                        child_table,
                     );
                     continue 'out; // Continue with child message
                 }
             }
             FieldKind::RepeatedGroup => {
-                let AuxTableEntry {
-                    offset,
-                    child_table,
-                } = Table::table(obj_state.table).aux_entry(offset);
+                let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
                 let slice = obj_state.get_slice::<*const Object>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
@@ -739,7 +729,7 @@ fn encode_loop<'a>(
                     obj_state.push(tag, -1, stack)?;
                     obj_state = ObjectEncodeState::new(
                         unsafe { &*slice[obj_state.rep_field_idx] },
-                        unsafe { &*child_table },
+                        child_table,
                     );
                     continue 'out; // Continue with child group
                 }
