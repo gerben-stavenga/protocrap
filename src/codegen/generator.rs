@@ -421,6 +421,13 @@ fn generate_message_impl(
     // Get doc comment for this message
     let message_doc = make_doc_comment(comments.get(name_prefix));
 
+    // Doc strings for generated methods
+    let proto_file = file.name();
+    let message_name = name_prefix.trim_start_matches('.');
+    let clear_doc = format!(" Resets all fields of `{}` to their default values.", message_name);
+    let file_descriptor_doc = format!(" Returns the file descriptor for `{}`.", proto_file);
+    let descriptor_proto_doc = format!(" Returns the descriptor for `{}`.", message_name);
+
     Ok(quote! {
         #(#nested_items)*
         #(#nested_enums)*
@@ -443,6 +450,7 @@ fn generate_message_impl(
         }
 
         impl ProtoType {
+            #[doc(hidden)]
             #[allow(clippy::too_many_arguments)]
             pub const fn from_static(
                 metadata: [u32; #metadata_words],
@@ -456,14 +464,17 @@ fn generate_message_impl(
                 }
             }
 
+            #[doc = #clear_doc]
             pub fn clear(&mut self) {
                 *self = Self::default();
             }
 
+            #[doc = #file_descriptor_doc]
             pub const fn file_descriptor() -> &'static protocrap::google::protobuf::FileDescriptorProto::ProtoType {
                 &#file_descriptor_path
             }
 
+            #[doc = #descriptor_proto_doc]
             pub const fn descriptor_proto() -> &'static protocrap::google::protobuf::DescriptorProto::ProtoType {
                 #message_descriptor_accessor
             }
