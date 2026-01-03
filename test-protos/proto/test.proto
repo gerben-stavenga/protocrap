@@ -1,15 +1,25 @@
 syntax = "proto2";
 
+// Status represents the current state of an entity.
 enum Status {
+    // Default unknown status.
     UNKNOWN = 0;
+    // Entity is active and operational.
     ACTIVE = 1;
+    // Entity has been deactivated.
     INACTIVE = 2;
+    // Entity is awaiting activation.
     PENDING = 3;
 }
 
+// Test is the main test message for protocrap testing.
+// It contains various field types to exercise the parser.
 message Test {
+    // The x coordinate.
     optional uint32 x = 1;
+    // The y coordinate as a fixed-width integer.
     optional fixed64 y = 2;
+    // A string label for this test.
     optional string z = 3;
     optional Test child1 = 4;
     optional group Child2 = 5 {

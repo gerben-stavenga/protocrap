@@ -7,6 +7,7 @@ use anyhow::Result;
 use protocrap::ProtobufMut;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
 
+pub mod comments;
 mod generator;
 mod names;
 mod static_gen;
