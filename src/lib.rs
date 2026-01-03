@@ -205,6 +205,8 @@ pub mod reflection;
 pub use base::TypedMessage;
 #[cfg(feature = "std")]
 pub mod descriptor_pool;
+#[cfg(feature = "std")]
+pub mod test_utils;
 
 // Re-export Allocator trait - use core on nightly, polyfill on stable
 #[cfg(feature = "nightly")]
@@ -495,33 +497,15 @@ impl<T: generated_code_only::Protobuf> ProtobufMut<'static> for T {
     }
 }
 
-#[cfg(feature = "std")]
-pub mod tests {
+#[cfg(all(test, feature = "std"))]
+mod tests {
     use crate::ProtobufMut;
+    use crate::ProtobufRef;
 
     #[cfg(feature = "nightly")]
     use std::alloc::Global;
     #[cfg(not(feature = "nightly"))]
     use allocator_api2::alloc::Global;
-
-    pub fn assert_roundtrip<'a, T: ProtobufMut<'a> + Default>(msg: &T) {
-        let data = msg.encode_vec::<32>().expect("msg should encode");
-
-        let mut arena = crate::arena::Arena::new(&Global);
-        let mut roundtrip_msg = T::default();
-        assert!(roundtrip_msg.decode_flat::<32>(&mut arena, &data));
-
-        println!(
-            "Encoded {} ({} bytes)",
-            msg.as_dyn().descriptor().name(),
-            data.len()
-        );
-        // println!("Roundtrip message: {:#?}", roundtrip_msg);
-
-        let roundtrip_data = roundtrip_msg.encode_vec::<32>().expect("msg should encode");
-
-        assert_eq!(roundtrip_data, data);
-    }
 
     #[test]
     fn descriptor_accessors() {
@@ -540,14 +524,48 @@ pub mod tests {
 
     #[test]
     fn file_descriptor_roundtrip() {
-        assert_roundtrip(
+        crate::test_utils::assert_roundtrip(
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor(),
         );
     }
 
     #[test]
+    fn compare_encode_flat_vs_vec() {
+        let file_descriptor =
+            crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
+
+        // encode_flat with large buffer
+        let mut flat_buffer = vec![0u8; 100_000];
+        let flat_result = file_descriptor.encode_flat::<32>(&mut flat_buffer).expect("encode_flat should work");
+        let flat_bytes = flat_result.to_vec();
+
+        // encode_vec with chunked encoding
+        let vec_bytes = file_descriptor.encode_vec::<32>().expect("encode_vec should work");
+
+        // Dump to files for comparison
+        std::fs::write("/tmp/encode_flat.bin", &flat_bytes).expect("write flat");
+        std::fs::write("/tmp/encode_vec.bin", &vec_bytes).expect("write vec");
+
+        println!("encode_flat: {} bytes, encode_vec: {} bytes", flat_bytes.len(), vec_bytes.len());
+
+        if flat_bytes != vec_bytes {
+            // Find first difference
+            for (i, (a, b)) in flat_bytes.iter().zip(vec_bytes.iter()).enumerate() {
+                if a != b {
+                    println!("First difference at byte {}: flat={:02x}, vec={:02x}", i, a, b);
+                    break;
+                }
+            }
+            if flat_bytes.len() != vec_bytes.len() {
+                println!("Length mismatch: flat={}, vec={}", flat_bytes.len(), vec_bytes.len());
+            }
+        }
+
+        assert_eq!(flat_bytes, vec_bytes, "encode_flat and encode_vec should produce identical output");
+    }
+
+    #[test]
     fn dynamic_file_descriptor_roundtrip() {
-        use crate::ProtobufRef;
         let mut pool = crate::descriptor_pool::DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();

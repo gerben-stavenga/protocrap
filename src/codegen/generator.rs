@@ -2,9 +2,11 @@
 
 use super::protocrap;
 
+use std::collections::HashMap;
 use std::panic;
 
 use allocator_api2::alloc::Global;
+use super::comments::extract_comments;
 use super::names::*;
 use super::tables;
 use anyhow::Result;
@@ -87,16 +89,19 @@ pub(crate) fn generate_file_set(file_set: &FileDescriptorSet) -> Result<TokenStr
 fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     let mut items = Vec::new();
 
+    // Extract comments from source_code_info
+    let comments = extract_comments(file);
+
     // Generate enums
     for enum_type in file.enum_type() {
-        items.push(generate_enum(enum_type.as_ref())?);
+        let name = enum_type.name();
+        items.push(generate_enum(enum_type.as_ref(), &comments, name)?);
     }
 
     // Generate messages
     for (idx, message) in file.message_type().iter().enumerate() {
-        let mut path = Vec::new();
-        path.push(idx);
-        items.push(generate_message(message, file, path)?);
+        let name = message.name();
+        items.push(generate_message(message, file, &comments, name, vec![idx])?);
     }
 
     // Generate FILE_DESCRIPTOR_PROTO in a dedicated module to avoid name collisions
@@ -144,8 +149,15 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     Ok(quote! { #(#items)* })
 }
 
-fn generate_enum(enum_desc: &EnumDescriptorProto) -> Result<TokenStream> {
+fn generate_enum(
+    enum_desc: &EnumDescriptorProto,
+    comments: &HashMap<String, String>,
+    name_prefix: &str,
+) -> Result<TokenStream> {
     let name = format_ident!("{}", enum_desc.name());
+
+    // Get doc comment for the enum
+    let enum_doc = make_doc_comment(comments.get(name_prefix));
 
     // Deduplicate enum values - Rust doesn't support aliased enum variants
     // Keep only the first variant for each numeric value
@@ -156,13 +168,18 @@ fn generate_enum(enum_desc: &EnumDescriptorProto) -> Result<TokenStream> {
         .filter(|v| seen_values.insert(v.number()))
         .collect();
 
-    // Enum variants
+    // Enum variants with doc comments
     let variants: Vec<_> = unique_values
         .iter()
         .map(|v| {
             let variant_name = format_ident!("{}", v.name());
             let number = v.number();
-            quote! { #variant_name = #number }
+            let value_key = format!("{}.{}", name_prefix, v.name());
+            let variant_doc = make_doc_comment(comments.get(&value_key));
+            quote! {
+                #variant_doc
+                #variant_name = #number
+            }
         })
         .collect();
 
@@ -177,6 +194,7 @@ fn generate_enum(enum_desc: &EnumDescriptorProto) -> Result<TokenStream> {
         .collect();
 
     Ok(quote! {
+        #enum_doc
         #[repr(i32)]
         #[derive(Debug, Clone, Copy, PartialEq, Eq)]
         #[allow(non_camel_case_types)]
@@ -199,12 +217,27 @@ fn generate_enum(enum_desc: &EnumDescriptorProto) -> Result<TokenStream> {
     })
 }
 
+/// Convert a comment string to doc comment tokens
+fn make_doc_comment(comment: Option<&String>) -> TokenStream {
+    match comment {
+        Some(text) => {
+            let lines: Vec<_> = text.lines().map(|line| format!(" {}", line)).collect();
+            quote! {
+                #(#[doc = #lines])*
+            }
+        }
+        None => quote! {},
+    }
+}
+
 fn generate_message(
     message: &DescriptorProto,
     file: &FileDescriptorProto,
+    comments: &HashMap<String, String>,
+    name_prefix: &str,
     path: Vec<usize>,
 ) -> Result<TokenStream> {
-    let msg = generate_message_impl(message, file, path)?;
+    let msg = generate_message_impl(message, file, comments, name_prefix, path)?;
     let name = format_ident!("{}", sanitize_field_name(message.name()));
 
     Ok(quote! {
@@ -221,21 +254,27 @@ fn generate_message(
 fn generate_message_impl(
     message: &DescriptorProto,
     file: &FileDescriptorProto,
+    comments: &HashMap<String, String>,
+    name_prefix: &str,
     path: Vec<usize>,
 ) -> Result<TokenStream> {
     // Nested types first
 
     let mut nested_items = Vec::new();
     for (idx, nested) in message.nested_type().iter().enumerate() {
+        let nested_prefix = format!("{}.{}", name_prefix, nested.name());
         let mut nested_path = path.clone();
         nested_path.push(idx);
-        nested_items.push(generate_message(nested, file, nested_path)?);
+        nested_items.push(generate_message(nested, file, comments, &nested_prefix, nested_path)?);
     }
 
     let nested_enums: Vec<_> = message
         .enum_type()
         .iter()
-        .map(|e| generate_enum(e.as_ref()))
+        .map(|e| {
+            let enum_prefix = format!("{}.{}", name_prefix, e.name());
+            generate_enum(e.as_ref(), comments, &enum_prefix)
+        })
         .collect::<Result<Vec<_>, _>>()?;
 
     // Calculate has bits (excludes oneof fields)
@@ -344,7 +383,7 @@ fn generate_message_impl(
         .collect();
 
     // Accessor methods
-    let accessors = generate_accessors(message, &has_bit_map)?;
+    let accessors = generate_accessors(message, &has_bit_map, comments, name_prefix)?;
 
     // Protobuf trait impl
     let protobuf_impl = generate_protobuf_impl();
@@ -379,12 +418,16 @@ fn generate_message_impl(
         .map(|oneof| format_ident!("{}", sanitize_field_name(oneof.name())))
         .collect();
 
+    // Get doc comment for this message
+    let message_doc = make_doc_comment(comments.get(name_prefix));
+
     Ok(quote! {
         #(#nested_items)*
         #(#nested_enums)*
 
         #(#union_defs)*
 
+        #message_doc
         #[repr(C)]
         #[derive(Default)]
         pub struct ProtoType {
@@ -599,6 +642,8 @@ fn parse_primitive_default(
 fn generate_accessors(
     message: &DescriptorProto,
     has_bit_map: &std::collections::HashMap<i32, usize>,
+    comments: &HashMap<String, String>,
+    name_prefix: &str,
 ) -> Result<TokenStream> {
     let mut methods = Vec::new();
 
@@ -612,6 +657,14 @@ fn generate_accessors(
 
     for field in message.field() {
         let field_name = format_ident!("{}", sanitize_field_name(field.name()));
+
+        // Get field doc comment
+        let field_key = format!("{}.{}", name_prefix, field.name());
+        let field_doc = make_doc_comment(comments.get(&field_key));
+        let has_doc_str = format!(" Returns whether the `{}` field is set.", field.name());
+        let has_doc = quote! { #[doc = #has_doc_str] };
+        let clear_doc_str = format!(" Clears the `{}` field.", field.name());
+        let clear_doc = quote! { #[doc = #clear_doc_str] };
 
         // Handle oneof fields specially
         if is_in_oneof(field.as_ref()) {
@@ -627,6 +680,7 @@ fn generate_accessors(
 
             // Generate has_<field> - check if discriminant matches this field
             methods.push(quote! {
+                #has_doc
                 pub fn #has_name(&self) -> bool {
                     self.metadata[#discriminant_word_idx] == #field_number
                 }
@@ -636,6 +690,7 @@ fn generate_accessors(
                 Type::TYPE_STRING => {
                     let optional_name = format_ident!("get_{}", field_name);
                     methods.push(quote! {
+                        #field_doc
                         pub fn #field_name(&self) -> &str {
                             if self.#has_name() {
                                 unsafe { (*self.#oneof_field_name.#field_name).as_str() }
@@ -644,6 +699,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #optional_name(&self) -> Option<&str> {
                             if self.#has_name() {
                                 Some(unsafe { (*self.#oneof_field_name.#field_name).as_str() })
@@ -652,6 +708,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
@@ -660,6 +717,7 @@ fn generate_accessors(
                             unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -668,6 +726,7 @@ fn generate_accessors(
                 Type::TYPE_BYTES => {
                     let optional_name = format_ident!("get_{}", field_name);
                     methods.push(quote! {
+                        #field_doc
                         pub fn #field_name(&self) -> &[u8] {
                             if self.#has_name() {
                                 unsafe { (*self.#oneof_field_name.#field_name).slice() }
@@ -676,6 +735,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #optional_name(&self) -> Option<&[u8]> {
                             if self.#has_name() {
                                 Some(unsafe { (*self.#oneof_field_name.#field_name).slice() })
@@ -684,6 +744,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
@@ -692,6 +753,7 @@ fn generate_accessors(
                             unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -701,6 +763,7 @@ fn generate_accessors(
                     let msg_type = rust_type_tokens(field);
                     let field_name_mut = format_ident!("{}_mut", field_name);
                     methods.push(quote! {
+                        #field_doc
                         pub fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
                             if self.#has_name() {
                                 use core::ops::Deref;
@@ -710,6 +773,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
@@ -719,6 +783,7 @@ fn generate_accessors(
                             unsafe { self.#oneof_field_name.#field_name.deref_mut() }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -727,6 +792,7 @@ fn generate_accessors(
                 Type::TYPE_ENUM => {
                     let enum_type = rust_type_tokens(field);
                     methods.push(quote! {
+                        #field_doc
                         pub fn #field_name(&self) -> Option<#enum_type> {
                             if self.#has_name() {
                                 #enum_type::from_i32(unsafe { *self.#oneof_field_name.#field_name })
@@ -735,11 +801,13 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: #enum_type) {
                             self.metadata[#discriminant_word_idx] = #field_number;
                             self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value.to_i32());
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -749,6 +817,7 @@ fn generate_accessors(
                     // Scalar types
                     let return_type = rust_element_type_tokens(field);
                     methods.push(quote! {
+                        #field_doc
                         pub fn #field_name(&self) -> #return_type {
                             if self.#has_name() {
                                 unsafe { *self.#oneof_field_name.#field_name }
@@ -757,11 +826,13 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: #return_type) {
                             self.metadata[#discriminant_word_idx] = #field_number;
                             self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value);
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -783,14 +854,17 @@ fn generate_accessors(
                 let field_name_mut = format_ident!("{}_mut", field_name);
                 let add_field_name = format_ident!("add_{}", field_name);
                 methods.push(quote! {
+                    #field_doc
                     pub const fn #field_name(&self) -> &[protocrap::TypedMessage<#msg_type::ProtoType>] {
                         self.#field_name.slice()
                     }
 
+                    #field_doc
                     pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<protocrap::TypedMessage<#msg_type::ProtoType>> {
                         &mut self.#field_name
                     }
 
+                    #field_doc
                     pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                         let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena);
                         self.#field_name.push(msg, arena);
@@ -802,10 +876,12 @@ fn generate_accessors(
             let element_type = rust_element_type_tokens(field);
             let field_name_mut = format_ident!("{}_mut", field_name);
             methods.push(quote! {
+                #field_doc
                 pub const fn #field_name(&self) -> &[#element_type] {
                     self.#field_name.slice()
                 }
 
+                #field_doc
                 pub fn #field_name_mut(&mut self) -> &mut protocrap::containers::RepeatedField<#element_type> {
                     &mut self.#field_name
                 }
@@ -818,6 +894,7 @@ fn generate_accessors(
             let has_name = format_ident!("has_{}", field_name);
             let has_bit = if let Some(has_bit) = has_bit_map.get(&field.number()).cloned() {
                 methods.push(quote! {
+                    #has_doc
                     pub const fn #has_name(&self) -> bool {
                         protocrap::generated_code_only::as_object(self).has_bit(#has_bit as u8)
                     }
@@ -846,10 +923,12 @@ fn generate_accessors(
                         };
 
                     methods.push(quote! {
+                        #field_doc
                         pub const fn #field_name(&self) -> &str {
                             #getter_impl
                         }
 
+                        #field_doc
                         pub const fn #optional_name(&self) -> Option<&str> {
                             if self.#has_name() {
                                 Some(self.#field_name.as_str())
@@ -858,6 +937,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
@@ -870,6 +950,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
@@ -890,10 +971,12 @@ fn generate_accessors(
                         quote! { self.#field_name.slice() }
                     };
                     methods.push(quote! {
+                        #field_doc
                         pub const fn #field_name(&self) -> &[u8] {
                             #getter_impl
                         }
 
+                        #field_doc
                         pub const fn #optional_name(&self) -> Option<&[u8]> {
                             if self.#has_name() {
                                 Some(self.#field_name.slice())
@@ -902,6 +985,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name.assign(value, arena);
@@ -914,6 +998,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
@@ -924,18 +1009,22 @@ fn generate_accessors(
                     let msg_type = rust_type_tokens(field);
                     let field_name_mut = format_ident!("{}_mut", field_name);
                     methods.push(quote! {
+                        #has_doc
                         pub const fn #has_name(&self) -> bool {
                             self.#field_name.is_some()
                         }
 
+                        #field_doc
                         pub const fn #field_name(&self) -> Option<&#msg_type::ProtoType> {
                             self.#field_name.get()
                         }
 
+                        #field_doc
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             self.#field_name.get_or_init(arena)
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.#field_name.clear();
                         }
@@ -958,10 +1047,12 @@ fn generate_accessors(
                     };
 
                     methods.push(quote! {
+                        #field_doc
                         pub const fn #field_name(&self) -> Option<#enum_type> {
                             #getter_impl
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: #enum_type) {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value.to_i32();
@@ -974,6 +1065,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = 0;
@@ -1001,10 +1093,12 @@ fn generate_accessors(
                     };
 
                     methods.push(quote! {
+                        #field_doc
                         pub const fn #field_name(&self) -> #return_type {
                             #getter_impl
                         }
 
+                        #field_doc
                         pub const fn #optional_name(&self) -> Option<#return_type> {
                             if self.#has_name() {
                                 Some(self.#field_name)
@@ -1013,6 +1107,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #field_doc
                         pub fn #setter_name(&mut self, value: #return_type) {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
                             self.#field_name = value;
@@ -1025,6 +1120,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = Default::default();
