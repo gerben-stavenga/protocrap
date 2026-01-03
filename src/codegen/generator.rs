@@ -11,7 +11,7 @@ use super::names::*;
 use super::tables;
 use anyhow::Result;
 use proc_macro2::TokenStream;
-use protocrap::ProtobufRef;
+use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap::google::protobuf::DescriptorProto::ProtoType as DescriptorProto;
 use protocrap::google::protobuf::EnumDescriptorProto::ProtoType as EnumDescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::Type;
@@ -104,33 +104,35 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         items.push(generate_message(message, file, &comments, name, vec![idx])?);
     }
 
-    // Generate FILE_DESCRIPTOR_PROTO in a dedicated module to avoid name collisions
-    // when multiple files share the same package
-    let file_descriptor = if file.name() == "proto/descriptor.proto" {
-        // Special case: generate FileDescriptorProto static
+    let file_descriptor = if file.name() == protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor().name() {
+        // Special case: generate FileDescriptorProto static for descriptor.proto itself
         let mut pool = protocrap::descriptor_pool::DescriptorPool::new(&Global);
         pool.add_file(file);
-        let serialized = file.encode_vec::<100>()?;
         let mut arena = protocrap::arena::Arena::new(&Global);
-        let dyn_file_descriptor = pool.decode_message(
+        let mut dyn_file_descriptor = pool.create_message(
             "google.protobuf.FileDescriptorProto",
-            &serialized,
             &mut arena,
         )?;
+        // Roundtrip file descriptor using protobuf encoding/decoding that is schema evolution safe
+        let serialized = file.encode_vec::<100>()?;
+        if !dyn_file_descriptor.decode_flat::<100>(&mut arena, &serialized) {
+            anyhow::bail!("Failed to decode FileDescriptorProto for descriptor.proto");
+        }
         super::static_gen::generate_static_dynamic(
             &dyn_file_descriptor,
             "google.protobuf.FileDescriptorProto",
             "protocrap",
         )?
     } else {
-        let dynamic_file = protocrap::reflection::DynamicMessageRef::new(file);
         super::static_gen::generate_static_dynamic(
-            &dynamic_file,
+            &protocrap::reflection::DynamicMessageRef::new(file),
             "google.protobuf.FileDescriptorProto",
             "protocrap",
         )?
     };
 
+    // Generate FILE_DESCRIPTOR_PROTO in a dedicated module to avoid name collisions
+    // when multiple files share the same package
     // Create a unique module name based on the proto filename (without path and extension)
     let filename = std::path::Path::new(file.name())
         .file_stem()

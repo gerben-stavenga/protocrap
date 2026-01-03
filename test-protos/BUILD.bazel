@@ -50,7 +50,6 @@ rust_library(
     rustc_env = {
         "TEST_PROTOS_DESCRIPTOR_SET": "$(execpath :descriptor_set)",
     },
-    rustc_flags = ["--cfg=bazel"],
     visibility = ["//visibility:public"],
     deps = [
         "//:protocrap",

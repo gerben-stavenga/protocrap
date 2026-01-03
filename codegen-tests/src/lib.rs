@@ -1,3 +1,4 @@
+#[cfg(test)]
 use allocator_api2::alloc::Global;
 
 #[cfg(test)]
@@ -6,12 +7,13 @@ use protocrap::{self, containers::Bytes};
 #[cfg(test)]
 use protocrap::ProtobufRef;
 
-use test_protos::{DefaultsTest, Status, Test};
+use test_protos::Test;
+
+#[cfg(test)]
+use test_protos::{DefaultsTest, Status};
 
 // Embedded const from JSON test data
-#[cfg(not(bazel))]
-const EMBEDDED_TEST: Test::ProtoType = include!(concat!(env!("OUT_DIR"), "/test_embed.pc.rs"));
-#[cfg(bazel)]
+#[cfg(test)]
 const EMBEDDED_TEST: Test::ProtoType = include!("test_embed.pc.rs");
 
 use Test::ProtoType as TestProto;
