@@ -42,6 +42,7 @@ use crate::{
     wire,
 };
 
+#[doc(hidden)]
 pub fn field_kind_tokens(field: &FieldDescriptorProto) -> wire::FieldKind {
     if field.label().unwrap() == Label::LABEL_REPEATED {
         match field.r#type().unwrap() {
@@ -84,6 +85,7 @@ pub fn field_kind_tokens(field: &FieldDescriptorProto) -> wire::FieldKind {
     }
 }
 
+#[doc(hidden)]
 pub fn calculate_tag_with_syntax(field: &FieldDescriptorProto, syntax: Option<&str>) -> u32 {
     let is_repeated = field.label().unwrap() == Label::LABEL_REPEATED;
 
@@ -128,10 +130,12 @@ pub fn calculate_tag_with_syntax(field: &FieldDescriptorProto, syntax: Option<&s
     (field.number() as u32) << 3 | wire_type
 }
 
+#[doc(hidden)]
 pub fn is_repeated(field: &FieldDescriptorProto) -> bool {
     field.label().unwrap() == Label::LABEL_REPEATED
 }
 
+#[doc(hidden)]
 pub fn is_message(field: &FieldDescriptorProto) -> bool {
     matches!(
         field.r#type().unwrap(),
@@ -139,14 +143,17 @@ pub fn is_message(field: &FieldDescriptorProto) -> bool {
     )
 }
 
+#[doc(hidden)]
 pub fn is_in_oneof(field: &FieldDescriptorProto) -> bool {
     field.has_oneof_index()
 }
 
+#[doc(hidden)]
 pub fn needs_has_bit(field: &FieldDescriptorProto) -> bool {
     !is_repeated(field) && !is_message(field) && !is_in_oneof(field)
 }
 
+#[doc(hidden)]
 pub fn default_value<'a>(field: &'a FieldDescriptorProto) -> Option<Value<'a, 'a>> {
     use Type::*;
 

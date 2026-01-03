@@ -205,6 +205,7 @@ pub mod reflection;
 pub use base::TypedMessage;
 #[cfg(feature = "std")]
 pub mod descriptor_pool;
+#[doc(hidden)]
 #[cfg(feature = "std")]
 pub mod test_utils;
 

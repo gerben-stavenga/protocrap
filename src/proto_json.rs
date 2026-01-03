@@ -244,6 +244,7 @@ impl<T: serde::Serialize + ?Sized> serde::Serialize for ProtoJsonValue<'_, T> {
 
 // Wrapper types for compound serializers
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeSeq<S> {
     inner: S,
 }
@@ -261,6 +262,7 @@ impl<S: SerializeSeq> SerializeSeq for ProtoJsonSerializeSeq<S> {
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeTuple<S> {
     inner: S,
 }
@@ -278,6 +280,7 @@ impl<S: SerializeTuple> SerializeTuple for ProtoJsonSerializeTuple<S> {
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeTupleStruct<S> {
     inner: S,
 }
@@ -295,6 +298,7 @@ impl<S: SerializeTupleStruct> SerializeTupleStruct for ProtoJsonSerializeTupleSt
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeTupleVariant<S> {
     inner: S,
 }
@@ -312,6 +316,7 @@ impl<S: SerializeTupleVariant> SerializeTupleVariant for ProtoJsonSerializeTuple
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeMap<S> {
     inner: S,
 }
@@ -333,6 +338,7 @@ impl<S: SerializeMap> SerializeMap for ProtoJsonSerializeMap<S> {
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeStruct<S> {
     inner: S,
 }
@@ -354,6 +360,7 @@ impl<S: SerializeStruct> SerializeStruct for ProtoJsonSerializeStruct<S> {
     }
 }
 
+#[doc(hidden)]
 pub struct ProtoJsonSerializeStructVariant<S> {
     inner: S,
 }

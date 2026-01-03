@@ -84,38 +84,3 @@ impl<T, const N: usize> DerefMut for StackWithStorage<T, N> {
         }
     }
 }
-
-pub struct LocalCapture<'a, T> {
-    value: core::mem::ManuallyDrop<T>,
-    origin: &'a mut T,
-}
-
-impl<'a, T> LocalCapture<'a, T> {
-    pub fn new(origin: &'a mut T) -> Self {
-        Self {
-            value: core::mem::ManuallyDrop::new(unsafe { core::ptr::read(origin) }),
-            origin,
-        }
-    }
-}
-
-impl<'a, T> core::ops::Deref for LocalCapture<'a, T> {
-    type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl<'a, T> core::ops::DerefMut for LocalCapture<'a, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
-}
-
-impl<'a, T> Drop for LocalCapture<'a, T> {
-    fn drop(&mut self) {
-        unsafe {
-            core::ptr::write(self.origin, core::mem::ManuallyDrop::take(&mut self.value));
-        }
-    }
-}
