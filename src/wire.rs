@@ -5,11 +5,11 @@ use core::{
 
 pub(crate) const SLOP_SIZE: usize = 16;
 
-pub fn zigzag_decode(n: u64) -> i64 {
+pub(crate) fn zigzag_decode(n: u64) -> i64 {
     ((n >> 1) as i64) ^ (-((n & 1) as i64))
 }
 
-pub fn zigzag_encode(n: i64) -> u64 {
+pub(crate) fn zigzag_encode(n: i64) -> u64 {
     ((n as u64) << 1) ^ ((n >> 63) as u64)
 }
 

@@ -749,7 +749,7 @@ impl<'de, 'arena, 'alloc, T: crate::generated_code_only::Protobuf + 'alloc> serd
     }
 }
 
-pub struct ProtobufVisitor<'arena, 'alloc, 'b, 'pool> {
+struct ProtobufVisitor<'arena, 'alloc, 'b, 'pool> {
     msg: DynamicMessage<'pool, 'b>,
     arena: &'arena mut crate::arena::Arena<'alloc>,
 }
@@ -769,7 +769,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::DeserializeSeed<'de>
     }
 }
 
-pub struct Optional<T>(T);
+struct Optional<T>(T);
 
 /// DeserializeSeed for enum values - accepts both integers and string names
 struct EnumSeed<'a> {
