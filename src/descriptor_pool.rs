@@ -210,34 +210,6 @@ impl<'alloc> DescriptorPool<'alloc> {
         Ok(DynamicMessage { object, table })
     }
 
-    /// Create a DynamicMessage by decoding bytes with the given message type
-    pub fn decode_message<'pool, 'msg>(
-        &'pool self,
-        message_type: &str,
-        bytes: &[u8],
-        arena: &'msg mut Arena,
-    ) -> Result<DynamicMessage<'pool, 'msg>, crate::Error> {
-        let table = &**self
-            .tables
-            .get(message_type)
-            .ok_or(crate::Error::MessageNotFound)?;
-
-        // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8).unwrap();
-        let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
-        assert!((ptr as usize) & 7 == 0);
-        let object = unsafe {
-            // Zero-initialize the object
-            core::ptr::write_bytes(ptr as *mut u8, 0, table.size as usize);
-            &mut *ptr
-        };
-
-        // Decode
-        self.decode_into(object, table, bytes, arena)?;
-
-        Ok(DynamicMessage { object, table })
-    }
-
     // TODO: improve lifetime annotations
     #[allow(clippy::mut_from_ref)]
     fn build_table_from_descriptor(
@@ -561,25 +533,6 @@ impl<'alloc> DescriptorPool<'alloc> {
             TYPE_STRING | TYPE_BYTES => core::mem::align_of::<crate::containers::String>() as u32,
             TYPE_MESSAGE | TYPE_GROUP => core::mem::align_of::<Message>() as u32,
         }
-    }
-
-    fn decode_into(
-        &self,
-        object: &mut Object,
-        table: &Table,
-        bytes: &[u8],
-        arena: &mut Arena,
-    ) -> Result<(), crate::Error> {
-        use crate::decoding::ResumeableDecode;
-
-        let mut decoder = ResumeableDecode::<32>::new_from_table(object, table, isize::MAX);
-        if !decoder.resume(bytes, arena) {
-            return Err(crate::Error::InvalidData);
-        }
-        if !decoder.finish(arena) {
-            return Err(crate::Error::InvalidData);
-        }
-        Ok(())
     }
 }
 

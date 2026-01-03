@@ -437,6 +437,15 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
     }
 }
 
+impl<'pool, 'msg> From<DynamicMessage<'pool, 'msg>> for DynamicMessageRef<'pool, 'msg> {
+    fn from(dynamic: DynamicMessage<'pool, 'msg>) -> Self {
+        DynamicMessageRef {
+            object: dynamic.object,
+            table: dynamic.table,
+        }
+    }
+}
+
 // ProtobufRef implementation for DynamicMessageRef
 impl<'pool, 'msg> ProtobufRef<'pool> for DynamicMessageRef<'pool, 'msg> {
     fn as_dyn<'a>(&'a self) -> DynamicMessageRef<'pool, 'a> {

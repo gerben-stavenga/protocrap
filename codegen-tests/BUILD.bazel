@@ -21,7 +21,6 @@ rust_library(
     ],
     crate_name = "codegen_tests",
     edition = "2024",
-    rustc_flags = ["--cfg=bazel"],
     visibility = ["//visibility:public"],
     deps = [
         "//:protocrap",
@@ -36,7 +35,6 @@ rust_library(
 rust_test(
     name = "codegen_tests",
     crate = ":codegen_tests_lib",
-    rustc_flags = ["--cfg=bazel"],
     deps = [
         "@crates//:criterion",
         "@crates//:rand",

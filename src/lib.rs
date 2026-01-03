@@ -517,8 +517,8 @@ mod tests {
         let nested_descriptor =
             crate::google::protobuf::DescriptorProto::ExtensionRange::ProtoType::descriptor_proto();
 
-        assert!(file_descriptor.name().ends_with("descriptor.proto"));
-        println!("File descriptor name: {}", file_descriptor.name());
+        // Test we built descriptor.proto using the canonical path
+        assert_eq!(file_descriptor.name(), "google/protobuf/descriptor.proto");
         assert_eq!(message_descriptor.name(), "DescriptorProto");
         assert_eq!(nested_descriptor.name(), "ExtensionRange");
     }
@@ -574,9 +574,10 @@ mod tests {
 
         let bytes = file_descriptor.encode_vec::<32>().expect("should encode");
         let mut arena = crate::arena::Arena::new(&Global);
-        let dynamic_file_descriptor = pool
-            .decode_message("google.protobuf.FileDescriptorProto", &bytes, &mut arena)
-            .expect("should decode");
+
+        let mut dynamic_file_descriptor = pool
+            .create_message("google.protobuf.FileDescriptorProto", &mut arena).expect("Should create");
+        assert!(dynamic_file_descriptor.decode_flat::<32>(&mut arena, &bytes));
 
         let roundtrip = dynamic_file_descriptor
             .encode_vec::<32>()
