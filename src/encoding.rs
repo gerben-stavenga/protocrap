@@ -44,7 +44,12 @@ impl StackEntry {
 enum EncodeObject<'a> {
     Done,
     Object(ObjectEncodeState<'a>),
-    String(&'a [u8]),
+    Bytes(&'a [u8]),
+    PackedVarint64(&'a [u64]),
+    PackedVarint32(&'a [u32]),
+    PackedInt32(&'a [i32]),
+    PackedSint64(&'a [i64]),
+    PackedSint32(&'a [i32]),
 }
 
 struct ObjectEncodeState<'a> {
@@ -126,9 +131,49 @@ fn encode_bytes<'a>(
     let buffer_size = (cursor - begin) as usize;
     if buffer_size < len {
         cursor.write_slice(&bytes[len - buffer_size..]);
-        return Some((cursor, EncodeObject::String(&bytes[..len - buffer_size])));
+        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
     }
     cursor.write_slice(bytes);
+    let (ctx, tag, old_byte_count) = stack.pop()?.into_context();
+    let field_byte_count = count(cursor, begin, byte_count) - old_byte_count;
+    cursor.write_varint(field_byte_count as u64);
+    cursor.write_tag(tag);
+    encode_loop(ctx, cursor, begin, byte_count, stack)
+}
+
+fn write_packed_varint<'a, T: Copy>(
+    slice: &'a [T],
+    mut cursor: WriteCursor,
+    begin: NonNull<u8>,
+    transform: impl Fn(T) -> u64,
+) -> (WriteCursor, &'a [T]) {
+    let mut idx = slice.len();
+    while idx > 0 {
+        if cursor <= begin {
+            return (cursor, &slice[..idx]);
+        }
+        idx -= 1;
+        cursor.write_varint(transform(slice[idx]));
+    }
+    (cursor, &[])
+}
+
+fn encode_packed_varint<'a, T: Copy>(
+    slice: &'a [T],
+    mut cursor: WriteCursor,
+    begin: NonNull<u8>,
+    byte_count: isize,
+    stack: &mut Stack<StackEntry>,
+    transform: impl Fn(T) -> u64,
+    wrap_remaining: impl FnOnce(&'a [T]) -> EncodeObject<'a>,
+) -> EncodeResult<'a> {
+    let remaining;
+    (cursor, remaining) = write_packed_varint(slice, cursor, begin, &transform);
+    if !remaining.is_empty() || cursor <= begin {
+        // Not enough space - return remaining slice
+        return Some((cursor, wrap_remaining(remaining)));
+    }
+    // Done - pop and write length + tag
     let (ctx, tag, old_byte_count) = stack.pop()?.into_context();
     let field_byte_count = count(cursor, begin, byte_count) - old_byte_count;
     cursor.write_varint(field_byte_count as u64);
@@ -162,36 +207,6 @@ fn write_repeated<T>(
         obj_state.rep_field_idx -= 1;
         write(cursor, &slice[obj_state.rep_field_idx]);
         cursor.write_tag(tag);
-    }
-}
-
-fn write_repeated_packed<T>(
-    obj_state: &mut ObjectEncodeState,
-    cursor: &mut WriteCursor,
-    begin: NonNull<u8>,
-    tag: u32,
-    slice: &[T],
-    write: impl Fn(&mut WriteCursor, &T),
-) {
-    if obj_state.rep_field_idx == 0 {
-        obj_state.rep_field_idx = slice.len();
-    }
-
-    // Write all values backwards without tags
-    let start_ptr = cursor.0;
-    while obj_state.rep_field_idx > 0 {
-        if *cursor <= begin {
-            break;
-        }
-        obj_state.rep_field_idx -= 1;
-        write(cursor, &slice[obj_state.rep_field_idx]);
-    }
-
-    // Only write tag + length if we wrote all values
-    if obj_state.rep_field_idx == 0 && !slice.is_empty() {
-        let packed_len = unsafe { start_ptr.as_ptr().offset_from(cursor.0.as_ptr()) as u64 };
-        cursor.write_varint(packed_len);
-        cursor.write_tag(tag); // Tag already has wire type 2
     }
 }
 
@@ -353,7 +368,7 @@ fn encode_loop<'a>(
                         obj_state.field_idx -= 1;
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                         cursor.write_slice(&bytes[len - buffer_size..]);
-                        return Some((cursor, EncodeObject::String(&bytes[..len - buffer_size])));
+                        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
                     }
                     cursor.write_slice(bytes);
                     cursor.write_varint(bytes.len() as u64);
@@ -403,16 +418,18 @@ fn encode_loop<'a>(
             FieldKind::RepeatedVarint64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
                 if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(val);
-                        },
-                    );
+                    if !slice.is_empty() {
+                        let start_count = count(cursor, begin, byte_count);
+                        let remaining;
+                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |v| v);
+                        if !remaining.is_empty() || cursor <= begin {
+                            obj_state.field_idx -= 1;
+                            obj_state.push(tag, start_count, stack)?;
+                            return Some((cursor, EncodeObject::PackedVarint64(remaining)));
+                        }
+                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor.write_tag(tag);
+                    }
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -429,16 +446,18 @@ fn encode_loop<'a>(
             FieldKind::RepeatedVarint32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
                 if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(val as u64);
-                        },
-                    );
+                    if !slice.is_empty() {
+                        let start_count = count(cursor, begin, byte_count);
+                        let remaining;
+                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |v| v as u64);
+                        if !remaining.is_empty() || cursor <= begin {
+                            obj_state.field_idx -= 1;
+                            obj_state.push(tag, start_count, stack)?;
+                            return Some((cursor, EncodeObject::PackedVarint32(remaining)));
+                        }
+                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor.write_tag(tag);
+                    }
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -455,16 +474,18 @@ fn encode_loop<'a>(
             FieldKind::RepeatedInt32 => {
                 let slice = obj_state.get_slice::<i32>(offset);
                 if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(val as i64 as u64);
-                        },
-                    );
+                    if !slice.is_empty() {
+                        let start_count = count(cursor, begin, byte_count);
+                        let remaining;
+                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |v| v as i64 as u64);
+                        if !remaining.is_empty() || cursor <= begin {
+                            obj_state.field_idx -= 1;
+                            obj_state.push(tag, start_count, stack)?;
+                            return Some((cursor, EncodeObject::PackedInt32(remaining)));
+                        }
+                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor.write_tag(tag);
+                    }
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -481,16 +502,20 @@ fn encode_loop<'a>(
             FieldKind::RepeatedVarint64Zigzag => {
                 let slice = obj_state.get_slice::<i64>(offset);
                 if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(zigzag_encode(val));
-                        },
-                    );
+                    if !slice.is_empty() {
+                        let start_count = count(cursor, begin, byte_count);
+                        let remaining;
+                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |
+                            v| zigzag_encode(v),
+                        );
+                        if !remaining.is_empty() || cursor <= begin {
+                            obj_state.field_idx -= 1;
+                            obj_state.push(tag, start_count, stack)?;
+                            return Some((cursor, EncodeObject::PackedSint64(remaining)));
+                        }
+                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor.write_tag(tag);
+                    }
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -507,16 +532,20 @@ fn encode_loop<'a>(
             FieldKind::RepeatedVarint32Zigzag => {
                 let slice = obj_state.get_slice::<i32>(offset);
                 if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(zigzag_encode(val as i64) as u32 as u64);
-                        },
-                    );
+                    if !slice.is_empty() {
+                        let start_count = count(cursor, begin, byte_count);
+                        let remaining;
+                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |
+                            v| zigzag_encode(v as i64),
+                        );
+                        if !remaining.is_empty() || cursor <= begin {
+                            obj_state.field_idx -= 1;
+                            obj_state.push(tag, start_count, stack)?;
+                            return Some((cursor, EncodeObject::PackedSint32(remaining)));
+                        }
+                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor.write_tag(tag);
+                    }
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -532,17 +561,28 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedBool => {
                 let slice = obj_state.get_slice::<bool>(offset);
-                if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_varint(if val { 1 } else { 0 });
-                        },
-                    );
+                if tag & 7 == 2 && !slice.is_empty() {
+                    // Packed: treat as bytes (bool is 1 byte)
+                    let bytes = unsafe {
+                        core::slice::from_raw_parts(
+                            slice.as_ptr() as *const u8,
+                            slice.len(),
+                        )
+                    };
+                    if cursor <= begin {
+                        break;
+                    }
+                    let len = bytes.len();
+                    let buffer_size = (cursor - begin) as usize;
+                    if buffer_size < len {
+                        obj_state.field_idx -= 1;
+                        obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
+                        cursor.write_slice(&bytes[len - buffer_size..]);
+                        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
+                    }
+                    cursor.write_slice(bytes);
+                    cursor.write_varint(len as u64);
+                    cursor.write_tag(tag);
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -558,17 +598,28 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedFixed64 => {
                 let slice = obj_state.get_slice::<u64>(offset);
-                if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_unaligned(val);
-                        },
-                    );
+                if tag & 7 == 2 && !slice.is_empty() {
+                    // Packed: treat as bytes
+                    let bytes = unsafe {
+                        core::slice::from_raw_parts(
+                            slice.as_ptr() as *const u8,
+                            slice.len() * 8,
+                        )
+                    };
+                    if cursor <= begin {
+                        break;
+                    }
+                    let len = bytes.len();
+                    let buffer_size = (cursor - begin) as usize;
+                    if buffer_size < len {
+                        obj_state.field_idx -= 1;
+                        obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
+                        cursor.write_slice(&bytes[len - buffer_size..]);
+                        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
+                    }
+                    cursor.write_slice(bytes);
+                    cursor.write_varint(len as u64);
+                    cursor.write_tag(tag);
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -584,17 +635,28 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedFixed32 => {
                 let slice = obj_state.get_slice::<u32>(offset);
-                if tag & 7 == 2 {
-                    write_repeated_packed(
-                        &mut obj_state,
-                        &mut cursor,
-                        begin,
-                        tag,
-                        slice,
-                        |cursor, &val| {
-                            cursor.write_unaligned(val);
-                        },
-                    );
+                if tag & 7 == 2 && !slice.is_empty() {
+                    // Packed: treat as bytes
+                    let bytes = unsafe {
+                        core::slice::from_raw_parts(
+                            slice.as_ptr() as *const u8,
+                            slice.len() * 4,
+                        )
+                    };
+                    if cursor <= begin {
+                        break;
+                    }
+                    let len = bytes.len();
+                    let buffer_size = (cursor - begin) as usize;
+                    if buffer_size < len {
+                        obj_state.field_idx -= 1;
+                        obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
+                        cursor.write_slice(&bytes[len - buffer_size..]);
+                        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
+                    }
+                    cursor.write_slice(bytes);
+                    cursor.write_varint(len as u64);
+                    cursor.write_tag(tag);
                 } else {
                     write_repeated(
                         &mut obj_state,
@@ -625,7 +687,7 @@ fn encode_loop<'a>(
                     if buffer_size < len {
                         cursor.write_slice(&bytes[len - buffer_size..]);
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
-                        return Some((cursor, EncodeObject::String(&bytes[..len - buffer_size])));
+                        return Some((cursor, EncodeObject::Bytes(&bytes[..len - buffer_size])));
                     }
                     cursor.write_slice(bytes);
                     cursor.write_varint(bytes.len() as u64);
@@ -710,8 +772,23 @@ impl<'a> ResumableState<'a> {
             let (new_cursor, object) = match object {
                 EncodeObject::Done => (cursor, EncodeObject::Done),
                 EncodeObject::Object(ctx) => encode_loop(ctx, cursor, begin, byte_count, stack)?,
-                EncodeObject::String(bytes) => {
+                EncodeObject::Bytes(bytes) => {
                     encode_bytes(bytes, cursor, begin, byte_count, stack)?
+                }
+                EncodeObject::PackedVarint64(slice) => {
+                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v, EncodeObject::PackedVarint64)?
+                }
+                EncodeObject::PackedVarint32(slice) => {
+                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v as u64, EncodeObject::PackedVarint32)?
+                }
+                EncodeObject::PackedInt32(slice) => {
+                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v as i64 as u64, EncodeObject::PackedInt32)?
+                }
+                EncodeObject::PackedSint64(slice) => {
+                    encode_packed_varint(slice, cursor, begin, byte_count, stack, zigzag_encode, EncodeObject::PackedSint64)?
+                }
+                EncodeObject::PackedSint32(slice) => {
+                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| zigzag_encode(v as i64), EncodeObject::PackedSint32)?
                 }
             };
             Some(ResumableState {

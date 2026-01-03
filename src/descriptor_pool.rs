@@ -583,78 +583,11 @@ impl<'alloc> DescriptorPool<'alloc> {
     }
 }
 
-pub mod test_util {
-    use crate::tables::Table;
-    use std::collections::HashSet;
-
-    pub fn compare_tables_rec(
-        static_table: &Table,
-        dynamic_table: &Table,
-        seen: &mut HashSet<*const Table>,
-    ) {
-        let type_name = dynamic_table.descriptor.name();
-        if !seen.insert(dynamic_table as *const Table) {
-            return;
-        }
-
-        assert_eq!(
-            dynamic_table.size, static_table.size,
-            "{}: size mismatch", type_name
-        );
-        assert_eq!(
-            dynamic_table.num_encode_entries, static_table.num_encode_entries,
-            "{}: num_encode_entries mismatch", type_name
-        );
-        assert_eq!(
-            dynamic_table.num_decode_entries, static_table.num_decode_entries,
-            "{}: num_decode_entries mismatch", type_name
-        );
-
-        let dynamic_encode = dynamic_table.encode_entries();
-        let static_encode = static_table.encode_entries();
-
-        let mut aux_offsets = Vec::new();
-        for (i, (dyn_entry, static_entry)) in
-            dynamic_encode.iter().zip(static_encode.iter()).enumerate()
-        {
-            let field_name = dynamic_table.descriptor.field()[i].name();
-            assert_eq!(dyn_entry.offset, static_entry.offset, "{}.{}: offset", type_name, field_name);
-            assert_eq!(dyn_entry.has_bit, static_entry.has_bit, "{}.{}: has_bit", type_name, field_name);
-            assert_eq!(dyn_entry.encoded_tag, static_entry.encoded_tag, "{}.{}: tag", type_name, field_name);
-            assert_eq!(dyn_entry.kind, static_entry.kind, "{}.{}: kind", type_name, field_name);
-
-            if dyn_entry.kind == crate::wire::FieldKind::Message
-                || dyn_entry.kind == crate::wire::FieldKind::RepeatedMessage
-            {
-                aux_offsets.push(dyn_entry.offset as usize);
-            }
-        }
-
-        let dynamic_decode = dynamic_table.decode_entries();
-        let static_decode = static_table.decode_entries();
-        for (i, (dyn_entry, static_entry)) in
-            dynamic_decode.iter().zip(static_decode.iter()).enumerate()
-        {
-            assert_eq!(dyn_entry.0, static_entry.0, "{} decode[{}]", type_name, i);
-        }
-
-        for offset in aux_offsets {
-            let dyn_aux = dynamic_table.aux_entry(offset);
-            let static_aux = static_table.aux_entry(offset);
-            assert_eq!(dyn_aux.offset, static_aux.offset, "{} aux@{}", type_name, offset);
-            compare_tables_rec(
-                unsafe { &*static_aux.child_table },
-                unsafe { &*dyn_aux.child_table },
-                seen,
-            );
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::generated_code_only::Protobuf;
+    use crate::test_utils::compare_tables_rec;
     use allocator_api2::alloc::Global;
     use std::collections::HashSet;
 
@@ -672,6 +605,6 @@ mod tests {
             .expect("FileDescriptorSet not found in pool");
 
         let mut seen = HashSet::new();
-        test_util::compare_tables_rec(static_table, dynamic_table, &mut seen);
+        compare_tables_rec(static_table, dynamic_table, &mut seen);
     }
 }

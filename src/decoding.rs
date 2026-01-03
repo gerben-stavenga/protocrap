@@ -307,7 +307,7 @@ fn skip_group<'a>(
             }
             #[cfg(feature = "std")]
             if TRACE_TAGS {
-                println!(
+                eprintln!(
                     "Skipping unknown field with field number {} and wire type {}",
                     field_number, wire_type
                 );
@@ -520,7 +520,7 @@ fn decode_loop<'a>(
                     .iter()
                     .find(|f| f.number() as u32 == field_number);
                 if let Some(field) = field {
-                    println!(
+                    eprintln!(
                         "Msg {} Field number: {}, Field name {}, wire type {}",
                         descriptor.name(),
                         field_number,
@@ -529,7 +529,7 @@ fn decode_loop<'a>(
                     );
                 } else {
                     // field not found in descriptor, treat as unknown
-                    println!(
+                    eprintln!(
                         "Msg {} Unknown Field number: {}, wire type {}",
                         descriptor.name(),
                         field_number,

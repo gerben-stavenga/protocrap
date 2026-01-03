@@ -221,7 +221,7 @@ fn generate_enum(
 fn make_doc_comment(comment: Option<&String>) -> TokenStream {
     match comment {
         Some(text) => {
-            let lines: Vec<_> = text.lines().collect();
+            let lines: Vec<_> = text.lines().map(|line| format!(" {}", line)).collect();
             quote! {
                 #(#[doc = #lines])*
             }
@@ -661,10 +661,10 @@ fn generate_accessors(
         // Get field doc comment
         let field_key = format!("{}.{}", name_prefix, field.name());
         let field_doc = make_doc_comment(comments.get(&field_key));
-        let has_doc = {
-            let field_name_str = field.name();
-            quote! { #[doc = concat!("Returns whether the `", #field_name_str, "` field is set.")] }
-        };
+        let has_doc_str = format!(" Returns whether the `{}` field is set.", field.name());
+        let has_doc = quote! { #[doc = #has_doc_str] };
+        let clear_doc_str = format!(" Clears the `{}` field.", field.name());
+        let clear_doc = quote! { #[doc = #clear_doc_str] };
 
         // Handle oneof fields specially
         if is_in_oneof(field.as_ref()) {
@@ -717,6 +717,7 @@ fn generate_accessors(
                             unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -752,6 +753,7 @@ fn generate_accessors(
                             unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -781,6 +783,7 @@ fn generate_accessors(
                             unsafe { self.#oneof_field_name.#field_name.deref_mut() }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -804,6 +807,7 @@ fn generate_accessors(
                             self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value.to_i32());
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -828,6 +832,7 @@ fn generate_accessors(
                             self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(value);
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.metadata[#discriminant_word_idx] = 0;
                         }
@@ -945,6 +950,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
@@ -992,6 +998,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name.clear();
@@ -1017,6 +1024,7 @@ fn generate_accessors(
                             self.#field_name.get_or_init(arena)
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             self.#field_name.clear();
                         }
@@ -1057,6 +1065,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = 0;
@@ -1111,6 +1120,7 @@ fn generate_accessors(
                             }
                         }
 
+                        #clear_doc
                         pub fn #clear_name(&mut self) {
                             protocrap::generated_code_only::as_object_mut(self).clear_has_bit(#has_bit);
                             self.#field_name = Default::default();

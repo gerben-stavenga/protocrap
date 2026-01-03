@@ -1,7 +1,7 @@
 use allocator_api2::alloc::Global;
 
 #[cfg(test)]
-use protocrap::tests::assert_roundtrip;
+use protocrap::test_utils::assert_roundtrip;
 use protocrap::{self, containers::Bytes};
 #[cfg(test)]
 use protocrap::ProtobufRef;
@@ -379,7 +379,7 @@ fn test_embedded_const() {
 
 #[cfg(test)]
 mod table_tests {
-    use protocrap::descriptor_pool::test_util::compare_tables_rec;
+    use protocrap::test_utils::compare_tables_rec;
     use protocrap::descriptor_pool::DescriptorPool;
     use protocrap::ProtobufMut;
     use std::collections::HashSet;

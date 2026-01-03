@@ -54,7 +54,7 @@ crate.annotation(crate = "protoc-gen-prost", gen_binaries = ["protoc-gen-prost"]
 crate.spec(package = "protoc-gen-prost", version = "0.4")
 
 # Bootstrap: published protocrap for verifying codegen compatibility
-crate.spec(package = "protocrap", version = "0.1")
+crate.spec(package = "protocrap", version = "0.2")
 
 crate.from_specs(name = "crates")
 
