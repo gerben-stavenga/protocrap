@@ -340,19 +340,37 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
                     }
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                    let aux = self.table.aux_entry_decode(entry);
-                    let slice = self.object.get_slice::<Message>(aux.offset as usize);
+                    let (offset, child_table) = self.table.aux_entry_decode(entry);
+                    let slice = self.object.get_slice::<Message>(offset as usize);
                     if slice.is_empty() {
                         return None;
                     }
                     let dynamic_array = DynamicMessageArray {
                         object: slice,
-                        table: unsafe { &*aux.child_table },
+                        table: child_table,
                     };
                     Some(Value::RepeatedMessage(dynamic_array))
                 }
             }
         } else {
+            // Check if field is set BEFORE accessing field data
+            // This is critical for oneofs where unset variants may contain garbage
+            let has_bit_idx = entry.has_bit_idx();
+            if has_bit_idx & 0x80 != 0 {
+                // Oneof field - check discriminant matches field number
+                let discriminant_word_idx = (has_bit_idx & 0x7F) as usize;
+                let discriminant = self.object.get::<u32>(discriminant_word_idx * 4);
+                if discriminant != field.number() as u32 {
+                    return None;
+                }
+            } else if needs_has_bit(field) {
+                // Field has a has_bit - check it
+                if !self.object.has_bit(has_bit_idx as u8) {
+                    return None;
+                }
+            }
+            // Proto3 scalar fields without has_bits are always "present" (may be default)
+
             let value = match field.r#type().unwrap() {
                 Type::TYPE_INT32 | Type::TYPE_SINT32 | Type::TYPE_SFIXED32 | Type::TYPE_ENUM => {
                     Value::Int32(self.object.get(entry.offset() as usize))
@@ -378,44 +396,19 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
                     Value::Bytes(self.object.get_slice::<u8>(entry.offset() as usize))
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
-                    // For oneof message fields, check discriminant first
-                    let has_bit_idx = entry.has_bit_idx();
-                    if has_bit_idx & 0x80 != 0 {
-                        let discriminant_word_idx = (has_bit_idx & 0x7F) as usize;
-                        let discriminant = self.object.get::<u32>(discriminant_word_idx * 4);
-                        if discriminant != field.number() as u32 {
-                            return None;
-                        }
-                    }
-                    let aux_entry = self.table.aux_entry_decode(entry);
-                    let offset = aux_entry.offset as usize;
-                    let msg = self.object.get::<Message>(offset);
-                    if msg.0.is_null() {
+                    let (offset, child_table) = self.table.aux_entry_decode(entry);
+                    let msg = self.object.ref_at::<Message>(offset as usize);
+                    if msg.is_null() {
                         return None;
                     }
                     let dynamic_msg = DynamicMessageRef {
-                        object: unsafe { &*msg.0 },
-                        table: unsafe { &*aux_entry.child_table },
+                        object: msg.as_ref(),
+                        table: child_table,
                     };
                     return Some(Value::Message(dynamic_msg));
                 }
             };
-            // Check if field is set
-            let has_bit_idx = entry.has_bit_idx();
-            let is_set = if has_bit_idx & 0x80 != 0 {
-                // Oneof field - check discriminant matches field number
-                let discriminant_word_idx = (has_bit_idx & 0x7F) as usize;
-                let discriminant = self.object.get::<u32>(discriminant_word_idx * 4);
-                discriminant == field.number() as u32
-            } else {
-                debug_assert!(needs_has_bit(field));
-                self.object.has_bit(has_bit_idx as u8)
-            };
-            if is_set {
-                Some(value)
-            } else {
-                None
-            }
+            Some(value)
         }
     }
 }
@@ -433,6 +426,17 @@ impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
         // (one has &mut Object, the other &Object)
         unsafe {
             &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
+        }
+    }
+
+    /// Zeroes all fields of this message.
+    pub fn clear(&mut self) {
+        unsafe {
+            core::ptr::write_bytes(
+                self.object as *mut Object as *mut u8,
+                0,
+                self.table.size as usize,
+            );
         }
     }
 }
@@ -484,7 +488,7 @@ impl<'pool, 'msg> core::fmt::Debug for DynamicMessageArray<'pool, 'msg> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_list()
             .entries(self.object.iter().map(|msg| DynamicMessageRef {
-                object: unsafe { &*msg.0 },
+                object: msg.as_ref(),
                 table: self.table,
             }))
             .finish()
@@ -501,9 +505,9 @@ impl<'pool, 'msg> DynamicMessageArray<'pool, 'msg> {
     }
 
     pub fn get(&self, index: usize) -> DynamicMessageRef<'pool, 'msg> {
-        let obj = self.object[index];
+        let obj = &self.object[index];
         DynamicMessageRef {
-            object: unsafe { &*obj.0 },
+            object: obj.as_ref(),
             table: self.table,
         }
     }
@@ -532,10 +536,10 @@ impl<'pool, 'a> Iterator for DynamicMessageArrayIter<'pool, 'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.index < self.object.len() {
-            let obj = self.object[self.index];
+            let obj = &self.object[self.index];
             self.index += 1;
             Some(DynamicMessageRef {
-                object: unsafe { &*obj.0 },
+                object: obj.as_ref(),
                 table: self.table,
             })
         } else {

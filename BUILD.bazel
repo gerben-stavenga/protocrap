@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_binary", "rust_test", "rust_doc_test")
 load("//bazel:proto_descriptor_set.bzl", "proto_descriptor_set")
 
 exports_files([
@@ -130,5 +130,11 @@ echo 'cp "$(location :generate_descriptor_bootstrap)" "$$BUILD_WORKSPACE_DIRECTO
 chmod +x $@
 """,
     executable = True,
+)
+
+# Test that doc examples compile and pass
+rust_doc_test(
+    name = "doc_test",
+    crate = ":protocrap",
 )
 

@@ -14,7 +14,6 @@ rust_library(
     srcs = ["src/lib.rs"],
     crate_name = "protocrap_conformance",
     edition = "2024",
-    rustc_flags = ["--cfg=bazel"],
     visibility = ["//visibility:public"],
     deps = [
         "//:protocrap",

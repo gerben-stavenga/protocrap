@@ -3,7 +3,7 @@ use core::ptr::NonNull;
 
 use crate::base::Object;
 use crate::containers::{Bytes, RepeatedField};
-use crate::tables::{AuxTableEntry, Table};
+use crate::tables::Table;
 use crate::utils::{Stack, StackWithStorage};
 use crate::wire::{FieldKind, ReadCursor, SLOP_SIZE, zigzag_decode};
 
@@ -20,6 +20,7 @@ impl TableEntry {
     }
 
     pub(crate) fn kind(&self) -> FieldKind {
+        debug_assert!((self.0 as u8) <= FieldKind::RepeatedGroup as u8);
         unsafe { core::mem::transmute(self.0 as u8) }
     }
 
@@ -47,7 +48,7 @@ impl Table {
     }
 
     #[inline(always)]
-    pub(crate) fn aux_entry_decode(&self, entry: TableEntry) -> AuxTableEntry {
+    pub(crate) fn aux_entry_decode(&self, entry: TableEntry) -> (u32, &Table) {
         let offset = entry.aux_offset();
         self.aux_entry(offset as usize)
     }
@@ -226,9 +227,8 @@ impl<'a> DecodeObjectState<'a> {
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
     ) -> (&'a mut Object, &'a Table) {
-        let aux_entry = self.table.aux_entry_decode(entry);
-        let field = self.obj.ref_mut::<*mut Object>(aux_entry.offset);
-        let child_table = unsafe { &*aux_entry.child_table };
+        let (offset, child_table) = self.table.aux_entry_decode(entry);
+        let field = self.obj.ref_mut::<*mut Object>(offset);
         let child = if (*field).is_null() {
             let child = Object::create(child_table.size as u32, arena);
             *field = child;
@@ -245,11 +245,10 @@ impl<'a> DecodeObjectState<'a> {
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
     ) -> (&'a mut Object, &'a Table) {
-        let aux_entry = self.table.aux_entry_decode(entry);
+        let (offset, child_table) = self.table.aux_entry_decode(entry);
         let field = self
             .obj
-            .ref_mut::<RepeatedField<*mut Object>>(aux_entry.offset);
-        let child_table = unsafe { &*aux_entry.child_table };
+            .ref_mut::<RepeatedField<*mut Object>>(offset);
         let child = Object::create(child_table.size as u32, arena);
         field.push(child, arena);
         (child, child_table)
@@ -1104,27 +1103,6 @@ pub struct ResumeableDecode<'a, const STACK_DEPTH: usize> {
 impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
     pub fn new<'pool: 'a>(msg: crate::reflection::DynamicMessage<'pool, 'a>, limit: isize) -> Self {
         let object = DecodeObject::Message(msg.object, msg.table);
-        Self {
-            state: MaybeUninit::new(ResumeableState {
-                limit,
-                object,
-                overrun: SLOP_SIZE as isize,
-            }),
-            patch_buffer: [0; SLOP_SIZE * 2],
-            stack: Default::default(),
-        }
-    }
-
-    pub fn new_from_table(
-        obj: &'a mut crate::base::Object,
-        table: &'a crate::tables::Table,
-        limit: isize,
-    ) -> Self {
-        // SAFETY: We extend the lifetime to 'static because the decode table is only used
-        // for reading and doesn't actually need to outlive the decode operation.
-        // The table lives in an arena and will outlive this decoder.
-        let table: &'static crate::tables::Table = unsafe { core::mem::transmute(table) };
-        let object = DecodeObject::Message(obj, table);
         Self {
             state: MaybeUninit::new(ResumeableState {
                 limit,

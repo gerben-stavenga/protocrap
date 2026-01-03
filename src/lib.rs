@@ -82,7 +82,7 @@
 //! Inspect messages dynamically without compile-time knowledge of the schema:
 //!
 //! ```
-//! use protocrap::{ProtobufRef, arena::Arena};
+//! use protocrap::{ProtobufRef, ProtobufMut, arena::Arena};
 //! use protocrap::google::protobuf::{FileDescriptorProto, DescriptorProto};
 //! use protocrap::descriptor_pool::DescriptorPool;
 //! use allocator_api2::alloc::Global;
@@ -98,11 +98,11 @@
 //!
 //! // Decode dynamically using the pool
 //! let mut arena = Arena::new(&Global);
-//! let msg = pool.decode_message(
+//! let mut msg = pool.create_message(
 //!     "google.protobuf.DescriptorProto",
-//!     &bytes,
 //!     &mut arena,
 //! ).unwrap();
+//! msg.decode_flat::<32>(&mut arena, &bytes);
 //!
 //! // Access fields dynamically
 //! for field in msg.descriptor().field() {
@@ -341,9 +341,14 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
     ) -> bool {
         let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
         if !decoder.resume(buf, arena) {
+            self.as_dyn_mut().clear();
             return false;
         }
-        decoder.finish(arena)
+        if !decoder.finish(arena) {
+            self.as_dyn_mut().clear();
+            return false;
+        }
+        true
     }
 
     fn decode<'a, E>(
@@ -357,10 +362,12 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                 break;
             };
             if !decoder.resume(buffer, arena) {
+                self.as_dyn_mut().clear();
                 return Err(Error::InvalidData);
             }
         }
         if !decoder.finish(arena) {
+            self.as_dyn_mut().clear();
             return Err(Error::InvalidData);
         }
         Ok(())
@@ -381,10 +388,12 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                     break;
                 };
                 if !decoder.resume(buffer, arena) {
+                    self.as_dyn_mut().clear();
                     return Err(Error::InvalidData);
                 }
             }
             if !decoder.finish(arena) {
+                self.as_dyn_mut().clear();
                 return Err(Error::InvalidData);
             }
             Ok(())
@@ -405,11 +414,13 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                 break;
             }
             if !decoder.resume(buffer, arena) {
+                self.as_dyn_mut().clear();
                 return Err(Error::InvalidData);
             }
             reader.consume(len);
         }
         if !decoder.finish(arena) {
+            self.as_dyn_mut().clear();
             return Err(Error::InvalidData);
         }
         Ok(())
@@ -442,11 +453,13 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                     break;
                 }
                 if !decoder.resume(buffer, arena) {
+                    self.as_dyn_mut().clear();
                     return Err(Error::InvalidData);
                 }
                 reader.consume_unpin(len);
             }
             if !decoder.finish(arena) {
+                self.as_dyn_mut().clear();
                 return Err(Error::InvalidData);
             }
             Ok(())

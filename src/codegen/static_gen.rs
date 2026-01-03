@@ -97,7 +97,7 @@ fn generate_has_bits_array(has_bits: &[u32]) -> TokenStream {
 fn generate_field_initializers(value: &DynamicMessageRef, crate_path: &str) -> Result<Vec<TokenStream>> {
     let mut inits = Vec::new();
 
-    let mut fields = Vec::from(value.descriptor().field());
+    let mut fields = value.descriptor().field().iter().collect::<Vec<_>>();
     fields.sort_by_key(|f| f.number());
 
     for field in fields {
