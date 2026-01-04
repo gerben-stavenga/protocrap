@@ -24,7 +24,7 @@
 //! assert_eq!(&numbers[..], &[1, 2]);
 //!
 //! // String from a str
-//! let s = String::from_str("hello", &mut arena);
+//! let s = String::from_str("hello", &mut arena).unwrap();
 //! assert_eq!(s.as_str(), "hello");
 //! ```
 
@@ -199,13 +199,13 @@ impl<T> RepeatedField<T> {
         }
     }
 
-    pub fn from_slice(slice: &[T], arena: &mut crate::arena::Arena) -> Self
+    pub fn from_slice(slice: &[T], arena: &mut crate::arena::Arena) -> Result<Self, crate::Error<core::alloc::LayoutError>>
     where
         T: Copy,
     {
         let mut rf = Self::new();
-        rf.append(slice, arena);
-        rf
+        rf.append(slice, arena)?;
+        Ok(rf)
     }
 
     pub const fn from_static(slice: &'static [T]) -> Self {
@@ -303,26 +303,27 @@ impl<T> RepeatedField<T> {
         self.buf.reserve(new_cap, Layout::new::<T>(), arena)
     }
 
-    pub fn assign(&mut self, slice: &[T], arena: &mut crate::arena::Arena)
+    pub fn assign(&mut self, slice: &[T], arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>>
     where
         T: Copy,
     {
         self.clear();
-        self.append(slice, arena);
+        self.append(slice, arena)
     }
 
-    pub fn append(&mut self, slice: &[T], arena: &mut crate::arena::Arena)
+    pub fn append(&mut self, slice: &[T], arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>>
     where
         T: Copy,
     {
         let old_len = self.len;
-        self.reserve(old_len + slice.len(), arena);
+        self.reserve(old_len + slice.len(), arena)?;
         unsafe {
             self.ptr()
                 .add(old_len)
                 .copy_from_nonoverlapping(slice.as_ptr(), slice.len());
         }
         self.len = old_len + slice.len();
+        Ok(())
     }
 }
 
@@ -357,8 +358,8 @@ impl String {
         String(RepeatedField::new())
     }
 
-    pub fn from_str(s: &str, arena: &mut crate::arena::Arena) -> Self {
-        String(RepeatedField::from_slice(s.as_bytes(), arena))
+    pub fn from_str(s: &str, arena: &mut crate::arena::Arena) -> Result<Self, crate::Error<core::alloc::LayoutError>> {
+        Ok(String(RepeatedField::from_slice(s.as_bytes(), arena)?))
     }
 
     pub const fn from_static(s: &'static str) -> Self {
@@ -370,8 +371,8 @@ impl String {
         unsafe { core::str::from_utf8_unchecked(self.0.slice()) }
     }
 
-    pub fn assign(&mut self, s: &str, arena: &mut crate::arena::Arena) {
-        self.0.assign(s.as_bytes(), arena);
+    pub fn assign(&mut self, s: &str, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+        self.0.assign(s.as_bytes(), arena)
     }
 
     pub fn clear(&mut self) {

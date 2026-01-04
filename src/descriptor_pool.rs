@@ -98,7 +98,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             } else {
                 format!("{}.{}", package, message.name())
             };
-            self.patch_message_aux_entries(&full_name);
+            self.patch_message_aux_entries(&full_name)?;
         }
         Ok(())
     }
@@ -546,7 +546,7 @@ mod tests {
         let mut pool = DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
-        pool.add_file(file_descriptor);
+        pool.add_file(file_descriptor).unwrap();
 
         let static_table =
             <crate::google::protobuf::FileDescriptorSet::ProtoType as Protobuf>::table();
