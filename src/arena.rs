@@ -13,11 +13,11 @@
 //! let mut arena = Arena::new(&Global);
 //!
 //! // Allocate raw memory
-//! let ptr: *mut u64 = arena.alloc();
+//! let ptr: *mut u64 = arena.alloc().unwrap(); // Returns Result<*mut u64, Error<LayoutError>>
 //! unsafe { *ptr = 42; }
 //!
 //! // Or place a value directly
-//! let value = arena.place(String::from("hello"));
+//! let value = arena.place(String::from("hello")).unwrap(); // Returns Result<&mut String, Error<LayoutError>>
 //! assert_eq!(value, "hello");
 //!
 //! // All memory freed when arena drops
@@ -51,7 +51,7 @@ pub struct Arena<'a> {
     current: *mut MemBlock,
     cursor: *mut u8,
     end: *mut u8,
-    allocator: &'a dyn Allocator,
+    allocator: Option<&'a dyn Allocator>,
 }
 
 // Mem block is a block of contiguous memory allocated from the allocator
@@ -70,36 +70,47 @@ impl<'a> Arena<'a> {
             current: ptr::null_mut(),
             cursor: ptr::null_mut(),
             end: ptr::null_mut(),
-            allocator,
+            allocator: Some(allocator),
+        }
+    }
+
+    /// Create an arena from a pre-allocated memory slice
+    pub fn from_slice(data: &'a mut [u8]) -> Self {
+        debug_assert!(data.len() >= core::mem::size_of::<MemBlock>());
+        Self {
+            current: data.as_mut_ptr() as *mut MemBlock,
+            cursor: unsafe { data.as_mut_ptr().add(core::mem::size_of::<MemBlock>()) },
+            end: unsafe { data.as_mut_ptr().add(data.len()) },
+            allocator: None,
         }
     }
 
     /// Allocate uninitialized memory for type T, returning a raw pointer
-    pub fn alloc<T>(&mut self) -> *mut T {
+    pub fn alloc<T>(&mut self) -> Result<*mut T, crate::Error<core::alloc::LayoutError>> {
         let layout = Layout::new::<T>();
-        let ptr = self.alloc_raw(layout);
-        ptr.as_ptr() as *mut T
+        let ptr = self.alloc_raw(layout)?;
+        Ok(ptr.as_ptr() as *mut T)
     }
 
-    pub fn place<T>(&mut self, val: T) -> &'a mut T {
-        let p = self.alloc::<T>();
+    pub fn place<T>(&mut self, val: T) -> Result<&'a mut T, crate::Error<core::alloc::LayoutError>> {
+        let p = self.alloc::<T>()?;
         unsafe {
             p.write(val);
-            &mut *p
+            Ok(&mut *p)
         }
     }
 
     /// Allocate an uninitialized slice of T with given length
-    pub fn alloc_slice<T>(&mut self, len: usize) -> *mut [T] {
-        let layout = Layout::array::<T>(len).expect("Layout overflow");
-        let ptr = self.alloc_raw(layout);
+    pub fn alloc_slice<T>(&mut self, len: usize) -> Result<*mut [T], crate::Error<core::alloc::LayoutError>> {
+        let layout = Layout::array::<T>(len)?;
+        let ptr = self.alloc_raw(layout)?;
 
-        ptr::slice_from_raw_parts_mut(ptr.as_ptr() as *mut T, len)
+        Ok(ptr::slice_from_raw_parts_mut(ptr.as_ptr() as *mut T, len))
     }
 
     /// Allocate raw memory with given size and alignment (uninitialized)
     #[inline]
-    pub fn alloc_raw(&mut self, layout: Layout) -> NonNull<u8> {
+    pub fn alloc_raw(&mut self, layout: Layout) -> Result<NonNull<u8>, crate::Error<core::alloc::LayoutError>> {
         let size = layout.size();
         let align = layout.align();
 
@@ -113,11 +124,11 @@ impl<'a> Arena<'a> {
         if crate::utils::likely(available >= size as isize) {
             // Fits in current block - use it regardless of size
             self.cursor = unsafe { aligned_cursor.add(size) };
-            return unsafe { NonNull::new_unchecked(aligned_cursor) };
+            return unsafe { Ok(NonNull::new_unchecked(aligned_cursor)) };
         }
 
         // Doesn't fit - need new allocation strategy
-        self.alloc_outlined(layout, available as usize)
+        self.alloc_outlined(layout, available as usize).ok_or(crate::Error::ArenaAllocationFailed)
     }
 
     /// Get total bytes allocated by this arena
@@ -137,7 +148,7 @@ impl<'a> Arena<'a> {
 
     /// Allocate a new memory block - never inlined to keep fast path small
     #[inline(never)]
-    fn alloc_outlined(&mut self, layout: Layout, available: usize) -> NonNull<u8> {
+    fn alloc_outlined(&mut self, layout: Layout, available: usize) -> Option<NonNull<u8>> {
         const SIGNIFICANT_SPACE_THRESHOLD: usize = 512; // 512 bytes is "significant"
 
         if available >= SIGNIFICANT_SPACE_THRESHOLD {
@@ -152,7 +163,11 @@ impl<'a> Arena<'a> {
     }
 
     /// Allocate a new memory block
-    fn allocate_new_block(&mut self, alloc_layout: Layout) -> NonNull<u8> {
+    fn allocate_new_block(&mut self, alloc_layout: Layout) -> Option<NonNull<u8>> {
+        let Some(allocator) = self.allocator else {
+            return None;
+        };
+
         // Calculate block size - grow exponentially but respect min_size
 
         let (layout, offset) = Layout::new::<MemBlock>()
@@ -172,11 +187,7 @@ impl<'a> Arena<'a> {
             .expect("Layout overflow");
         let layout = layout.pad_to_align();
 
-        let ptr = self
-            .allocator
-            .allocate(layout)
-            .expect("Allocation failed")
-            .as_ptr() as *mut MemBlock;
+        let ptr = allocator.allocate(layout).ok()?.as_ptr() as *mut MemBlock;
 
         unsafe {
             // Initialize the MemBlock header
@@ -187,23 +198,22 @@ impl<'a> Arena<'a> {
             self.current = ptr;
             self.cursor = (ptr as *mut u8).add(block_start);
             self.end = (ptr as *mut u8).add(layout.size());
-            NonNull::new_unchecked((ptr as *mut u8).add(offset))
+            Some(NonNull::new_unchecked((ptr as *mut u8).add(offset)))
         }
     }
 
     /// Allocate a dedicated (large) memory directly from allocator (dedicated block)
-    fn alloc_dedicated(&mut self, layout: Layout) -> NonNull<u8> {
+    fn alloc_dedicated(&mut self, layout: Layout) -> Option<NonNull<u8>> {
+        let Some(allocator) = self.allocator else {
+            return None;
+        };
         // Use layout extend for proper alignment
         let memblock_layout = Layout::new::<MemBlock>();
         let (extended_layout, data_offset) =
             memblock_layout.extend(layout).expect("Layout overflow");
         let final_layout = extended_layout.pad_to_align();
 
-        let ptr = self
-            .allocator
-            .allocate(final_layout)
-            .expect("Allocation failed")
-            .as_ptr() as *mut MemBlock;
+        let ptr = allocator.allocate(final_layout).ok()?.as_ptr() as *mut MemBlock;
 
         unsafe {
             (*ptr).layout = final_layout;
@@ -222,13 +232,16 @@ impl<'a> Arena<'a> {
 
             // Return aligned data pointer after header
             let data_ptr = (ptr as *mut u8).add(data_offset);
-            NonNull::new_unchecked(data_ptr)
+            Some(NonNull::new_unchecked(data_ptr))
         }
     }
 }
 
 impl<'a> Drop for Arena<'a> {
     fn drop(&mut self) {
+        let Some(allocator) = self.allocator else {
+            return;
+        };
         unsafe {
             let mut current = self.current;
             while !current.is_null() {
@@ -237,7 +250,7 @@ impl<'a> Drop for Arena<'a> {
 
                 // Deallocate this block with correct size
                 let ptr = NonNull::new_unchecked(current as *mut u8);
-                self.allocator.deallocate(ptr, layout);
+                allocator.deallocate(ptr, layout);
 
                 current = prev;
             }
@@ -261,8 +274,8 @@ mod tests {
     fn test_basic_allocation() {
         let mut arena = Arena::new(&Global);
 
-        let ptr1: *mut u32 = arena.alloc();
-        let ptr2: *mut u64 = arena.alloc();
+        let ptr1: *mut u32 = arena.alloc().unwrap();
+        let ptr2: *mut u64 = arena.alloc().unwrap();
 
         unsafe {
             *ptr1 = 42;
@@ -277,7 +290,7 @@ mod tests {
     fn test_slice_allocation() {
         let mut arena = Arena::new(&Global);
 
-        let slice_ptr: *mut [u32] = arena.alloc_slice(100);
+        let slice_ptr: *mut [u32] = arena.alloc_slice(100).unwrap();
 
         unsafe {
             let slice = &mut *slice_ptr;
@@ -295,8 +308,8 @@ mod tests {
         let mut arena = Arena::new(&Global);
 
         // Allocate types with different alignment requirements
-        let _u8_ptr: *mut u8 = arena.alloc();
-        let u64_ptr: *mut u64 = arena.alloc();
+        let _u8_ptr: *mut u8 = arena.alloc().unwrap();
+        let u64_ptr: *mut u64 = arena.alloc().unwrap();
 
         // Check that u64 is properly aligned
         assert_eq!(u64_ptr as usize % core::mem::align_of::<u64>(), 0);
@@ -307,7 +320,7 @@ mod tests {
         let mut arena = Arena::new(&Global);
 
         // Allocate something larger than default block size
-        let large_slice_ptr: *mut [u8] = arena.alloc_slice(DEFAULT_BLOCK_SIZE * 2);
+        let large_slice_ptr: *mut [u8] = arena.alloc_slice(DEFAULT_BLOCK_SIZE * 2).unwrap();
 
         unsafe {
             let large_slice = &mut *large_slice_ptr;

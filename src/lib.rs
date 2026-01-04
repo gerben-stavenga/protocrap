@@ -242,22 +242,18 @@ pub mod codegen;
 /// Errors that can occur during protobuf encoding/decoding operations.
 #[derive(Debug)]
 pub enum Error<E = ()> {
-    TreeTooDeep,
+    MessageTreeTooDeep,
     BufferTooSmall,
-    InvalidData,
+    InvalidProtobufData,
     MessageNotFound,
+    ArenaAllocationFailed,
+    UnknownError,
     Io(E),
 }
 
 impl<E: core::fmt::Debug> core::fmt::Display for Error<E> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Error::TreeTooDeep => write!(f, "message tree too deep"),
-            Error::BufferTooSmall => write!(f, "buffer too small"),
-            Error::InvalidData => write!(f, "invalid protobuf data"),
-            Error::MessageNotFound => write!(f, "message type not found"),
-            Error::Io(e) => write!(f, "{:?}", e),
-        }
+        core::fmt::Debug::fmt(self, f)
     }
 }
 
@@ -287,7 +283,7 @@ pub trait ProtobufRef<'pool> {
         let mut resumeable_encode = encoding::ResumeableEncode::<STACK_DEPTH>::new(self.as_dyn());
         let encoding::ResumeResult::Done(buf) = resumeable_encode
             .resume_encode(buffer)
-            .ok_or(Error::TreeTooDeep)?
+            .ok_or(Error::MessageTreeTooDeep)?
         else {
             return Err(Error::BufferTooSmall);
         };
@@ -303,7 +299,7 @@ pub trait ProtobufRef<'pool> {
         loop {
             match resumeable_encode
                 .resume_encode(&mut buffer)
-                .ok_or(Error::TreeTooDeep)?
+                .ok_or(Error::MessageTreeTooDeep)?
             {
                 encoding::ResumeResult::Done(buf) => {
                     let len = buf.len();
@@ -364,12 +360,12 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
             };
             if !decoder.resume(buffer, arena) {
                 self.as_dyn_mut().clear();
-                return Err(Error::InvalidData);
+                return Err(Error::InvalidProtobufData);
             }
         }
         if !decoder.finish(arena) {
             self.as_dyn_mut().clear();
-            return Err(Error::InvalidData);
+            return Err(Error::InvalidProtobufData);
         }
         Ok(())
     }
@@ -390,12 +386,12 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                 };
                 if !decoder.resume(buffer, arena) {
                     self.as_dyn_mut().clear();
-                    return Err(Error::InvalidData);
+                    return Err(Error::InvalidProtobufData);
                 }
             }
             if !decoder.finish(arena) {
                 self.as_dyn_mut().clear();
-                return Err(Error::InvalidData);
+                return Err(Error::InvalidProtobufData);
             }
             Ok(())
         }
@@ -417,13 +413,13 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
             }
             if !decoder.resume(buffer, arena) {
                 self.as_dyn_mut().clear();
-                return Err(Error::InvalidData);
+                return Err(Error::InvalidProtobufData);
             }
             reader.consume(len);
         }
         if !decoder.finish(arena) {
             self.as_dyn_mut().clear();
-            return Err(Error::InvalidData);
+            return Err(Error::InvalidProtobufData);
         }
         Ok(())
     }
@@ -457,13 +453,13 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
                 }
                 if !decoder.resume(buffer, arena) {
                     self.as_dyn_mut().clear();
-                    return Err(Error::InvalidData);
+                    return Err(Error::InvalidProtobufData);
                 }
                 reader.consume_unpin(len);
             }
             if !decoder.finish(arena) {
                 self.as_dyn_mut().clear();
-                return Err(Error::InvalidData);
+                return Err(Error::InvalidProtobufData);
             }
             Ok(())
         }

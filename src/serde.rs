@@ -1,4 +1,5 @@
 use serde::ser::{SerializeSeq, SerializeStruct};
+use serde::de::Error;
 
 use crate::ProtobufMut;
 use crate::base::Object;
@@ -960,7 +961,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
     {
         let ProtobufArrayfVisitor { rf, table, arena } = self;
         loop {
-            let msg_obj = Object::create(table.size as u32, arena);
+            let msg_obj = Object::create(table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
 
             let seed = ProtobufVisitor {
                 msg: DynamicMessage {
@@ -1027,7 +1028,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
             .ok_or_else(|| serde::de::Error::custom("Map entry missing value field in table"))?;
 
         while let Some(key_str) = map.next_key::<std::string::String>()? {
-            let entry_obj = Object::create(table.size as u32, arena);
+            let entry_obj = Object::create(table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
 
             match key_field.r#type().unwrap() {
                 Type::TYPE_BOOL => {
@@ -1123,7 +1124,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                 }
                 Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                     let (offset, child_table) = table.aux_entry_decode(value_entry);
-                    let child_obj = Object::create(child_table.size as u32, arena);
+                    let child_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                     let seed = ProtobufVisitor {
                         msg: DynamicMessage {
                             object: child_obj,
@@ -1658,7 +1659,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(offset);
                 // Each map entry is a message with key(1)=string, value(2)=Value
                 while let Some(key) = map.next_key::<std::string::String>()? {
-                    let entry_obj = Object::create(child_table.size as u32, arena);
+                    let entry_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                     // Set key (field 1)
                     let key_entry = child_table.entry(1).ok_or_else(|| {
                         serde::de::Error::custom("Struct entry missing key field")
@@ -1674,7 +1675,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         serde::de::Error::custom("Struct entry missing value field")
                     })?;
                     let (offset, child_table) = child_table.aux_entry_decode(value_entry);
-                    let child_obj = Object::create(child_table.size as u32, arena);
+                    let child_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                     let seed = ProtobufVisitor {
                         msg: DynamicMessage {
                             object: child_obj,
@@ -1696,7 +1697,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .entry(5)
                     .ok_or_else(|| serde::de::Error::custom("Value missing field 5"))?;
                 let (offset, child_table) = msg.table.aux_entry_decode(entry);
-                let child_obj = Object::create(child_table.size as u32, arena);
+                let child_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                 let visitor = ProtobufVisitor {
                     msg: DynamicMessage {
                         object: child_obj,
@@ -1927,7 +1928,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
                         let (offset, child_table) = msg.table.aux_entry_decode(entry);
-                        let child_obj = Object::create(child_table.size as u32, arena);
+                        let child_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                         // Value type: null is a valid value, don't wrap with Optional
                         if detect_well_known_type(child_table.descriptor) == WellKnownType::Value {
                             let seed = ProtobufVisitor {
@@ -1984,7 +1985,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .object
                     .ref_mut::<crate::containers::RepeatedField<crate::base::Message>>(offset);
                 while {
-                    let value_obj = Object::create(child_table.size as u32, arena);
+                    let value_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                     let seed = ProtobufVisitor {
                         msg: DynamicMessage {
                             object: value_obj,
@@ -2008,7 +2009,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .entry(6)
                     .ok_or_else(|| serde::de::Error::custom("Value missing field 6"))?;
                 let (offset, child_table) = msg.table.aux_entry_decode(entry);
-                let list_obj = Object::create(child_table.size as u32, arena);
+                let list_obj = Object::create(child_table.size as u32, arena).map_err(|e| A::Error::custom(e))?;
                 let visitor = ProtobufVisitor {
                     msg: DynamicMessage {
                         object: list_obj,

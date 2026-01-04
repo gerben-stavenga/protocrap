@@ -18,10 +18,10 @@ pub fn load_descriptor_pool() -> Result<DescriptorPool<'static>> {
         bail!("Failed to decode FileDescriptorSet");
     }
 
-    let fds = pool.arena.place(fds);
+    let fds = pool.arena.place(fds)?;
 
     for file in fds.file() {
-        pool.add_file(file.as_ref());
+        pool.add_file(file.as_ref())?;
     }
 
     Ok(pool)

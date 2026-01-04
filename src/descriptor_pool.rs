@@ -74,7 +74,7 @@ impl<'alloc> DescriptorPool<'alloc> {
     }
 
     /// Add a FileDescriptorProto to the pool
-    pub fn add_file(&mut self, file: &'alloc FileDescriptorProto) {
+    pub fn add_file(&mut self, file: &'alloc FileDescriptorProto) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         let package = if file.has_package() {
             file.package()
         } else {
@@ -88,7 +88,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             } else {
                 format!("{}.{}", package, message.name())
             };
-            self.add_message(message, &full_name, file.get_syntax());
+            self.add_message(message, &full_name, file.get_syntax())?;
         }
 
         // Second pass: patch aux entries with correct child table pointers
@@ -100,6 +100,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             };
             self.patch_message_aux_entries(&full_name);
         }
+        Ok(())
     }
 
     fn add_message(
@@ -107,24 +108,25 @@ impl<'alloc> DescriptorPool<'alloc> {
         message: &'alloc DescriptorProto,
         full_name: &str,
         syntax: Option<&str>,
-    ) {
+    ) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         // Build table from descriptor
-        let table = self.build_table_from_descriptor(message, syntax);
+        let table = self.build_table_from_descriptor(message, syntax)?;
         self.tables.insert(full_name.to_string(), table);
 
         // Add nested types
         for nested in message.nested_type() {
             let nested_full_name = format!("{}.{}", full_name, nested.name());
-            self.add_message(nested, &nested_full_name, syntax);
+            self.add_message(nested, &nested_full_name, syntax)?;
         }
+        Ok(())
     }
 
-    fn patch_message_aux_entries(&mut self, full_name: &str) {
+    fn patch_message_aux_entries(&mut self, full_name: &str) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         use crate::tables::AuxTableEntry;
 
         let table = match self.tables.get_mut(full_name) {
             Some(t) => &mut **t,
-            None => return,
+            None => return Ok(()),
         };
 
         let descriptor = table.descriptor;
@@ -132,7 +134,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Count aux entries (message fields)
         let num_aux_entries = descriptor.field().iter().filter(|f| is_message(f)).count();
         if num_aux_entries == 0 {
-            return;
+            return Ok(());
         }
 
         // Get aux entry pointer - must use same Layout::extend logic as build_table_from_descriptor
@@ -143,13 +145,10 @@ impl<'alloc> DescriptorPool<'alloc> {
                 .extend(
                     core::alloc::Layout::array::<crate::decoding::TableEntry>(
                         table.num_decode_entries as usize,
-                    )
-                    .unwrap(),
-                )
-                .unwrap()
+                    )?,
+                )?
                 .0
-                .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
-                .unwrap();
+                .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries)?)?;
 
             let aux_ptr =
                 (table as *mut Table as *mut u8).add(aux_offset_from_table) as *mut AuxTableEntry;
@@ -176,8 +175,9 @@ impl<'alloc> DescriptorPool<'alloc> {
         // Patch nested types
         for nested in descriptor.nested_type() {
             let nested_full_name = format!("{}.{}", full_name, nested.name());
-            self.patch_message_aux_entries(&nested_full_name);
+            self.patch_message_aux_entries(&nested_full_name)?;
         }
+        Ok(())
     }
 
     /// Get a table by message type name
@@ -190,7 +190,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         &'pool self,
         message_type: &str,
         arena: &mut Arena<'msg>,
-    ) -> Result<DynamicMessage<'pool, 'msg>, crate::Error> {
+    ) -> Result<DynamicMessage<'pool, 'msg>, crate::Error<core::alloc::LayoutError>> {
         let table = &**self
             .tables
             .get(message_type)
@@ -198,7 +198,7 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
         let layout = core::alloc::Layout::from_size_align(table.size as usize, 8).unwrap();
-        let ptr = arena.alloc_raw(layout).as_ptr() as *mut Object;
+        let ptr = arena.alloc_raw(layout)?.as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
         let object = unsafe {
             // Zero-initialize the object
@@ -215,7 +215,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         &mut self,
         descriptor: &'alloc DescriptorProto,
         syntax: Option<&str>,
-    ) -> &'alloc mut Table {
+    ) -> Result<&'alloc mut Table, crate::Error<core::alloc::LayoutError>> {
         use crate::{
             decoding, encoding, reflection::calculate_tag_with_syntax, tables::AuxTableEntry,
         };
@@ -334,7 +334,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
             .unwrap();
 
-        let base_ptr = self.arena.alloc_raw(layout).as_ptr();
+        let base_ptr = self.arena.alloc_raw(layout)?.as_ptr();
 
         unsafe {
             let encode_ptr = base_ptr as *mut encoding::TableEntry;
@@ -490,7 +490,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                 });
             }
 
-            &mut *table_ptr
+            Ok(&mut *table_ptr)
         }
     }
 
