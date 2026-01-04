@@ -132,34 +132,61 @@ mod tests {
     #[test]
     fn test_extract_comments_from_descriptor() {
         // Use the descriptor.proto file descriptor which now has source_code_info
-        let file_desc = protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
+        let file_desc =
+            protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
 
-        assert!(file_desc.source_code_info().is_some(), "descriptor should have source_code_info");
+        assert!(
+            file_desc.source_code_info().is_some(),
+            "descriptor should have source_code_info"
+        );
 
         let comments = extract_comments(file_desc);
 
         // descriptor.proto has lots of comments
-        assert!(comments.len() > 100, "Should have extracted many comments, got {}", comments.len());
+        assert!(
+            comments.len() > 100,
+            "Should have extracted many comments, got {}",
+            comments.len()
+        );
 
         // Check for some known types
-        assert!(comments.contains_key("FileDescriptorProto"), "Should have FileDescriptorProto");
-        assert!(comments.contains_key("DescriptorProto"), "Should have DescriptorProto");
-        assert!(comments.contains_key("FieldDescriptorProto"), "Should have FieldDescriptorProto");
+        assert!(
+            comments.contains_key("FileDescriptorProto"),
+            "Should have FileDescriptorProto"
+        );
+        assert!(
+            comments.contains_key("DescriptorProto"),
+            "Should have DescriptorProto"
+        );
+        assert!(
+            comments.contains_key("FieldDescriptorProto"),
+            "Should have FieldDescriptorProto"
+        );
 
         // Check for nested types
-        assert!(comments.contains_key("FieldDescriptorProto.Type.TYPE_DOUBLE"), "Should have enum value comment");
+        assert!(
+            comments.contains_key("FieldDescriptorProto.Type.TYPE_DOUBLE"),
+            "Should have enum value comment"
+        );
 
         // Check for fields
-        assert!(comments.contains_key("FileDescriptorProto.name"), "Should have field comment");
+        assert!(
+            comments.contains_key("FileDescriptorProto.name"),
+            "Should have field comment"
+        );
 
         // Verify comment content
         let desc_comment = comments.get("DescriptorProto").unwrap();
-        assert!(desc_comment.contains("message type"), "DescriptorProto comment should mention 'message type'");
+        assert!(
+            desc_comment.contains("message type"),
+            "DescriptorProto comment should mention 'message type'"
+        );
     }
 
     #[test]
     fn dump_comments_to_file() {
-        let file_desc = protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
+        let file_desc =
+            protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
         let comments = extract_comments(file_desc);
 
         let mut output = String::new();

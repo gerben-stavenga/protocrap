@@ -30,9 +30,6 @@ pub const fn as_object_mut<T: Protobuf>(msg: &mut T) -> &mut crate::base::Object
     unsafe { &mut *(msg as *mut T as *mut crate::base::Object) }
 }
 
-pub fn debug_message<T: Protobuf>(
-    msg: &T,
-    f: &mut core::fmt::Formatter<'_>,
-) -> core::fmt::Result {
+pub fn debug_message<T: Protobuf>(msg: &T, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
     core::fmt::Debug::fmt(&msg.as_dyn(), f)
 }

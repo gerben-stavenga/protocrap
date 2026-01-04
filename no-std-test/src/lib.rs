@@ -34,7 +34,9 @@ pub fn test_decode(alloc: &dyn Allocator) -> bool {
 
     // Wire format for FileDescriptorProto with name="test.proto"
     // Field 1 (name) = string, tag = 0x0a, length = 10, "test.proto"
-    let data: &[u8] = &[0x0a, 0x0a, b't', b'e', b's', b't', b'.', b'p', b'r', b'o', b't', b'o'];
+    let data: &[u8] = &[
+        0x0a, 0x0a, b't', b'e', b's', b't', b'.', b'p', b'r', b'o', b't', b'o',
+    ];
 
     let mut msg = FileDescriptorProto::ProtoType::default();
     if msg.decode_flat::<16>(&mut arena, data) {

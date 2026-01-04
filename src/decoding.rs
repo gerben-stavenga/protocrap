@@ -1,10 +1,11 @@
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
 
-use crate::base::Object;
+use crate::base::{Message, Object};
 use crate::containers::{Bytes, RepeatedField};
+use crate::reflection::DynamicMessage;
 use crate::tables::Table;
-use crate::utils::{Stack, StackWithStorage};
+use crate::utils::{Ptr, PtrMut, Stack, StackWithStorage, UpdateByValue};
 use crate::wire::{FieldKind, ReadCursor, SLOP_SIZE, zigzag_decode};
 
 #[cfg(feature = "std")]
@@ -55,8 +56,7 @@ impl Table {
 }
 
 struct StackEntry {
-    obj: *mut Object,
-    table: *const Table,
+    obj_table: Option<(PtrMut<Object>, Ptr<Table>)>,
     delta_limit_or_group_tag: isize,
 }
 
@@ -76,17 +76,22 @@ impl StackEntry {
             }
             limit += self.delta_limit_or_group_tag;
         }
+        let Some((mut obj, table)) = self.obj_table else {
+            unreachable!("popped stack entry with null obj/table in non-group context");
+        };
         Some(DecodeObjectState {
             limit,
-            obj: unsafe { &mut *self.obj },
-            table: unsafe { &*self.table },
+            msg: DynamicMessage {
+                object: obj.as_mut(),
+                table: table.as_ref(),
+            },
         })
     }
 }
 
 enum DecodeObject<'a> {
     None,
-    Message(&'a mut Object, &'a Table),
+    Message(DynamicMessage<'a, 'a>),
     /// Bytes field with optional UTF-8 validation flag (true = validate as string)
     Bytes(&'a mut Bytes, bool),
     SkipLengthDelimited,
@@ -103,13 +108,16 @@ enum DecodeObject<'a> {
 #[repr(C)]
 struct DecodeObjectState<'a> {
     limit: isize, // relative to end
-    obj: &'a mut Object,
-    table: &'a Table,
+    msg: DynamicMessage<'a, 'a>,
+}
+
+fn calc_limited_end(end: NonNull<u8>, limit: isize) -> NonNull<u8> {
+    unsafe { end.offset(limit.min(0)) }
 }
 
 impl<'a> DecodeObjectState<'a> {
     fn limited_end(&self, end: NonNull<u8>) -> NonNull<u8> {
-        unsafe { end.offset(self.limit.min(0)) }
+        calc_limited_end(end, self.limit)
     }
 
     #[inline(always)]
@@ -126,8 +134,7 @@ impl<'a> DecodeObjectState<'a> {
             return None;
         }
         stack.push(StackEntry {
-            obj: self.obj,
-            table: self.table,
+            obj_table: Some((PtrMut::new(self.msg.object), Ptr::new(self.msg.table))),
             delta_limit_or_group_tag: delta_limit,
         })?;
         self.limit = new_limit;
@@ -147,8 +154,7 @@ impl<'a> DecodeObjectState<'a> {
     #[inline(always)]
     fn push_group(&mut self, field_number: u32, stack: &mut Stack<StackEntry>) -> Option<()> {
         stack.push(StackEntry {
-            obj: self.obj,
-            table: self.table,
+            obj_table: Some((PtrMut::new(self.msg.object), Ptr::new(self.msg.table))),
             delta_limit_or_group_tag: -(field_number as isize),
         })?;
         Some(())
@@ -166,77 +172,64 @@ impl<'a> DecodeObjectState<'a> {
         if has_bit_idx & 0x80 != 0 {
             // Oneof field: has_bit_idx stores discriminant word index with 0x80 flag
             let discriminant_word_idx = has_bit_idx & 0x7F;
-            self.obj
+            self.msg
+                .object
                 .set_oneof(entry.offset(), discriminant_word_idx, field_number, val);
         } else {
-            self.obj.set(entry.offset(), has_bit_idx, val);
+            self.msg.object.set(entry.offset(), has_bit_idx, val);
         }
     }
 
     #[inline(always)]
     fn add<T>(&mut self, entry: TableEntry, val: T, arena: &mut crate::arena::Arena) {
-        self.obj.add(entry.aux_offset(), val, arena);
+        self.msg.object.add(entry.aux_offset(), val, arena);
     }
 
     #[inline(always)]
-    fn set_bytes(
-        &mut self,
+    fn set_bytes<'b>(
+        &'b mut self,
         entry: TableEntry,
         field_number: u32,
         slice: &[u8],
         arena: &mut crate::arena::Arena,
-    ) -> &'a mut Bytes {
+    ) -> &'b mut Bytes {
         let has_bit_idx = entry.has_bit_idx();
         if has_bit_idx & 0x80 != 0 {
             // Oneof field
             let discriminant_word_idx = has_bit_idx & 0x7F;
-            unsafe {
-                core::mem::transmute(self.obj.set_bytes_oneof(
-                    entry.offset(),
-                    discriminant_word_idx,
-                    field_number,
-                    slice,
-                    arena,
-                ))
-            }
+            self.msg.object.set_bytes_oneof(
+                entry.offset(),
+                discriminant_word_idx,
+                field_number,
+                slice,
+                arena,
+            )
         } else {
-            unsafe {
-                core::mem::transmute(self.obj.set_bytes(
-                    entry.offset(),
-                    has_bit_idx,
-                    slice,
-                    arena,
-                ))
-            }
+            self.msg
+                .object
+                .set_bytes(entry.offset(), has_bit_idx, slice, arena)
         }
     }
 
     #[inline(always)]
-    fn add_bytes(
-        &mut self,
-        entry: TableEntry,
-        slice: &[u8],
-        arena: &mut crate::arena::Arena,
-    ) -> &'a mut Bytes {
-        unsafe { core::mem::transmute(self.obj.add_bytes(entry.aux_offset(), slice, arena)) }
-    }
-
-    #[inline(always)]
     fn get_or_create_child_object(
-        &mut self,
+        self,
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
-    ) -> (&'a mut Object, &'a Table) {
-        let (offset, child_table) = self.table.aux_entry_decode(entry);
-        let field = self.obj.ref_mut::<*mut Object>(offset);
-        let child = if (*field).is_null() {
+    ) -> DynamicMessage<'a, 'a> {
+        let (offset, child_table) = self.msg.table.aux_entry_decode(entry);
+        let field = self.msg.object.ref_mut::<Message>(offset);
+        let child = if field.is_null() {
             let child = Object::create(child_table.size as u32, arena);
-            *field = child;
+            *field = Message::new(child);
             child
         } else {
-            unsafe { &mut **field }
+            field.as_mut()
         };
-        (child, child_table)
+        DynamicMessage {
+            object: child,
+            table: child_table,
+        }
     }
 
     #[inline(always)]
@@ -244,14 +237,18 @@ impl<'a> DecodeObjectState<'a> {
         &mut self,
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
-    ) -> (&'a mut Object, &'a Table) {
-        let (offset, child_table) = self.table.aux_entry_decode(entry);
+    ) -> DynamicMessage<'a, 'a> {
+        let (offset, child_table) = self.msg.table.aux_entry_decode(entry);
         let field = self
-            .obj
+            .msg
+            .object
             .ref_mut::<RepeatedField<*mut Object>>(offset);
         let child = Object::create(child_table.size as u32, arena);
         field.push(child, arena);
-        (child, child_table)
+        DynamicMessage {
+            object: child,
+            table: child_table,
+        }
     }
 }
 
@@ -271,7 +268,7 @@ fn skip_length_delimited<'a>(
     }
     cursor.read_slice(limit - (cursor - end));
     let stack_entry = stack.pop()?;
-    if stack_entry.obj.is_null() {
+    if stack_entry.obj_table.is_none() {
         debug_assert!(stack_entry.delta_limit_or_group_tag >= 0);
         return skip_group(
             limit + stack_entry.delta_limit_or_group_tag,
@@ -293,7 +290,7 @@ fn skip_group<'a>(
     stack: &mut Stack<StackEntry>,
     arena: &mut crate::arena::Arena,
 ) -> DecodeLoopResult<'a> {
-    let limited_end = unsafe { end.offset(limit.min(0)) };
+    let limited_end = calc_limited_end(end, limit);
     // loop popping the stack as needed
     loop {
         // inner parse loop
@@ -333,8 +330,7 @@ fn skip_group<'a>(
                             return None;
                         }
                         stack.push(StackEntry {
-                            obj: core::ptr::null_mut(),
-                            table: core::ptr::null(),
+                            obj_table: None,
                             delta_limit_or_group_tag: delta_limit,
                         })?;
                         return Some((cursor, new_limit, DecodeObject::SkipLengthDelimited));
@@ -343,26 +339,23 @@ fn skip_group<'a>(
                 3 => {
                     // start group
                     stack.push(StackEntry {
-                        obj: core::ptr::null_mut(),
-                        table: core::ptr::null(),
+                        obj_table: None,
                         delta_limit_or_group_tag: -(field_number as isize),
                     })?;
                 }
                 4 => {
                     // end group
-                    let StackEntry {
-                        obj,
-                        table,
-                        delta_limit_or_group_tag,
-                    } = stack.pop()?;
-                    if -delta_limit_or_group_tag != field_number as isize {
+                    let stack_entry = stack.pop()?;
+                    if -stack_entry.delta_limit_or_group_tag != field_number as isize {
                         return None;
                     }
-                    if !obj.is_null() {
+                    if let Some((mut obj, table)) = stack_entry.obj_table {
                         let ctx = DecodeObjectState {
                             limit,
-                            obj: unsafe { &mut *obj },
-                            table: unsafe { &*table },
+                            msg: DynamicMessage {
+                                object: obj.as_mut(),
+                                table: table.as_ref(),
+                            },
                         };
                         return decode_loop(ctx, cursor, end, stack, arena);
                     }
@@ -381,8 +374,8 @@ fn skip_group<'a>(
                 return Some((cursor, limit, DecodeObject::None));
             }
             let stack_entry = stack.pop()?;
-            if stack_entry.obj.is_null() {
-                // We are at a limit but we are finiished this group, so parse failed
+            if stack_entry.obj_table.is_none() {
+                // We are at a limit but we haven't finished this group, so parse failed
                 return None;
             }
             let ctx = stack_entry.into_context(limit, None)?;
@@ -444,7 +437,7 @@ fn decode_packed<'a, T>(
         let cursor = unpack_varint(field, cursor, end, arena, decode_fn)?;
         return Some((cursor, limit, decode_obj(field)));
     }
-    let limited_end = unsafe { end.offset(limit) };
+    let limited_end = calc_limited_end(end, limit);
     let cursor = unpack_varint(field, cursor, limited_end, arena, decode_fn)?;
     let ctx = stack.pop()?.into_context(limit, None)?;
     decode_loop(ctx, cursor, end, stack, arena)
@@ -464,7 +457,7 @@ fn decode_fixed<'a, T>(
         let cursor = unpack_fixed(field, cursor, end, arena);
         return Some((cursor, limit, decode_obj(field)));
     }
-    let limited_end = unsafe { end.offset(limit) };
+    let limited_end = calc_limited_end(end, limit);
     let cursor = unpack_fixed(field, cursor, limited_end, arena);
     let ctx = stack.pop()?.into_context(limit, None)?;
     decode_loop(ctx, cursor, end, stack, arena)
@@ -513,7 +506,7 @@ fn decode_loop<'a>(
             let field_number = tag >> 3;
             #[cfg(feature = "std")]
             if TRACE_TAGS {
-                let descriptor = ctx.table.descriptor;
+                let descriptor = ctx.msg.table.descriptor;
                 let field = descriptor
                     .field()
                     .iter()
@@ -536,7 +529,7 @@ fn decode_loop<'a>(
                     );
                 }
             }
-            if let Some(entry) = ctx.table.entry(field_number) {
+            if let Some(entry) = ctx.msg.table.entry(field_number) {
                 'unknown: {
                     match entry.kind() {
                         FieldKind::Varint64 => {
@@ -600,13 +593,31 @@ fn decode_loop<'a>(
                                 ctx.set_bytes(entry, field_number, slice, arena);
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
-                                let bytes = ctx.set_bytes(
-                                    entry,
-                                    field_number,
-                                    cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
-                                    arena,
-                                );
-                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes, validate_utf8)));
+
+                                let DecodeObjectState { limit, msg } = ctx;
+
+                                let has_bit_idx = entry.has_bit_idx();
+                                let slice = cursor.read_slice(SLOP_SIZE as isize - (cursor - end));
+                                let bytes = if has_bit_idx & 0x80 != 0 {
+                                    // Oneof field
+                                    let discriminant_word_idx = has_bit_idx & 0x7F;
+                                    msg.object.set_bytes_oneof(
+                                        entry.offset(),
+                                        discriminant_word_idx,
+                                        field_number,
+                                        slice,
+                                        arena,
+                                    )
+                                } else {
+                                    msg.object
+                                        .set_bytes(entry.offset(), has_bit_idx, slice, arena)
+                                };
+
+                                return Some((
+                                    cursor,
+                                    limit,
+                                    DecodeObject::Bytes(bytes, validate_utf8),
+                                ));
                             }
                         }
                         FieldKind::Message => {
@@ -617,18 +628,28 @@ fn decode_loop<'a>(
                             let has_bit_idx = entry.has_bit_idx();
                             if has_bit_idx & 0x80 != 0 {
                                 let discriminant_word_idx = has_bit_idx & 0x7F;
-                                *ctx.obj.ref_mut::<u32>(discriminant_word_idx * 4) = field_number;
+                                *ctx.msg.object.ref_mut::<u32>(discriminant_word_idx * 4) =
+                                    field_number;
                             }
                             let len = cursor.read_size()?;
                             limited_end = ctx.push_limit(len, cursor, end, stack)?;
-                            (ctx.obj, ctx.table) = ctx.get_or_create_child_object(entry, arena);
+
+                            ctx.update(|ctx| {
+                                let limit = ctx.limit;
+                                let msg = ctx.get_or_create_child_object(entry, arena);
+                                DecodeObjectState { limit, msg }
+                            });
                         }
                         FieldKind::Group => {
                             if tag & 7 != 3 {
                                 break 'unknown;
                             };
                             ctx.push_group(field_number, stack)?;
-                            (ctx.obj, ctx.table) = ctx.get_or_create_child_object(entry, arena);
+                            ctx.update(|ctx| {
+                                let limit = ctx.limit;
+                                let msg = ctx.get_or_create_child_object(entry, arena);
+                                DecodeObjectState { limit, msg }
+                            });
                         }
                         FieldKind::RepeatedVarint64 => {
                             if tag & 7 == 0 {
@@ -640,8 +661,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u64>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_varint(field, cursor, end, arena, |v| v)?;
                                     if cursor != end {
@@ -650,8 +673,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u64>>(entry.offset());
                                     cursor = unpack_varint(field, cursor, end, arena, |v| v)?;
                                     return Some((
                                         cursor,
@@ -673,8 +698,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 as isize {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u32>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor =
                                         unpack_varint(field, cursor, end, arena, |v| v as u32)?;
@@ -684,8 +711,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u32>>(entry.offset());
                                     cursor =
                                         unpack_varint(field, cursor, end, arena, |v| v as u32)?;
                                     return Some((
@@ -708,8 +737,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 as isize {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<i64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<i64>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_varint(field, cursor, end, arena, |v| {
                                         zigzag_decode(v)
@@ -720,8 +751,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<i64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<i64>>(entry.offset());
                                     cursor = unpack_varint(field, cursor, end, arena, |v| {
                                         zigzag_decode(v)
                                     })?;
@@ -749,8 +782,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<i32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<i32>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_varint(field, cursor, end, arena, |v| {
                                         zigzag_decode(v as u32 as u64) as i32
@@ -761,8 +796,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<i32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<i32>>(entry.offset());
                                     cursor = unpack_varint(field, cursor, end, arena, |v| {
                                         zigzag_decode(v as u32 as u64) as i32
                                     })?;
@@ -787,8 +824,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<bool>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<bool>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_varint(field, cursor, end, arena, |v| v != 0)?;
                                     if cursor != end {
@@ -797,8 +836,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<bool>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<bool>>(entry.offset());
                                     cursor = unpack_varint(field, cursor, end, arena, |v| v != 0)?;
                                     return Some((
                                         cursor,
@@ -820,8 +861,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u64>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_fixed(field, cursor, end, arena);
                                     if cursor != end {
@@ -830,8 +873,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u64>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u64>>(entry.offset());
                                     cursor = unpack_fixed(field, cursor, end, arena);
                                     return Some((
                                         cursor,
@@ -853,8 +898,10 @@ fn decode_loop<'a>(
 
                                 // Fast path: entire packed field fits in buffer
                                 if cursor - limited_end + len <= 0 {
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u32>>(entry.offset());
                                     let end = (cursor + len).0;
                                     cursor = unpack_fixed(field, cursor, end, arena);
                                     if cursor != end {
@@ -863,8 +910,10 @@ fn decode_loop<'a>(
                                 } else {
                                     // Slow path: field spans buffers - transition to resumable parsing
                                     ctx.push_limit(len, cursor, end, stack)?;
-                                    let field =
-                                        ctx.obj.ref_mut::<RepeatedField<u32>>(entry.offset());
+                                    let field = ctx
+                                        .msg
+                                        .object
+                                        .ref_mut::<RepeatedField<u32>>(entry.offset());
                                     cursor = unpack_fixed(field, cursor, end, arena);
                                     return Some((
                                         cursor,
@@ -887,15 +936,17 @@ fn decode_loop<'a>(
                                 if validate_utf8 && core::str::from_utf8(slice).is_err() {
                                     return None;
                                 }
-                                ctx.add_bytes(entry, slice, arena);
+                                ctx.msg.object.add_bytes(entry.aux_offset(), slice, arena);
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
-                                let bytes = ctx.add_bytes(
-                                    entry,
-                                    cursor.read_slice(SLOP_SIZE as isize - (cursor - end)),
-                                    arena,
-                                );
-                                return Some((cursor, ctx.limit, DecodeObject::Bytes(bytes, validate_utf8)));
+                                let DecodeObjectState { limit, msg } = ctx;
+                                let slice = cursor.read_slice(SLOP_SIZE as isize - (cursor - end));
+                                let bytes = msg.object.add_bytes(entry.aux_offset(), slice, arena);
+                                return Some((
+                                    cursor,
+                                    limit,
+                                    DecodeObject::Bytes(bytes, validate_utf8),
+                                ));
                             }
                         }
                         FieldKind::RepeatedMessage => {
@@ -904,14 +955,14 @@ fn decode_loop<'a>(
                             };
                             let len = cursor.read_size()?;
                             limited_end = ctx.push_limit(len, cursor, end, stack)?;
-                            (ctx.obj, ctx.table) = ctx.add_child_object(entry, arena);
+                            ctx.msg = ctx.add_child_object(entry, arena);
                         }
                         FieldKind::RepeatedGroup => {
                             if tag & 7 != 3 {
                                 break 'unknown;
                             };
                             ctx.push_group(field_number, stack)?;
-                            (ctx.obj, ctx.table) = ctx.add_child_object(entry, arena);
+                            ctx.msg = ctx.add_child_object(entry, arena);
                         }
                         FieldKind::Unknown => {
                             break 'unknown;
@@ -984,7 +1035,7 @@ fn decode_loop<'a>(
             return None;
         }
     }
-    Some((cursor, ctx.limit, DecodeObject::Message(ctx.obj, ctx.table)))
+    Some((cursor, ctx.limit, DecodeObject::Message(ctx.msg)))
 }
 
 struct ResumeableState<'a> {
@@ -1009,11 +1060,10 @@ impl<'a> ResumeableState<'a> {
         let (mut cursor, end) = ReadCursor::new(buf);
         cursor += self.overrun;
         let (new_cursor, new_limit, new_object) = match self.object {
-            DecodeObject::Message(obj, table) => {
+            DecodeObject::Message(msg) => {
                 let ctx = DecodeObjectState {
                     limit: self.limit,
-                    obj,
-                    table,
+                    msg,
                 };
                 decode_loop(ctx, cursor, end, stack, arena)?
             }
@@ -1102,7 +1152,7 @@ pub struct ResumeableDecode<'a, const STACK_DEPTH: usize> {
 
 impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
     pub fn new<'pool: 'a>(msg: crate::reflection::DynamicMessage<'pool, 'a>, limit: isize) -> Self {
-        let object = DecodeObject::Message(msg.object, msg.table);
+        let object = DecodeObject::Message(msg);
         Self {
             state: MaybeUninit::new(ResumeableState {
                 limit,
@@ -1134,9 +1184,7 @@ impl<'a, const STACK_DEPTH: usize> ResumeableDecode<'a, STACK_DEPTH> {
             return false;
         };
 
-        state.overrun == 0
-            && matches!(state.object, DecodeObject::Message(_, _))
-            && stack.is_empty()
+        state.overrun == 0 && matches!(state.object, DecodeObject::Message(_)) && stack.is_empty()
     }
 
     fn resume_impl(&mut self, buf: &[u8], arena: &mut crate::arena::Arena) -> Option<()> {

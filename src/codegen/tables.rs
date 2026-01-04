@@ -1,5 +1,5 @@
-use super::protocrap;
 use super::names::{rust_type_tokens, sanitize_field_name};
+use super::protocrap;
 use anyhow::Result;
 use proc_macro2::TokenStream;
 use protocrap::google::protobuf::DescriptorProto::ProtoType as DescriptorProto;
@@ -228,8 +228,10 @@ pub(crate) fn generate_table(
     let mut aux_index_map = std::collections::HashMap::<i32, usize>::new();
     let aux_entries = generate_aux_entries(message, oneof_info, &mut aux_index_map)?;
 
-    let encoding_entries = generate_encoding_entries(message, has_bit_map, oneof_info, &aux_index_map, syntax)?;
-    let decoding_entries = generate_decoding_table(message, has_bit_map, oneof_info, &aux_index_map)?;
+    let encoding_entries =
+        generate_encoding_entries(message, has_bit_map, oneof_info, &aux_index_map, syntax)?;
+    let decoding_entries =
+        generate_decoding_table(message, has_bit_map, oneof_info, &aux_index_map)?;
 
     let num_encode_entries = encoding_entries.len();
     let num_decode_entries = decoding_entries.len();

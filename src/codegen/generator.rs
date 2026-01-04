@@ -5,21 +5,21 @@ use super::protocrap;
 use std::collections::HashMap;
 use std::panic;
 
-use allocator_api2::alloc::Global;
 use super::comments::extract_comments;
 use super::names::*;
 use super::tables;
+use allocator_api2::alloc::Global;
 use anyhow::Result;
 use proc_macro2::TokenStream;
-use protocrap::{ProtobufMut, ProtobufRef};
 use protocrap::google::protobuf::DescriptorProto::ProtoType as DescriptorProto;
 use protocrap::google::protobuf::EnumDescriptorProto::ProtoType as EnumDescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::Type;
 use protocrap::google::protobuf::FileDescriptorProto::ProtoType as FileDescriptorProto;
 use protocrap::google::protobuf::FileDescriptorSet::ProtoType as FileDescriptorSet;
-use protocrap::reflection::is_repeated;
 use protocrap::reflection::is_in_oneof;
+use protocrap::reflection::is_repeated;
 use protocrap::reflection::needs_has_bit;
+use protocrap::{ProtobufMut, ProtobufRef};
 use quote::{format_ident, quote};
 
 #[allow(dead_code)]
@@ -104,15 +104,15 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         items.push(generate_message(message, file, &comments, name, vec![idx])?);
     }
 
-    let file_descriptor = if file.name() == protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor().name() {
+    let file_descriptor = if file.name()
+        == protocrap::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor().name()
+    {
         // Special case: generate FileDescriptorProto static for descriptor.proto itself
         let mut pool = protocrap::descriptor_pool::DescriptorPool::new(&Global);
         pool.add_file(file);
         let mut arena = protocrap::arena::Arena::new(&Global);
-        let mut dyn_file_descriptor = pool.create_message(
-            "google.protobuf.FileDescriptorProto",
-            &mut arena,
-        )?;
+        let mut dyn_file_descriptor =
+            pool.create_message("google.protobuf.FileDescriptorProto", &mut arena)?;
         // Roundtrip file descriptor using protobuf encoding/decoding that is schema evolution safe
         let serialized = file.encode_vec::<100>()?;
         if !dyn_file_descriptor.decode_flat::<100>(&mut arena, &serialized) {
@@ -125,7 +125,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
         )?
     } else {
         super::static_gen::generate_static_dynamic(
-            &protocrap::reflection::DynamicMessageRef::new(file),
+            &file.as_dyn(),
             "google.protobuf.FileDescriptorProto",
             "protocrap",
         )?
@@ -267,7 +267,13 @@ fn generate_message_impl(
         let nested_prefix = format!("{}.{}", name_prefix, nested.name());
         let mut nested_path = path.clone();
         nested_path.push(idx);
-        nested_items.push(generate_message(nested, file, comments, &nested_prefix, nested_path)?);
+        nested_items.push(generate_message(
+            nested,
+            file,
+            comments,
+            &nested_prefix,
+            nested_path,
+        )?);
     }
 
     let nested_enums: Vec<_> = message
@@ -426,7 +432,10 @@ fn generate_message_impl(
     // Doc strings for generated methods
     let proto_file = file.name();
     let message_name = name_prefix.trim_start_matches('.');
-    let clear_doc = format!(" Resets all fields of `{}` to their default values.", message_name);
+    let clear_doc = format!(
+        " Resets all fields of `{}` to their default values.",
+        message_name
+    );
     let file_descriptor_doc = format!(" Returns the file descriptor for `{}`.", proto_file);
     let descriptor_proto_doc = format!(" Returns the descriptor for `{}`.", message_name);
 

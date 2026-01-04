@@ -9,7 +9,9 @@ pub use core::hint::likely;
 
 #[cfg(not(feature = "nightly"))]
 #[inline(always)]
-pub const fn likely(b: bool) -> bool { b }
+pub const fn likely(b: bool) -> bool {
+    b
+}
 
 #[repr(C)]
 pub(crate) struct Stack<T> {
@@ -82,5 +84,56 @@ impl<T, const N: usize> DerefMut for StackWithStorage<T, N> {
             let fat_ptr = core::ptr::slice_from_raw_parts_mut(self, N) as *mut Stack<T>;
             &mut *fat_ptr
         }
+    }
+}
+
+pub(crate) trait UpdateByValue: Sized {
+    fn update(&mut self, update: impl FnOnce(Self) -> Self);
+}
+
+impl<T> UpdateByValue for T {
+    fn update(&mut self, update: impl FnOnce(Self) -> Self) {
+        unsafe {
+            *self = update(core::ptr::read(self));
+        }
+    }
+}
+
+pub struct Ptr<T: ?Sized>(*const T);
+
+impl<T: ?Sized> Ptr<T> {
+    pub fn new(r: &T) -> Self {
+        Ptr(r)
+    }
+
+    // Safe! Invariant enforced by constructor
+    pub fn as_ref<'a>(&self) -> &'a T {
+        unsafe { &*self.0 }
+    }
+}
+
+pub struct PtrMut<T: ?Sized>(*mut T);
+
+impl<T: ?Sized> PtrMut<T> {
+    pub fn new(r: &mut T) -> Self {
+        PtrMut(r)
+    }
+
+    // Safe! Invariant enforced by constructor
+    pub fn as_ref<'a>(&self) -> &'a T {
+        unsafe { &*self.0 }
+    }
+
+    pub fn as_mut<'a>(&mut self) -> &'a mut T {
+        unsafe { &mut *self.0 }
+    }
+}
+
+pub(crate) fn as_bytes<T>(slice: &[T]) -> &[u8] {
+    unsafe {
+        core::slice::from_raw_parts(
+            slice.as_ptr() as *const u8,
+            slice.len() * core::mem::size_of::<T>(),
+        )
     }
 }

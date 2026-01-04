@@ -87,7 +87,6 @@ pub struct TypedMessage<T: Protobuf> {
     _marker: PhantomData<T>,
 }
 
-
 // Note: No Default impl - TypedMessage must always point to a valid message
 
 impl<T: Protobuf> core::fmt::Debug for TypedMessage<T> {
@@ -143,7 +142,6 @@ pub struct OptionalMessage<T: Protobuf> {
     msg: Message,
     _marker: PhantomData<T>,
 }
-
 
 impl<T: Protobuf> Default for OptionalMessage<T> {
     fn default() -> Self {
@@ -236,11 +234,14 @@ impl Object {
     }
 
     pub const fn ref_at<T>(&self, offset: usize) -> &T {
-        unsafe { &*((self as *const Self as *const u8).add(offset) as *const T) }
+        let ptr = (self as *const Self as *const u8).wrapping_add(offset);
+        unsafe { &*(ptr as *const T) }
     }
 
     pub(crate) fn ref_mut<T>(&mut self, offset: u32) -> &mut T {
-        unsafe { &mut *((self as *mut Object as *mut u8).add(offset as usize) as *mut T) }
+        let ptr = (self as *mut Object as *mut u8).wrapping_add(offset as usize);
+        debug_assert!(ptr as usize % core::mem::align_of::<T>() == 0);
+        unsafe { &mut *(ptr as *mut T) }
     }
 
     pub const fn has_bit(&self, has_bit_idx: u8) -> bool {

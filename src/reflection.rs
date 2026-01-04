@@ -197,13 +197,11 @@ pub struct DynamicMessage<'pool, 'msg> {
     pub(crate) table: &'pool Table,
 }
 
-// Deref allows DynamicMessage to use all DynamicMessageRef methods
 impl<'pool, 'msg> core::ops::Deref for DynamicMessage<'pool, 'msg> {
     type Target = DynamicMessageRef<'pool, 'msg>;
 
     fn deref(&self) -> &Self::Target {
-        // SAFETY: DynamicMessageRef has the same layout with &Object instead of &mut Object
-        // and we're only providing immutable access through the Deref
+        // Safety: This is unsound but works.
         unsafe {
             &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
         }
@@ -225,18 +223,11 @@ impl<'pool, 'msg> core::fmt::Debug for DynamicMessageRef<'pool, 'msg> {
 impl<'pool, 'msg> core::fmt::Debug for DynamicMessage<'pool, 'msg> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         // Delegate to DynamicMessageRef's Debug impl via Deref
-        core::fmt::Debug::fmt(&**self, f)
+        self.as_ref().fmt(f)
     }
 }
 
 impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
-    pub fn new<T>(msg: &'msg T) -> Self
-    where
-        T: crate::generated_code_only::Protobuf,
-    {
-        msg.as_dyn()
-    }
-    
     pub fn descriptor(&self) -> &'pool DescriptorProto {
         self.table.descriptor
     }
@@ -414,18 +405,10 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
 }
 
 impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
-    pub fn new<T>(msg: &'msg mut T) -> Self
-    where
-        T: crate::generated_code_only::Protobuf,
-    {
-        msg.as_dyn_mut()
-    }
-
-    pub fn as_ref(&self) -> &DynamicMessageRef<'pool, 'msg> {
-        // SAFETY: DynamicMessage and DynamicMessageRef have the same layout
-        // (one has &mut Object, the other &Object)
-        unsafe {
-            &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
+    pub fn as_ref<'a>(&'a self) -> DynamicMessageRef<'pool, 'a> {
+        DynamicMessageRef {
+            object: self.object,
+            table: self.table,
         }
     }
 
@@ -622,27 +605,27 @@ pub enum Value<'pool, 'msg> {
 
 impl core::fmt::Debug for Value<'_, '_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Value::Int32(v) => core::fmt::Debug::fmt(v, f),
-            Value::Int64(v) => core::fmt::Debug::fmt(v, f),
-            Value::UInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::UInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::Float(v) => core::fmt::Debug::fmt(v, f),
-            Value::Double(v) => core::fmt::Debug::fmt(v, f),
-            Value::Bool(v) => core::fmt::Debug::fmt(v, f),
-            Value::String(v) => core::fmt::Debug::fmt(v, f),
-            Value::Bytes(v) => core::fmt::Debug::fmt(v, f),
-            Value::Message(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedUInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedUInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedFloat(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedDouble(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedBool(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedString(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedBytes(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedMessage(v) => core::fmt::Debug::fmt(v, f),
+        match *self {
+            Value::Int32(v) => v.fmt(f),
+            Value::Int64(v) => v.fmt(f),
+            Value::UInt32(v) => v.fmt(f),
+            Value::UInt64(v) => v.fmt(f),
+            Value::Float(v) => v.fmt(f),
+            Value::Double(v) => v.fmt(f),
+            Value::Bool(v) => v.fmt(f),
+            Value::String(v) => v.fmt(f),
+            Value::Bytes(v) => v.fmt(f),
+            Value::Message(ref v) => v.fmt(f),
+            Value::RepeatedInt32(v) => v.fmt(f),
+            Value::RepeatedInt64(v) => v.fmt(f),
+            Value::RepeatedUInt32(v) => v.fmt(f),
+            Value::RepeatedUInt64(v) => v.fmt(f),
+            Value::RepeatedFloat(v) => v.fmt(f),
+            Value::RepeatedDouble(v) => v.fmt(f),
+            Value::RepeatedBool(v) => v.fmt(f),
+            Value::RepeatedString(v) => v.fmt(f),
+            Value::RepeatedBytes(v) => v.fmt(f),
+            Value::RepeatedMessage(ref v) => v.fmt(f),
         }
     }
 }
