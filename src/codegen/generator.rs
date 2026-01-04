@@ -799,7 +799,7 @@ fn generate_accessors(
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
-                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena));
+                                self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena).unwrap());
                             }
                             use core::ops::DerefMut;
                             unsafe { self.#oneof_field_name.#field_name.deref_mut() }
@@ -888,7 +888,7 @@ fn generate_accessors(
 
                     #field_doc
                     pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                        let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena);
+                        let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena).unwrap();
                         self.#field_name.push(msg, arena);
                         self.#field_name.last_mut().unwrap()
                     }
@@ -1043,7 +1043,7 @@ fn generate_accessors(
 
                         #field_doc
                         pub fn #field_name_mut(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                            self.#field_name.get_or_init(arena)
+                            self.#field_name.get_or_init(arena).unwrap()
                         }
 
                         #clear_doc

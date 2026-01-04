@@ -395,7 +395,7 @@ mod table_tests {
         // Load descriptor set
         let mut fds = protocrap::google::protobuf::FileDescriptorSet::ProtoType::default();
         assert!(fds.decode_flat::<32>(&mut pool.arena, test_protos::DESCRIPTOR_BYTES));
-        let fds = pool.arena.place(fds);
+        let fds = pool.arena.place(fds).unwrap();
 
         for file in fds.file() {
             pool.add_file(file.as_ref());

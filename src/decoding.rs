@@ -216,20 +216,20 @@ impl<'a> DecodeObjectState<'a> {
         self,
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
-    ) -> DynamicMessage<'a, 'a> {
+    ) -> Result<DynamicMessage<'a, 'a>, crate::Error<core::alloc::LayoutError>> {
         let (offset, child_table) = self.msg.table.aux_entry_decode(entry);
         let field = self.msg.object.ref_mut::<Message>(offset);
         let child = if field.is_null() {
-            let child = Object::create(child_table.size as u32, arena);
+            let child = Object::create(child_table.size as u32, arena)?;
             *field = Message::new(child);
             child
         } else {
             field.as_mut()
         };
-        DynamicMessage {
+        Ok(DynamicMessage {
             object: child,
             table: child_table,
-        }
+        })
     }
 
     #[inline(always)]
@@ -237,18 +237,18 @@ impl<'a> DecodeObjectState<'a> {
         &mut self,
         entry: TableEntry,
         arena: &mut crate::arena::Arena,
-    ) -> DynamicMessage<'a, 'a> {
+    ) -> Result<DynamicMessage<'a, 'a>, crate::Error<core::alloc::LayoutError>> {
         let (offset, child_table) = self.msg.table.aux_entry_decode(entry);
         let field = self
             .msg
             .object
             .ref_mut::<RepeatedField<*mut Object>>(offset);
-        let child = Object::create(child_table.size as u32, arena);
+        let child = Object::create(child_table.size as u32, arena)?;
         field.push(child, arena);
-        DynamicMessage {
+        Ok(DynamicMessage {
             object: child,
             table: child_table,
-        }
+        })
     }
 }
 
@@ -636,7 +636,7 @@ fn decode_loop<'a>(
 
                             ctx.update(|ctx| {
                                 let limit = ctx.limit;
-                                let msg = ctx.get_or_create_child_object(entry, arena);
+                                let msg = ctx.get_or_create_child_object(entry, arena).unwrap();
                                 DecodeObjectState { limit, msg }
                             });
                         }
@@ -647,7 +647,7 @@ fn decode_loop<'a>(
                             ctx.push_group(field_number, stack)?;
                             ctx.update(|ctx| {
                                 let limit = ctx.limit;
-                                let msg = ctx.get_or_create_child_object(entry, arena);
+                                let msg = ctx.get_or_create_child_object(entry, arena).unwrap();
                                 DecodeObjectState { limit, msg }
                             });
                         }
@@ -955,14 +955,14 @@ fn decode_loop<'a>(
                             };
                             let len = cursor.read_size()?;
                             limited_end = ctx.push_limit(len, cursor, end, stack)?;
-                            ctx.msg = ctx.add_child_object(entry, arena);
+                            ctx.msg = ctx.add_child_object(entry, arena).ok()?;
                         }
                         FieldKind::RepeatedGroup => {
                             if tag & 7 != 3 {
                                 break 'unknown;
                             };
                             ctx.push_group(field_number, stack)?;
-                            ctx.msg = ctx.add_child_object(entry, arena);
+                            ctx.msg = ctx.add_child_object(entry, arena).ok()?;
                         }
                         FieldKind::Unknown => {
                             break 'unknown;

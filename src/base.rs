@@ -111,12 +111,12 @@ impl<T: Protobuf> DerefMut for TypedMessage<T> {
 
 impl<T: Protobuf> TypedMessage<T> {
     /// Create a new message allocated in the arena, initialized to default.
-    pub fn new_in(arena: &mut Arena) -> Self {
-        let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
-        Self {
+    pub fn new_in(arena: &mut Arena) -> Result<Self, crate::Error<core::alloc::LayoutError>> {
+        let obj = Object::create(core::mem::size_of::<T>() as u32, arena)?;
+        Ok(Self {
             msg: Message(obj as *mut Object),
             _marker: PhantomData,
-        }
+        })
     }
 
     /// Create from a static reference (for static initializers).
@@ -203,12 +203,12 @@ impl<T: Protobuf> OptionalMessage<T> {
         }
     }
 
-    pub fn get_or_init(&mut self, arena: &mut Arena) -> &mut T {
+    pub fn get_or_init(&mut self, arena: &mut Arena) -> Result<&mut T, crate::Error<core::alloc::LayoutError>> {
         if self.msg.is_null() {
-            let obj = Object::create(core::mem::size_of::<T>() as u32, arena);
+            let obj = Object::create(core::mem::size_of::<T>() as u32, arena)?;
             self.msg = Message(obj as *mut Object);
         }
-        self.msg.as_mut()
+        Ok(self.msg.as_mut())
     }
 
     /// Clear the message (set to None).
@@ -220,16 +220,16 @@ impl<T: Protobuf> OptionalMessage<T> {
 pub struct Object;
 
 impl Object {
-    pub fn create(size: u32, arena: &mut Arena) -> &'static mut Object {
+    pub fn create(size: u32, arena: &mut Arena) -> Result<&'static mut Object, crate::Error<core::alloc::LayoutError>> {
         unsafe {
             let buffer = arena
                 .alloc_raw(Layout::from_size_align_unchecked(
                     size as usize,
                     core::mem::align_of::<u64>(),
-                ))
+                ))?
                 .as_ptr();
             core::ptr::write_bytes(buffer, 0, size as usize);
-            &mut *(buffer as *mut Object)
+            Ok(&mut *(buffer as *mut Object))
         }
     }
 

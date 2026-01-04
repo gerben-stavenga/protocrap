@@ -33,6 +33,7 @@ use core::fmt::Debug;
 use core::marker::PhantomData;
 use core::ops::{Deref, DerefMut};
 use core::ptr;
+use core::ptr::NonNull;
 
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -44,17 +45,39 @@ pub(super) struct RawVec {
 unsafe impl Send for RawVec {}
 unsafe impl Sync for RawVec {}
 
+struct RawVecGrown {
+    ptr: NonNull<u8>,
+    cap: usize,
+}
+
+// assert Result<RawVecGrown, crate::Error<LayoutError>> is same size as RawVec
+// ju
+const _: () = {
+    // check the size at compile time, no transmute
+    let _ = core::mem::transmute::<
+        Result<RawVecGrown, crate::Error<core::alloc::LayoutError>>,
+        RawVec,
+    >;
+};
+
 impl RawVec {
     const fn new() -> Self {
-        // `NonNull::dangling()` doubles as "unallocated" and "zero-sized allocation"
         RawVec {
             ptr: core::ptr::null_mut(),
             cap: 0,
         }
     }
 
+    #[inline(always)]
+    pub fn grow(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+        let RawVecGrown { ptr, cap } = self.grow_outline(new_cap, layout, arena)?;
+        self.ptr = ptr.as_ptr();
+        self.cap = cap;
+        Ok(())
+    }
+
     #[inline(never)]
-    fn grow(mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Self {
+    fn grow_outline(self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<RawVecGrown, crate::Error<core::alloc::LayoutError>> {
         // since we set the capacity to usize::MAX when T has size 0,
         // getting to here necessarily means the Vec is overfull.
         assert!(layout.size() != 0, "capacity overflow");
@@ -89,40 +112,14 @@ impl RawVec {
         );
 
         let new_ptr = if self.cap == 0 {
-            arena.alloc_raw(new_layout).as_ptr()
+            arena.alloc_raw(new_layout)?
         } else {
-            let new_ptr = arena.alloc_raw(new_layout).as_ptr();
-            unsafe { core::ptr::copy_nonoverlapping(self.ptr, new_ptr, layout.size() * self.cap) };
+            let new_ptr = arena.alloc_raw(new_layout)?;
+            unsafe { core::ptr::copy_nonoverlapping(self.ptr, new_ptr.as_ptr(), layout.size() * self.cap) };
             new_ptr
         };
 
-        // If allocation fails, `new_ptr` will be null, in which case we abort.
-        if new_ptr.is_null() {
-            // TODO: use a better error handling strategy
-            panic!("allocation failed");
-        }
-        self.ptr = new_ptr;
-        self.cap = new_cap;
-        self
-    }
-
-    #[allow(dead_code)]
-    #[inline(always)]
-    pub unsafe fn push_uninitialized(
-        &mut self,
-        len: &mut usize,
-        layout: Layout,
-        arena: &mut crate::arena::Arena,
-    ) -> *mut u8 {
-        let l = *len;
-        if l == self.cap {
-            *self = self.grow(0, layout, arena);
-        }
-
-        // Can't overflow, we'll OOM first.
-        *len = l + 1;
-
-        unsafe { self.ptr.add(l * layout.size()) }
+        Ok(RawVecGrown { ptr: new_ptr, cap: new_cap })
     }
 
     pub unsafe fn pop(&mut self, len: &mut usize, layout: Layout) -> Option<*mut u8> {
@@ -137,11 +134,14 @@ impl RawVec {
         }
     }
 
-    pub fn reserve(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) {
+    pub fn reserve(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         if new_cap > self.cap {
-            *self = self.grow(new_cap, layout, arena);
+            self.grow(new_cap, layout, arena)?;
         }
+        Ok(())
     }
+
+
 }
 
 /// Like `Vec<T>` but arena-allocated and never drops elements.
@@ -236,15 +236,16 @@ impl<T> RepeatedField<T> {
     }
 
     #[inline(always)]
-    pub fn push(&mut self, elem: T, arena: &mut crate::arena::Arena) {
+    pub fn push(&mut self, elem: T, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         let l = self.len;
         if l == self.cap() {
-            self.buf = self.buf.grow(0, Layout::new::<T>(), arena);
+            self.buf.grow(0, Layout::new::<T>(), arena)?;
         }
         unsafe { self.ptr().add(l).write(elem) };
 
         // Can't overflow, we'll OOM first.
         self.len = l + 1;
+        Ok(())
     }
 
     pub fn pop(&mut self) -> Option<T> {
@@ -255,11 +256,11 @@ impl<T> RepeatedField<T> {
         }
     }
 
-    pub fn insert(&mut self, index: usize, elem: T, arena: &mut crate::arena::Arena) {
+    pub fn insert(&mut self, index: usize, elem: T, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         assert!(index <= self.len, "index out of bounds");
         let len = self.len;
         if len == self.cap() {
-            self.buf = self.buf.grow(0, Layout::new::<T>(), arena);
+            self.buf.grow(0, Layout::new::<T>(), arena)?;
         }
 
         unsafe {
@@ -272,6 +273,7 @@ impl<T> RepeatedField<T> {
         }
 
         self.len = len + 1;
+        Ok(())
     }
 
     pub fn remove(&mut self, index: usize) -> T {
@@ -297,8 +299,8 @@ impl<T> RepeatedField<T> {
         self.len = 0
     }
 
-    pub fn reserve(&mut self, new_cap: usize, arena: &mut crate::arena::Arena) {
-        self.buf.reserve(new_cap, Layout::new::<T>(), arena);
+    pub fn reserve(&mut self, new_cap: usize, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+        self.buf.reserve(new_cap, Layout::new::<T>(), arena)
     }
 
     pub fn assign(&mut self, slice: &[T], arena: &mut crate::arena::Arena)
