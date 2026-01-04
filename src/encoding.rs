@@ -1,10 +1,10 @@
 use core::{mem::MaybeUninit, ptr::NonNull};
 
 use crate::{
-    base::Object,
+    base::{Message, Object},
     containers::Bytes,
     tables::Table,
-    utils::{Stack, StackWithStorage},
+    utils::{Ptr, Stack, StackWithStorage, as_bytes},
     wire::{FieldKind, SLOP_SIZE, WriteCursor, zigzag_encode},
 };
 
@@ -18,8 +18,8 @@ pub struct TableEntry {
 }
 
 struct StackEntry {
-    obj: *const Object,
-    table: *const [TableEntry],
+    obj: Ptr<Object>,
+    table: Ptr<[TableEntry]>,
     field_idx: usize,
     rep_field_idx: usize,
     byte_count: isize,
@@ -30,8 +30,8 @@ impl StackEntry {
     fn into_context<'a>(self) -> (ObjectEncodeState<'a>, u32, isize) {
         (
             ObjectEncodeState {
-                obj: unsafe { &*self.obj },
-                table: unsafe { &*self.table },
+                obj: self.obj.as_ref(),
+                table: self.table.as_ref(),
                 field_idx: self.field_idx,
                 rep_field_idx: self.rep_field_idx,
             },
@@ -70,10 +70,10 @@ impl<'a> ObjectEncodeState<'a> {
         }
     }
 
-    fn push(&mut self, tag: u32, byte_count: isize, stack: &mut Stack<StackEntry>) -> Option<()> {
+    fn push(&self, tag: u32, byte_count: isize, stack: &mut Stack<StackEntry>) -> Option<()> {
         stack.push(StackEntry {
-            obj: self.obj,
-            table: self.table,
+            obj: Ptr::new(self.obj),
+            table: Ptr::new(self.table),
             field_idx: self.field_idx,
             rep_field_idx: self.rep_field_idx,
             tag,
@@ -381,12 +381,12 @@ fn encode_loop<'a>(
                     // Skip - not the active oneof field
                 } else {
                     let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
-                    let child_ptr = obj_state.get::<*const Object>(offset as usize);
-                    if !child_ptr.is_null() {
+                    let child = obj_state.obj.ref_at::<Message>(offset as usize);
+                    if !child.is_null() {
                         obj_state.field_idx -= 1;
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                         obj_state =
-                            ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
+                            ObjectEncodeState::new(child.as_ref(), child_table);
                         continue 'out; // Continue with child message
                     }
                 }
@@ -395,8 +395,8 @@ fn encode_loop<'a>(
                 let (offset,
                     child_table,
                  ) = Table::table(obj_state.table).aux_entry(offset);
-                let child_ptr = obj_state.get::<*const Object>(offset as usize);
-                if !child_ptr.is_null() {
+                let child = obj_state.obj.ref_at::<Message>(offset as usize);
+                if !child.is_null() {
                     if cursor <= begin {
                         break;
                     }
@@ -407,7 +407,7 @@ fn encode_loop<'a>(
                     obj_state.field_idx -= 1;
                     obj_state.push(tag, -1, stack)?;
                     obj_state =
-                        ObjectEncodeState::new(unsafe { &*child_ptr }, child_table);
+                        ObjectEncodeState::new(child.as_ref(), child_table);
                     continue 'out; // Continue with child group
                 }
             }
@@ -559,12 +559,7 @@ fn encode_loop<'a>(
                 let slice = obj_state.get_slice::<bool>(offset);
                 if tag & 7 == 2 && !slice.is_empty() {
                     // Packed: treat as bytes (bool is 1 byte)
-                    let bytes = unsafe {
-                        core::slice::from_raw_parts(
-                            slice.as_ptr() as *const u8,
-                            slice.len(),
-                        )
-                    };
+                    let bytes = as_bytes(slice);
                     if cursor <= begin {
                         break;
                     }
@@ -596,12 +591,7 @@ fn encode_loop<'a>(
                 let slice = obj_state.get_slice::<u64>(offset);
                 if tag & 7 == 2 && !slice.is_empty() {
                     // Packed: treat as bytes
-                    let bytes = unsafe {
-                        core::slice::from_raw_parts(
-                            slice.as_ptr() as *const u8,
-                            slice.len() * 8,
-                        )
-                    };
+                    let bytes = as_bytes(slice);
                     if cursor <= begin {
                         break;
                     }
@@ -633,12 +623,7 @@ fn encode_loop<'a>(
                 let slice = obj_state.get_slice::<u32>(offset);
                 if tag & 7 == 2 && !slice.is_empty() {
                     // Packed: treat as bytes
-                    let bytes = unsafe {
-                        core::slice::from_raw_parts(
-                            slice.as_ptr() as *const u8,
-                            slice.len() * 4,
-                        )
-                    };
+                    let bytes = as_bytes(slice);
                     if cursor <= begin {
                         break;
                     }
@@ -692,7 +677,7 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedMessage => {
                 let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
-                let slice = obj_state.get_slice::<*const Object>(offset as usize);
+                let slice = obj_state.get_slice::<Message>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -703,7 +688,7 @@ fn encode_loop<'a>(
                     }
                     obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
                     obj_state = ObjectEncodeState::new(
-                        unsafe { &*slice[obj_state.rep_field_idx] },
+                        slice[obj_state.rep_field_idx].as_ref(),
                         child_table,
                     );
                     continue 'out; // Continue with child message
@@ -711,7 +696,7 @@ fn encode_loop<'a>(
             }
             FieldKind::RepeatedGroup => {
                 let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
-                let slice = obj_state.get_slice::<*const Object>(offset as usize);
+                let slice = obj_state.get_slice::<Message>(offset as usize);
                 if obj_state.rep_field_idx == 0 {
                     obj_state.rep_field_idx = slice.len();
                 }
@@ -728,7 +713,7 @@ fn encode_loop<'a>(
                     cursor.write_tag(end_tag);
                     obj_state.push(tag, -1, stack)?;
                     obj_state = ObjectEncodeState::new(
-                        unsafe { &*slice[obj_state.rep_field_idx] },
+                        slice[obj_state.rep_field_idx].as_ref(),
                         child_table,
                     );
                     continue 'out; // Continue with child group
