@@ -94,7 +94,10 @@ fn generate_has_bits_array(has_bits: &[u32]) -> TokenStream {
     quote! { [#(#values),*] }
 }
 
-fn generate_field_initializers(value: &DynamicMessageRef, crate_path: &str) -> Result<Vec<TokenStream>> {
+fn generate_field_initializers(
+    value: &DynamicMessageRef,
+    crate_path: &str,
+) -> Result<Vec<TokenStream>> {
     let mut inits = Vec::new();
 
     let mut fields = value.descriptor().field().iter().collect::<Vec<_>>();
@@ -271,7 +274,11 @@ fn generate_field_value(
     }
 }
 
-fn generate_nested_message(msg: &DynamicMessageRef, type_name: &str, crate_path: &str) -> Result<TokenStream> {
+fn generate_nested_message(
+    msg: &DynamicMessageRef,
+    type_name: &str,
+    crate_path: &str,
+) -> Result<TokenStream> {
     let nested_initializer = generate_static_dynamic(msg, type_name, crate_path)?;
     let path_parts = resolve_type_path(type_name);
     let prefix = crate_prefix(crate_path);

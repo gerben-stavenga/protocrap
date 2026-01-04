@@ -126,7 +126,10 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         self.inner.serialize_none()
     }
 
-    fn serialize_some<T: ?Sized + serde::Serialize>(self, value: &T) -> Result<Self::Ok, Self::Error> {
+    fn serialize_some<T: ?Sized + serde::Serialize>(
+        self,
+        value: &T,
+    ) -> Result<Self::Ok, Self::Error> {
         value.serialize(self)
     }
 
@@ -144,7 +147,8 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         variant_index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_unit_variant(name, variant_index, variant)
+        self.inner
+            .serialize_unit_variant(name, variant_index, variant)
     }
 
     fn serialize_newtype_struct<T: ?Sized + serde::Serialize>(
@@ -153,7 +157,8 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         value: &T,
     ) -> Result<Self::Ok, Self::Error> {
         // Serialize through our wrapper to apply transformations
-        self.inner.serialize_newtype_struct(name, &ProtoJsonValue(value))
+        self.inner
+            .serialize_newtype_struct(name, &ProtoJsonValue(value))
     }
 
     fn serialize_newtype_variant<T: ?Sized + serde::Serialize>(
@@ -163,7 +168,8 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         variant: &'static str,
         value: &T,
     ) -> Result<Self::Ok, Self::Error> {
-        self.inner.serialize_newtype_variant(name, variant_index, variant, &ProtoJsonValue(value))
+        self.inner
+            .serialize_newtype_variant(name, variant_index, variant, &ProtoJsonValue(value))
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {
@@ -196,7 +202,9 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         len: usize,
     ) -> Result<Self::SerializeTupleVariant, Self::Error> {
         Ok(ProtoJsonSerializeTupleVariant {
-            inner: self.inner.serialize_tuple_variant(name, variant_index, variant, len)?,
+            inner: self
+                .inner
+                .serialize_tuple_variant(name, variant_index, variant, len)?,
         })
     }
 
@@ -224,7 +232,9 @@ impl<S: serde::Serializer> serde::Serializer for ProtoJsonSerializer<S> {
         len: usize,
     ) -> Result<Self::SerializeStructVariant, Self::Error> {
         Ok(ProtoJsonSerializeStructVariant {
-            inner: self.inner.serialize_struct_variant(name, variant_index, variant, len)?,
+            inner: self
+                .inner
+                .serialize_struct_variant(name, variant_index, variant, len)?,
         })
     }
 
@@ -253,7 +263,10 @@ impl<S: SerializeSeq> SerializeSeq for ProtoJsonSerializeSeq<S> {
     type Ok = S::Ok;
     type Error = S::Error;
 
-    fn serialize_element<T: ?Sized + serde::Serialize>(&mut self, value: &T) -> Result<(), Self::Error> {
+    fn serialize_element<T: ?Sized + serde::Serialize>(
+        &mut self,
+        value: &T,
+    ) -> Result<(), Self::Error> {
         self.inner.serialize_element(&ProtoJsonValue(value))
     }
 
@@ -271,7 +284,10 @@ impl<S: SerializeTuple> SerializeTuple for ProtoJsonSerializeTuple<S> {
     type Ok = S::Ok;
     type Error = S::Error;
 
-    fn serialize_element<T: ?Sized + serde::Serialize>(&mut self, value: &T) -> Result<(), Self::Error> {
+    fn serialize_element<T: ?Sized + serde::Serialize>(
+        &mut self,
+        value: &T,
+    ) -> Result<(), Self::Error> {
         self.inner.serialize_element(&ProtoJsonValue(value))
     }
 
@@ -289,7 +305,10 @@ impl<S: SerializeTupleStruct> SerializeTupleStruct for ProtoJsonSerializeTupleSt
     type Ok = S::Ok;
     type Error = S::Error;
 
-    fn serialize_field<T: ?Sized + serde::Serialize>(&mut self, value: &T) -> Result<(), Self::Error> {
+    fn serialize_field<T: ?Sized + serde::Serialize>(
+        &mut self,
+        value: &T,
+    ) -> Result<(), Self::Error> {
         self.inner.serialize_field(&ProtoJsonValue(value))
     }
 
@@ -307,7 +326,10 @@ impl<S: SerializeTupleVariant> SerializeTupleVariant for ProtoJsonSerializeTuple
     type Ok = S::Ok;
     type Error = S::Error;
 
-    fn serialize_field<T: ?Sized + serde::Serialize>(&mut self, value: &T) -> Result<(), Self::Error> {
+    fn serialize_field<T: ?Sized + serde::Serialize>(
+        &mut self,
+        value: &T,
+    ) -> Result<(), Self::Error> {
         self.inner.serialize_field(&ProtoJsonValue(value))
     }
 
@@ -329,7 +351,10 @@ impl<S: SerializeMap> SerializeMap for ProtoJsonSerializeMap<S> {
         self.inner.serialize_key(&ProtoJsonValue(key))
     }
 
-    fn serialize_value<T: ?Sized + serde::Serialize>(&mut self, value: &T) -> Result<(), Self::Error> {
+    fn serialize_value<T: ?Sized + serde::Serialize>(
+        &mut self,
+        value: &T,
+    ) -> Result<(), Self::Error> {
         self.inner.serialize_value(&ProtoJsonValue(value))
     }
 
@@ -476,7 +501,8 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
     }
 
     fn deserialize_option<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_option(ProtoJsonOptionVisitor(visitor))
+        self.inner
+            .deserialize_option(ProtoJsonOptionVisitor(visitor))
     }
 
     fn deserialize_unit<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
@@ -496,15 +522,21 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
         name: &'static str,
         visitor: V,
     ) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_newtype_struct(name, ProtoJsonVisitor(visitor))
+        self.inner
+            .deserialize_newtype_struct(name, ProtoJsonVisitor(visitor))
     }
 
     fn deserialize_seq<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
         self.inner.deserialize_seq(ProtoJsonSeqVisitor(visitor))
     }
 
-    fn deserialize_tuple<V: Visitor<'de>>(self, len: usize, visitor: V) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_tuple(len, ProtoJsonSeqVisitor(visitor))
+    fn deserialize_tuple<V: Visitor<'de>>(
+        self,
+        len: usize,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.inner
+            .deserialize_tuple(len, ProtoJsonSeqVisitor(visitor))
     }
 
     fn deserialize_tuple_struct<V: Visitor<'de>>(
@@ -513,7 +545,8 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
         len: usize,
         visitor: V,
     ) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_tuple_struct(name, len, ProtoJsonSeqVisitor(visitor))
+        self.inner
+            .deserialize_tuple_struct(name, len, ProtoJsonSeqVisitor(visitor))
     }
 
     fn deserialize_map<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
@@ -526,7 +559,8 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
         fields: &'static [&'static str],
         visitor: V,
     ) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_struct(name, fields, ProtoJsonMapVisitor(visitor))
+        self.inner
+            .deserialize_struct(name, fields, ProtoJsonMapVisitor(visitor))
     }
 
     fn deserialize_enum<V: Visitor<'de>>(
@@ -535,7 +569,8 @@ impl<'de, D: serde::Deserializer<'de>> serde::Deserializer<'de> for ProtoJsonDes
         variants: &'static [&'static str],
         visitor: V,
     ) -> Result<V::Value, Self::Error> {
-        self.inner.deserialize_enum(name, variants, ProtoJsonEnumVisitor(visitor))
+        self.inner
+            .deserialize_enum(name, variants, ProtoJsonEnumVisitor(visitor))
     }
 
     fn deserialize_identifier<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
@@ -598,7 +633,10 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for ProtoJsonVisitor<V> {
         self.0.visit_none()
     }
 
-    fn visit_some<D: serde::Deserializer<'de>>(self, deserializer: D) -> Result<Self::Value, D::Error> {
+    fn visit_some<D: serde::Deserializer<'de>>(
+        self,
+        deserializer: D,
+    ) -> Result<Self::Value, D::Error> {
         self.0.visit_some(ProtoJsonDeserializer::new(deserializer))
     }
 
@@ -606,8 +644,12 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for ProtoJsonVisitor<V> {
         self.0.visit_unit()
     }
 
-    fn visit_newtype_struct<D: serde::Deserializer<'de>>(self, deserializer: D) -> Result<Self::Value, D::Error> {
-        self.0.visit_newtype_struct(ProtoJsonDeserializer::new(deserializer))
+    fn visit_newtype_struct<D: serde::Deserializer<'de>>(
+        self,
+        deserializer: D,
+    ) -> Result<Self::Value, D::Error> {
+        self.0
+            .visit_newtype_struct(ProtoJsonDeserializer::new(deserializer))
     }
 
     fn visit_seq<A: SeqAccess<'de>>(self, seq: A) -> Result<Self::Value, A::Error> {
@@ -763,7 +805,7 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for FlexibleBytesVisitor<V> {
 
     fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
         use base64::Engine;
-        use base64::engine::{GeneralPurpose, GeneralPurposeConfig, DecodePaddingMode};
+        use base64::engine::{DecodePaddingMode, GeneralPurpose, GeneralPurposeConfig};
         // Lenient base64 decoder: accepts standard or URL-safe, with or without padding
         let config = GeneralPurposeConfig::new()
             .with_decode_padding_mode(DecodePaddingMode::Indifferent)
@@ -799,7 +841,10 @@ impl<'de, V: Visitor<'de>> Visitor<'de> for ProtoJsonOptionVisitor<V> {
         self.0.visit_none()
     }
 
-    fn visit_some<D: serde::Deserializer<'de>>(self, deserializer: D) -> Result<Self::Value, D::Error> {
+    fn visit_some<D: serde::Deserializer<'de>>(
+        self,
+        deserializer: D,
+    ) -> Result<Self::Value, D::Error> {
         self.0.visit_some(ProtoJsonDeserializer::new(deserializer))
     }
 
@@ -857,7 +902,10 @@ struct ProtoJsonSeqAccess<A>(A);
 impl<'de, A: SeqAccess<'de>> SeqAccess<'de> for ProtoJsonSeqAccess<A> {
     type Error = A::Error;
 
-    fn next_element_seed<T: DeserializeSeed<'de>>(&mut self, seed: T) -> Result<Option<T::Value>, Self::Error> {
+    fn next_element_seed<T: DeserializeSeed<'de>>(
+        &mut self,
+        seed: T,
+    ) -> Result<Option<T::Value>, Self::Error> {
         self.0.next_element_seed(ProtoJsonDeserializeSeed(seed))
     }
 }
@@ -867,11 +915,17 @@ struct ProtoJsonMapAccess<A>(A);
 impl<'de, A: MapAccess<'de>> MapAccess<'de> for ProtoJsonMapAccess<A> {
     type Error = A::Error;
 
-    fn next_key_seed<K: DeserializeSeed<'de>>(&mut self, seed: K) -> Result<Option<K::Value>, Self::Error> {
+    fn next_key_seed<K: DeserializeSeed<'de>>(
+        &mut self,
+        seed: K,
+    ) -> Result<Option<K::Value>, Self::Error> {
         self.0.next_key_seed(seed) // Keys don't need transformation
     }
 
-    fn next_value_seed<V: DeserializeSeed<'de>>(&mut self, seed: V) -> Result<V::Value, Self::Error> {
+    fn next_value_seed<V: DeserializeSeed<'de>>(
+        &mut self,
+        seed: V,
+    ) -> Result<V::Value, Self::Error> {
         self.0.next_value_seed(ProtoJsonDeserializeSeed(seed))
     }
 }
@@ -881,8 +935,10 @@ struct ProtoJsonDeserializeSeed<T>(T);
 impl<'de, T: DeserializeSeed<'de>> DeserializeSeed<'de> for ProtoJsonDeserializeSeed<T> {
     type Value = T::Value;
 
-    fn deserialize<D: serde::Deserializer<'de>>(self, deserializer: D) -> Result<Self::Value, D::Error> {
+    fn deserialize<D: serde::Deserializer<'de>>(
+        self,
+        deserializer: D,
+    ) -> Result<Self::Value, D::Error> {
         self.0.deserialize(ProtoJsonDeserializer::new(deserializer))
     }
 }
-

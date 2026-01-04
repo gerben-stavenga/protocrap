@@ -2,10 +2,10 @@
 
 use super::protocrap;
 
-use protocrap::reflection::is_in_oneof;
 use proc_macro2::TokenStream;
 use protocrap::google::protobuf::FieldDescriptorProto::ProtoType as FieldDescriptorProto;
 use protocrap::google::protobuf::FieldDescriptorProto::Type;
+use protocrap::reflection::is_in_oneof;
 use quote::{format_ident, quote};
 
 const RUST_KEYWORDS: &[&str] = &[

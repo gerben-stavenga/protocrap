@@ -87,7 +87,6 @@ pub struct TypedMessage<T: Protobuf> {
     _marker: PhantomData<T>,
 }
 
-
 // Note: No Default impl - TypedMessage must always point to a valid message
 
 impl<T: Protobuf> core::fmt::Debug for TypedMessage<T> {
@@ -143,7 +142,6 @@ pub struct OptionalMessage<T: Protobuf> {
     msg: Message,
     _marker: PhantomData<T>,
 }
-
 
 impl<T: Protobuf> Default for OptionalMessage<T> {
     fn default() -> Self {

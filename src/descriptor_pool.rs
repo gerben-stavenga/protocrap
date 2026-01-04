@@ -44,8 +44,7 @@ use crate::{
         FileDescriptorProto::ProtoType as FileDescriptorProto,
     },
     reflection::{
-        field_kind_tokens, is_in_oneof, is_message, is_repeated, needs_has_bit,
-        DynamicMessage,
+        DynamicMessage, field_kind_tokens, is_in_oneof, is_message, is_repeated, needs_has_bit,
     },
     tables::Table,
 };
@@ -218,9 +217,7 @@ impl<'alloc> DescriptorPool<'alloc> {
         syntax: Option<&str>,
     ) -> &'alloc mut Table {
         use crate::{
-            decoding, encoding,
-            reflection::calculate_tag_with_syntax,
-            tables::AuxTableEntry,
+            decoding, encoding, reflection::calculate_tag_with_syntax, tables::AuxTableEntry,
         };
 
         // Calculate sizes
@@ -267,8 +264,7 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         // Calculate field offsets and total size using Layout::extend for proper padding
         // Start with metadata layout (always u32 array, so alignment is 4)
-        let mut layout =
-            core::alloc::Layout::from_size_align(metadata_size as usize, 4).unwrap();
+        let mut layout = core::alloc::Layout::from_size_align(metadata_size as usize, 4).unwrap();
 
         // First pass: calculate offsets for regular fields (not in oneof)
         // Store in a map by field number
@@ -428,8 +424,8 @@ impl<'alloc> DescriptorPool<'alloc> {
                         if is_message(&**field) {
                             // Oneof message field - offset points to aux entry
                             let aux_index = aux_index_map[&field_number];
-                            let aux_offset =
-                                (aux_ptr as usize) + aux_index * core::mem::size_of::<AuxTableEntry>();
+                            let aux_offset = (aux_ptr as usize)
+                                + aux_index * core::mem::size_of::<AuxTableEntry>();
                             let table_addr = table_ptr as usize;
                             decoding::TableEntry::new(
                                 field_kind_tokens(field),

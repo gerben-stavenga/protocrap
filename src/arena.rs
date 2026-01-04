@@ -252,10 +252,10 @@ unsafe impl<'a> Send for Arena<'a> where &'a dyn Allocator: Send {}
 mod tests {
     use super::*;
 
-    #[cfg(feature = "nightly")]
-    use std::alloc::Global;
     #[cfg(not(feature = "nightly"))]
     use allocator_api2::alloc::Global;
+    #[cfg(feature = "nightly")]
+    use std::alloc::Global;
 
     #[test]
     fn test_basic_allocation() {

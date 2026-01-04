@@ -63,7 +63,7 @@ pub fn generate_embed(
     }
 
     // Generate the initializer expression
-    let tokens = static_gen::generate_static_dynamic(&msg, type_name, crate_path)?;
+    let tokens = static_gen::generate_static_dynamic(&msg.as_ref(), type_name, crate_path)?;
 
     // Parse as expression (not file) and format
     let expr: syn::Expr = syn::parse2(tokens)?;

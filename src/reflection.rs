@@ -197,13 +197,11 @@ pub struct DynamicMessage<'pool, 'msg> {
     pub(crate) table: &'pool Table,
 }
 
-// Deref allows DynamicMessage to use all DynamicMessageRef methods
 impl<'pool, 'msg> core::ops::Deref for DynamicMessage<'pool, 'msg> {
     type Target = DynamicMessageRef<'pool, 'msg>;
 
     fn deref(&self) -> &Self::Target {
-        // SAFETY: DynamicMessageRef has the same layout with &Object instead of &mut Object
-        // and we're only providing immutable access through the Deref
+        // Safety: This is unsound but works.
         unsafe {
             &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
         }
@@ -225,18 +223,11 @@ impl<'pool, 'msg> core::fmt::Debug for DynamicMessageRef<'pool, 'msg> {
 impl<'pool, 'msg> core::fmt::Debug for DynamicMessage<'pool, 'msg> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         // Delegate to DynamicMessageRef's Debug impl via Deref
-        core::fmt::Debug::fmt(&**self, f)
+        self.as_ref().fmt(f)
     }
 }
 
 impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
-    pub fn new<T>(msg: &'msg T) -> Self
-    where
-        T: crate::generated_code_only::Protobuf,
-    {
-        msg.as_dyn()
-    }
-    
     pub fn descriptor(&self) -> &'pool DescriptorProto {
         self.table.descriptor
     }
@@ -414,18 +405,10 @@ impl<'pool, 'msg> DynamicMessageRef<'pool, 'msg> {
 }
 
 impl<'pool, 'msg> DynamicMessage<'pool, 'msg> {
-    pub fn new<T>(msg: &'msg mut T) -> Self
-    where
-        T: crate::generated_code_only::Protobuf,
-    {
-        msg.as_dyn_mut()
-    }
-
-    pub fn as_ref(&self) -> &DynamicMessageRef<'pool, 'msg> {
-        // SAFETY: DynamicMessage and DynamicMessageRef have the same layout
-        // (one has &mut Object, the other &Object)
-        unsafe {
-            &*(self as *const DynamicMessage<'pool, 'msg> as *const DynamicMessageRef<'pool, 'msg>)
+    pub fn as_ref<'a>(&'a self) -> DynamicMessageRef<'pool, 'a> {
+        DynamicMessageRef {
+            object: self.object,
+            table: self.table,
         }
     }
 

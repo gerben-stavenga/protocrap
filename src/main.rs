@@ -60,11 +60,17 @@ fn run_embed_mode(args: &[String], embed_idx: usize) -> Result<(), Box<dyn std::
 
     // Parse data.pb:type_name
     let (data_path, type_name) = embed_arg.split_once(':').ok_or_else(|| {
-        format!("Invalid --embed argument '{}': expected <data.pb>:<type_name>", embed_arg)
+        format!(
+            "Invalid --embed argument '{}': expected <data.pb>:<type_name>",
+            embed_arg
+        )
     })?;
 
     // Find output file (-o flag)
-    let output_path = args.iter().position(|a| a == "-o").and_then(|i| args.get(i + 1));
+    let output_path = args
+        .iter()
+        .position(|a| a == "-o")
+        .and_then(|i| args.get(i + 1));
 
     // Find crate path (--crate-path flag, defaults to "protocrap")
     let crate_path = args
@@ -89,7 +95,13 @@ fn run_embed_mode(args: &[String], embed_idx: usize) -> Result<(), Box<dyn std::
     );
 
     // Generate initializer
-    let code = codegen::generate_embed(&descriptor_bytes, &data_bytes, type_name, is_json, crate_path)?;
+    let code = codegen::generate_embed(
+        &descriptor_bytes,
+        &data_bytes,
+        type_name,
+        is_json,
+        crate_path,
+    )?;
 
     // Write output
     if let Some(path) = output_path {
@@ -124,5 +136,7 @@ fn print_usage(program: &str) {
     eprintln!();
     eprintln!("  # Embed binary proto as const:");
     eprintln!("  {program} desc.pb --embed config.pb:my.package.Config -o config.pc.rs");
-    eprintln!("  # Then in Rust: const CONFIG: my::package::Config::ProtoType = include!(\"config.pc.rs\");");
+    eprintln!(
+        "  # Then in Rust: const CONFIG: my::package::Config::ProtoType = include!(\"config.pc.rs\");"
+    );
 }

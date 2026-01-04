@@ -210,18 +210,18 @@ pub mod descriptor_pool;
 pub mod test_utils;
 
 // Re-export Allocator trait - use core on nightly, polyfill on stable
-#[cfg(feature = "nightly")]
-pub use core::alloc::Allocator;
 #[cfg(not(feature = "nightly"))]
 pub use allocator_api2::alloc::Allocator;
+#[cfg(feature = "nightly")]
+pub use core::alloc::Allocator;
 
 // Internal modules - only accessible within the crate
 // Types needed by generated code are re-exported via generated_code_only
 pub(crate) mod decoding;
 pub(crate) mod encoding;
 pub(crate) mod tables;
-pub(crate) mod wire;
 pub(crate) mod utils;
+pub(crate) mod wire;
 
 /// Internal types for generated code. **Do not use directly.**
 #[doc(hidden)]
@@ -339,7 +339,8 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         arena: &mut crate::arena::Arena,
         buf: &[u8],
     ) -> bool {
-        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
+        let mut decoder =
+            decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
         if !decoder.resume(buf, arena) {
             self.as_dyn_mut().clear();
             return false;
@@ -406,7 +407,8 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         arena: &mut crate::arena::Arena,
         reader: &mut impl std::io::BufRead,
     ) -> Result<(), Error<std::io::Error>> {
-        let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
+        let mut decoder =
+            decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
         loop {
             let buffer = reader.fill_buf().map_err(Error::Io)?;
             let len = buffer.len();
@@ -445,7 +447,8 @@ pub trait ProtobufMut<'pool>: ProtobufRef<'pool> {
         use futures::io::AsyncBufReadExt;
 
         async move {
-            let mut decoder = decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
+            let mut decoder =
+                decoding::ResumeableDecode::<STACK_DEPTH>::new(self.as_dyn_mut(), isize::MAX);
             loop {
                 let buffer = reader.fill_buf().await.map_err(Error::Io)?;
                 let len = buffer.len();
@@ -516,10 +519,10 @@ mod tests {
     use crate::ProtobufMut;
     use crate::ProtobufRef;
 
-    #[cfg(feature = "nightly")]
-    use std::alloc::Global;
     #[cfg(not(feature = "nightly"))]
     use allocator_api2::alloc::Global;
+    #[cfg(feature = "nightly")]
+    use std::alloc::Global;
 
     #[test]
     fn descriptor_accessors() {
@@ -550,32 +553,50 @@ mod tests {
 
         // encode_flat with large buffer
         let mut flat_buffer = vec![0u8; 100_000];
-        let flat_result = file_descriptor.encode_flat::<32>(&mut flat_buffer).expect("encode_flat should work");
+        let flat_result = file_descriptor
+            .encode_flat::<32>(&mut flat_buffer)
+            .expect("encode_flat should work");
         let flat_bytes = flat_result.to_vec();
 
         // encode_vec with chunked encoding
-        let vec_bytes = file_descriptor.encode_vec::<32>().expect("encode_vec should work");
+        let vec_bytes = file_descriptor
+            .encode_vec::<32>()
+            .expect("encode_vec should work");
 
         // Dump to files for comparison
         std::fs::write("/tmp/encode_flat.bin", &flat_bytes).expect("write flat");
         std::fs::write("/tmp/encode_vec.bin", &vec_bytes).expect("write vec");
 
-        println!("encode_flat: {} bytes, encode_vec: {} bytes", flat_bytes.len(), vec_bytes.len());
+        println!(
+            "encode_flat: {} bytes, encode_vec: {} bytes",
+            flat_bytes.len(),
+            vec_bytes.len()
+        );
 
         if flat_bytes != vec_bytes {
             // Find first difference
             for (i, (a, b)) in flat_bytes.iter().zip(vec_bytes.iter()).enumerate() {
                 if a != b {
-                    println!("First difference at byte {}: flat={:02x}, vec={:02x}", i, a, b);
+                    println!(
+                        "First difference at byte {}: flat={:02x}, vec={:02x}",
+                        i, a, b
+                    );
                     break;
                 }
             }
             if flat_bytes.len() != vec_bytes.len() {
-                println!("Length mismatch: flat={}, vec={}", flat_bytes.len(), vec_bytes.len());
+                println!(
+                    "Length mismatch: flat={}, vec={}",
+                    flat_bytes.len(),
+                    vec_bytes.len()
+                );
             }
         }
 
-        assert_eq!(flat_bytes, vec_bytes, "encode_flat and encode_vec should produce identical output");
+        assert_eq!(
+            flat_bytes, vec_bytes,
+            "encode_flat and encode_vec should produce identical output"
+        );
     }
 
     #[test]
@@ -589,7 +610,8 @@ mod tests {
         let mut arena = crate::arena::Arena::new(&Global);
 
         let mut dynamic_file_descriptor = pool
-            .create_message("google.protobuf.FileDescriptorProto", &mut arena).expect("Should create");
+            .create_message("google.protobuf.FileDescriptorProto", &mut arena)
+            .expect("Should create");
         assert!(dynamic_file_descriptor.decode_flat::<32>(&mut arena, &bytes));
 
         let roundtrip = dynamic_file_descriptor
@@ -610,6 +632,9 @@ mod tests {
         let mut msg = crate::google::protobuf::FileDescriptorProto::ProtoType::default();
         let result = msg.decode_flat::<32>(&mut arena, invalid_utf8_name);
 
-        assert!(!result, "decoding invalid UTF-8 in string field should fail");
+        assert!(
+            !result,
+            "decoding invalid UTF-8 in string field should fail"
+        );
     }
 }

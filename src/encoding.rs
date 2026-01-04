@@ -385,16 +385,13 @@ fn encode_loop<'a>(
                     if !child.is_null() {
                         obj_state.field_idx -= 1;
                         obj_state.push(tag, count(cursor, begin, byte_count), stack)?;
-                        obj_state =
-                            ObjectEncodeState::new(child.as_ref(), child_table);
+                        obj_state = ObjectEncodeState::new(child.as_ref(), child_table);
                         continue 'out; // Continue with child message
                     }
                 }
             }
             FieldKind::Group => {
-                let (offset,
-                    child_table,
-                 ) = Table::table(obj_state.table).aux_entry(offset);
+                let (offset, child_table) = Table::table(obj_state.table).aux_entry(offset);
                 let child = obj_state.obj.ref_at::<Message>(offset as usize);
                 if !child.is_null() {
                     if cursor <= begin {
@@ -406,8 +403,7 @@ fn encode_loop<'a>(
                     cursor.write_tag(end_tag);
                     obj_state.field_idx -= 1;
                     obj_state.push(tag, -1, stack)?;
-                    obj_state =
-                        ObjectEncodeState::new(child.as_ref(), child_table);
+                    obj_state = ObjectEncodeState::new(child.as_ref(), child_table);
                     continue 'out; // Continue with child group
                 }
             }
@@ -423,7 +419,8 @@ fn encode_loop<'a>(
                             obj_state.push(tag, start_count, stack)?;
                             return Some((cursor, EncodeObject::PackedVarint64(remaining)));
                         }
-                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor
+                            .write_varint((count(cursor, begin, byte_count) - start_count) as u64);
                         cursor.write_tag(tag);
                     }
                 } else {
@@ -445,13 +442,15 @@ fn encode_loop<'a>(
                     if !slice.is_empty() {
                         let start_count = count(cursor, begin, byte_count);
                         let remaining;
-                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |v| v as u64);
+                        (cursor, remaining) =
+                            write_packed_varint(slice, cursor, begin, |v| v as u64);
                         if !remaining.is_empty() || cursor <= begin {
                             obj_state.field_idx -= 1;
                             obj_state.push(tag, start_count, stack)?;
                             return Some((cursor, EncodeObject::PackedVarint32(remaining)));
                         }
-                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor
+                            .write_varint((count(cursor, begin, byte_count) - start_count) as u64);
                         cursor.write_tag(tag);
                     }
                 } else {
@@ -473,13 +472,15 @@ fn encode_loop<'a>(
                     if !slice.is_empty() {
                         let start_count = count(cursor, begin, byte_count);
                         let remaining;
-                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |v| v as i64 as u64);
+                        (cursor, remaining) =
+                            write_packed_varint(slice, cursor, begin, |v| v as i64 as u64);
                         if !remaining.is_empty() || cursor <= begin {
                             obj_state.field_idx -= 1;
                             obj_state.push(tag, start_count, stack)?;
                             return Some((cursor, EncodeObject::PackedInt32(remaining)));
                         }
-                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor
+                            .write_varint((count(cursor, begin, byte_count) - start_count) as u64);
                         cursor.write_tag(tag);
                     }
                 } else {
@@ -501,15 +502,15 @@ fn encode_loop<'a>(
                     if !slice.is_empty() {
                         let start_count = count(cursor, begin, byte_count);
                         let remaining;
-                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |
-                            v| zigzag_encode(v),
-                        );
+                        (cursor, remaining) =
+                            write_packed_varint(slice, cursor, begin, |v| zigzag_encode(v));
                         if !remaining.is_empty() || cursor <= begin {
                             obj_state.field_idx -= 1;
                             obj_state.push(tag, start_count, stack)?;
                             return Some((cursor, EncodeObject::PackedSint64(remaining)));
                         }
-                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor
+                            .write_varint((count(cursor, begin, byte_count) - start_count) as u64);
                         cursor.write_tag(tag);
                     }
                 } else {
@@ -531,15 +532,15 @@ fn encode_loop<'a>(
                     if !slice.is_empty() {
                         let start_count = count(cursor, begin, byte_count);
                         let remaining;
-                        (cursor, remaining) = write_packed_varint(slice, cursor, begin, |
-                            v| zigzag_encode(v as i64),
-                        );
+                        (cursor, remaining) =
+                            write_packed_varint(slice, cursor, begin, |v| zigzag_encode(v as i64));
                         if !remaining.is_empty() || cursor <= begin {
                             obj_state.field_idx -= 1;
                             obj_state.push(tag, start_count, stack)?;
                             return Some((cursor, EncodeObject::PackedSint32(remaining)));
                         }
-                        cursor.write_varint((count(cursor, begin, byte_count) - start_count) as u64);
+                        cursor
+                            .write_varint((count(cursor, begin, byte_count) - start_count) as u64);
                         cursor.write_tag(tag);
                     }
                 } else {
@@ -750,21 +751,51 @@ impl<'a> ResumableState<'a> {
                 EncodeObject::Bytes(bytes) => {
                     encode_bytes(bytes, cursor, begin, byte_count, stack)?
                 }
-                EncodeObject::PackedVarint64(slice) => {
-                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v, EncodeObject::PackedVarint64)?
-                }
-                EncodeObject::PackedVarint32(slice) => {
-                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v as u64, EncodeObject::PackedVarint32)?
-                }
-                EncodeObject::PackedInt32(slice) => {
-                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| v as i64 as u64, EncodeObject::PackedInt32)?
-                }
-                EncodeObject::PackedSint64(slice) => {
-                    encode_packed_varint(slice, cursor, begin, byte_count, stack, zigzag_encode, EncodeObject::PackedSint64)?
-                }
-                EncodeObject::PackedSint32(slice) => {
-                    encode_packed_varint(slice, cursor, begin, byte_count, stack, |v| zigzag_encode(v as i64), EncodeObject::PackedSint32)?
-                }
+                EncodeObject::PackedVarint64(slice) => encode_packed_varint(
+                    slice,
+                    cursor,
+                    begin,
+                    byte_count,
+                    stack,
+                    |v| v,
+                    EncodeObject::PackedVarint64,
+                )?,
+                EncodeObject::PackedVarint32(slice) => encode_packed_varint(
+                    slice,
+                    cursor,
+                    begin,
+                    byte_count,
+                    stack,
+                    |v| v as u64,
+                    EncodeObject::PackedVarint32,
+                )?,
+                EncodeObject::PackedInt32(slice) => encode_packed_varint(
+                    slice,
+                    cursor,
+                    begin,
+                    byte_count,
+                    stack,
+                    |v| v as i64 as u64,
+                    EncodeObject::PackedInt32,
+                )?,
+                EncodeObject::PackedSint64(slice) => encode_packed_varint(
+                    slice,
+                    cursor,
+                    begin,
+                    byte_count,
+                    stack,
+                    zigzag_encode,
+                    EncodeObject::PackedSint64,
+                )?,
+                EncodeObject::PackedSint32(slice) => encode_packed_varint(
+                    slice,
+                    cursor,
+                    begin,
+                    byte_count,
+                    stack,
+                    |v| zigzag_encode(v as i64),
+                    EncodeObject::PackedSint32,
+                )?,
             };
             Some(ResumableState {
                 object,

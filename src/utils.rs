@@ -9,7 +9,9 @@ pub use core::hint::likely;
 
 #[cfg(not(feature = "nightly"))]
 #[inline(always)]
-pub const fn likely(b: bool) -> bool { b }
+pub const fn likely(b: bool) -> bool {
+    b
+}
 
 #[repr(C)]
 pub(crate) struct Stack<T> {
@@ -100,7 +102,9 @@ impl<T> UpdateByValue for T {
 pub struct Ptr<T: ?Sized>(*const T);
 
 impl<T: ?Sized> Ptr<T> {
-    pub fn new(r: &T) -> Self { Ptr(r) }
+    pub fn new(r: &T) -> Self {
+        Ptr(r)
+    }
 
     // Safe! Invariant enforced by constructor
     pub fn as_ref<'a>(&self) -> &'a T {
@@ -108,11 +112,12 @@ impl<T: ?Sized> Ptr<T> {
     }
 }
 
-
 pub struct PtrMut<T: ?Sized>(*mut T);
 
 impl<T: ?Sized> PtrMut<T> {
-    pub fn new(r: &mut T) -> Self { PtrMut(r) }
+    pub fn new(r: &mut T) -> Self {
+        PtrMut(r)
+    }
 
     // Safe! Invariant enforced by constructor
     pub fn as_ref<'a>(&self) -> &'a T {
