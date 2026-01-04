@@ -622,27 +622,27 @@ pub enum Value<'pool, 'msg> {
 
 impl core::fmt::Debug for Value<'_, '_> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Value::Int32(v) => core::fmt::Debug::fmt(v, f),
-            Value::Int64(v) => core::fmt::Debug::fmt(v, f),
-            Value::UInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::UInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::Float(v) => core::fmt::Debug::fmt(v, f),
-            Value::Double(v) => core::fmt::Debug::fmt(v, f),
-            Value::Bool(v) => core::fmt::Debug::fmt(v, f),
-            Value::String(v) => core::fmt::Debug::fmt(v, f),
-            Value::Bytes(v) => core::fmt::Debug::fmt(v, f),
-            Value::Message(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedUInt32(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedUInt64(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedFloat(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedDouble(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedBool(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedString(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedBytes(v) => core::fmt::Debug::fmt(v, f),
-            Value::RepeatedMessage(v) => core::fmt::Debug::fmt(v, f),
+        match *self {
+            Value::Int32(v) => v.fmt(f),
+            Value::Int64(v) => v.fmt(f),
+            Value::UInt32(v) => v.fmt(f),
+            Value::UInt64(v) => v.fmt(f),
+            Value::Float(v) => v.fmt(f),
+            Value::Double(v) => v.fmt(f),
+            Value::Bool(v) => v.fmt(f),
+            Value::String(v) => v.fmt(f),
+            Value::Bytes(v) => v.fmt(f),
+            Value::Message(ref v) => v.fmt(f),
+            Value::RepeatedInt32(v) => v.fmt(f),
+            Value::RepeatedInt64(v) => v.fmt(f),
+            Value::RepeatedUInt32(v) => v.fmt(f),
+            Value::RepeatedUInt64(v) => v.fmt(f),
+            Value::RepeatedFloat(v) => v.fmt(f),
+            Value::RepeatedDouble(v) => v.fmt(f),
+            Value::RepeatedBool(v) => v.fmt(f),
+            Value::RepeatedString(v) => v.fmt(f),
+            Value::RepeatedBytes(v) => v.fmt(f),
+            Value::RepeatedMessage(ref v) => v.fmt(f),
         }
     }
 }
