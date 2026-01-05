@@ -47,6 +47,8 @@ Arena allocation serves two critical purposes in this library:
 
 **Flexibility**: Since actual allocator calls only happen when requesting new blocks, we can use `&dyn Allocator` without significant performance impact. This gives users complete control over memory placement while serving as a highly efficient type eraser.
 
+**Fallible Allocation**: All arena operations return `Result`, allowing custom allocators to enforce memory limits and reject allocations. This gives you explicit control over memory budgets—your allocator decides how much memory to admit, and protocrap properly propagates those decisions as errors rather than panicking.
+
 ### A Push API for Stream Parsing and Serialization
 
 Most serialization frameworks limit themselves to flat buffers as sources and sinks—a restrictive approach. The Rust standard library's Read/Write and BufRead/BufWrite traits provide better abstractions, but they're generic traits that force code duplication for each implementation. Using dynamic dispatch for individual operations touching just a few bytes creates unacceptable overhead.
@@ -151,11 +153,8 @@ The data goes straight to `.rodata` - zero runtime overhead.
 For working on protocrap itself (regenerating descriptor.pc.rs):
 
 ```bash
-# Normal update (uses current protocrap)
-./generate_descriptor.sh
-
-# Bootstrap mode (uses protocrap from crates.io for table layout changes)
-./generate_descriptor.sh bootstrap
+# Regenerate using bootstrap codegen (protocrap from crates.io)
+bazel run //:regen_descriptor
 ```
 
 ## Runtime Reflection
@@ -208,10 +207,10 @@ cargo +nightly fuzz run decode_fuzz
 
 ## Status
 
-🚧 **Alpha** - This library is not yet mature. Expect:
+🚧 **Beta** - This library is not yet fully matured. Expect:
 - **API changes**: The public API may change in breaking ways between versions
 - **Potential bugs**: While tested via conformance tests and fuzzing, edge cases may exist
-- **Missing features**: Maps and some proto3 semantics are not implemented
+- **Missing features**: Maps are not implemented and encoding still needs some optimization
 
 Use in production at your own risk. Bug reports and contributions welcome!
 
@@ -230,6 +229,6 @@ Use in production at your own risk. Bug reports and contributions welcome!
 - [x] Fuzz testing
 - [x] Oneof support
 - [x] Static data embedding (const protobuf from .pb/.json)
+- [x] Full documentation
 - [ ] Map support
-- [ ] Full documentation
 

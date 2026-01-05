@@ -1,6 +1,6 @@
 module(
     name = "protocrap",
-    version = "0.1.0",
+    version = "0.3.0",
 )
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
@@ -53,8 +53,8 @@ crate.spec(package = "prost-types", version = "0.13")
 crate.annotation(crate = "protoc-gen-prost", gen_binaries = ["protoc-gen-prost"])
 crate.spec(package = "protoc-gen-prost", version = "0.4")
 
-# Bootstrap: published protocrap for verifying codegen compatibility
-crate.spec(package = "protocrap", version = "0.2.1")
+# Bootstrap: published protocrap for verifying codegen compatibility (always latest)
+crate.spec(package = "protocrap", version = "*")
 
 crate.from_specs(name = "crates")
 

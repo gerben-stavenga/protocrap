@@ -119,11 +119,6 @@ impl<T: ?Sized> PtrMut<T> {
         PtrMut(r)
     }
 
-    // Safe! Invariant enforced by constructor
-    pub fn as_ref<'a>(&self) -> &'a T {
-        unsafe { &*self.0 }
-    }
-
     pub fn as_mut<'a>(&mut self) -> &'a mut T {
         unsafe { &mut *self.0 }
     }

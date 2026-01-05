@@ -109,7 +109,7 @@ fn generate_file_content(file: &FileDescriptorProto) -> Result<TokenStream> {
     {
         // Special case: generate FileDescriptorProto static for descriptor.proto itself
         let mut pool = protocrap::descriptor_pool::DescriptorPool::new(&Global);
-        pool.add_file(file);
+        pool.add_file(file)?;
         let mut arena = protocrap::arena::Arena::new(&Global);
         let mut dyn_file_descriptor =
             pool.create_message("google.protobuf.FileDescriptorProto", &mut arena)?;

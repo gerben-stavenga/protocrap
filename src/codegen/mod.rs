@@ -48,7 +48,7 @@ pub fn generate_embed(
     // Build descriptor pool
     let mut pool = protocrap::descriptor_pool::DescriptorPool::new(&Global);
     for file in file_set.file() {
-        pool.add_file(file);
+        pool.add_file(file)?;
     }
 
     // Decode the data using the pool

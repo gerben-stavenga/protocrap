@@ -37,7 +37,7 @@ protoc --include_imports --descriptor_set_out=descriptor.bin my_types.proto
 protocrap-codegen descriptor.bin my_types.pc.rs
 ```
 
-Update self-hosted descriptor code with `./generate_descriptor.sh`.
+Update self-hosted descriptor code with `bazel run //:regen_descriptor`.
 
 ## Generated API
 
