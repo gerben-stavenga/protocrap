@@ -27,43 +27,43 @@ fn roundtrip_proto<'pool, T: protocrap::ProtobufMut<'pool>>(
                     msg.descriptor().name()
                 ),
                 arena,
-            );
+            ).unwrap();
             return response;
         }
     } else if let Some(data) = request.get_json_payload() {
         if !TEST_JSON {
-            response.set_skipped("Json format input not supported", arena);
+            response.set_skipped("Json format input not supported", arena).unwrap();
             return response;
         }
         let mut inner = serde_json::Deserializer::from_str(data);
         if let Err(e) = msg.serde_deserialize(arena, ProtoJsonDeserializer::new(&mut inner))
         {
-            response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena);
+            response.set_parse_error(&format!("Failed to parse JSON message: {:?}", e), arena).unwrap();
             return response;
         }
     } else if request.has_text_payload() {
-        response.set_skipped("Text format input not supported", arena);
+        response.set_skipped("Text format input not supported", arena).unwrap();
         return response;
     } else if request.has_jspb_payload() {
-        response.set_skipped("JSPB input not supported", arena);
+        response.set_skipped("JSPB input not supported", arena).unwrap();
         return response;
     } else {
-        response.set_runtime_error("No input payload specified", arena);
+        response.set_runtime_error("No input payload specified", arena).unwrap();
         return response;
     };
     // Encode output
     match request.requested_output_format() {
         Some(WireFormat::PROTOBUF) => match msg.encode_vec::<32>() {
             Ok(bytes) => {
-                response.set_protobuf_payload(&bytes, arena);
+                response.set_protobuf_payload(&bytes, arena).unwrap();
             }
             Err(e) => {
-                response.set_serialize_error(&format!("Encode error: {:?}", e), arena);
+                response.set_serialize_error(&format!("Encode error: {:?}", e), arena).unwrap();
             }
         },
         Some(WireFormat::JSON) => {
             if !TEST_JSON {
-                response.set_skipped("Json format output not supported", arena);
+                response.set_skipped("Json format output not supported", arena).unwrap();
                 return response;
             }
             let mut inner = serde_json::Serializer::new(Vec::new());
@@ -72,21 +72,21 @@ fn roundtrip_proto<'pool, T: protocrap::ProtobufMut<'pool>>(
                 Ok(()) => {
                     let vec = inner.into_inner();
                     let json_str = String::from_utf8(vec).unwrap_or_default();
-                    response.set_json_payload(&json_str, arena);
+                    response.set_json_payload(&json_str, arena).unwrap();
                 }
                 Err(e) => {
-                    response.set_serialize_error(&format!("JSON serialize error: {:?}", e), arena);
+                    response.set_serialize_error(&format!("JSON serialize error: {:?}", e), arena).unwrap();
                 }
             }
         }
         Some(WireFormat::TEXT_FORMAT) => {
-            response.set_skipped("Text format output not supported", arena);
+            response.set_skipped("Text format output not supported", arena).unwrap();
         }
         Some(WireFormat::JSPB) => {
-            response.set_skipped("JSPB output not supported", arena);
+            response.set_skipped("JSPB output not supported", arena).unwrap();
         }
         None | Some(WireFormat::UNSPECIFIED) => {
-            response.set_skipped("Output format unspecified", arena);
+            response.set_skipped("Output format unspecified", arena).unwrap();
         }
     }
     response
@@ -110,7 +110,7 @@ fn do_test_dynamic(
                     message_type, e
                 ),
                 arena,
-            );
+            ).unwrap();
             return response;
         }
     };
@@ -134,7 +134,7 @@ fn do_test(
             response.set_skipped(
                 &format!("Message type {} not supported", message_type),
                 arena,
-            );
+            ).unwrap();
             return response;
         }
         let mut msg = TestAllTypesProto2::ProtoType::default();

@@ -131,6 +131,11 @@ impl<T: Protobuf> TypedMessage<T> {
     pub const fn as_ref(&self) -> &T {
         self.msg.as_ref()
     }
+
+    /// Get a mutable reference to the underlying message.
+    pub fn as_mut(&mut self) -> &mut T {
+        self.msg.as_mut()
+    }
 }
 
 /// A typed optional message field. Wraps a nullable pointer to T.
@@ -295,7 +300,7 @@ impl Object {
         field
     }
 
-    pub(crate) fn add<T>(&mut self, offset: u32, val: T, arena: &mut Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+    pub(crate) fn add<T>(&mut self, offset: u32, val: T, arena: &mut Arena) -> Result<&mut T, crate::Error<core::alloc::LayoutError>> {
         let field = self.ref_mut::<RepeatedField<T>>(offset);
         field.push(val, arena)
     }
@@ -310,11 +315,11 @@ impl Object {
         has_bit_idx: u32,
         bytes: &[u8],
         arena: &mut Arena,
-    ) -> &mut Bytes {
+    ) -> Result<&mut Bytes, crate::Error<core::alloc::LayoutError>> {
         self.set_has_bit(has_bit_idx);
         let field = self.ref_mut::<Bytes>(offset);
-        field.assign(bytes, arena);
-        field
+        field.assign(bytes, arena)?;
+        Ok(field)
     }
 
     /// Set bytes field that's in a oneof.
@@ -325,19 +330,18 @@ impl Object {
         field_number: u32,
         bytes: &[u8],
         arena: &mut Arena,
-    ) -> &mut Bytes {
+    ) -> Result<&mut Bytes, crate::Error<core::alloc::LayoutError>> {
         // Write field number to discriminant
         *self.ref_mut::<u32>(discriminant_word_idx * 4) = field_number;
         // Write value
         let field = self.ref_mut::<Bytes>(offset);
-        field.assign(bytes, arena);
-        field
+        field.assign(bytes, arena)?;
+        Ok(field)
     }
 
     pub(crate) fn add_bytes(&mut self, offset: u32, bytes: &[u8], arena: &mut Arena) -> Result<&mut Bytes, crate::Error<core::alloc::LayoutError>> {
         let field = self.ref_mut::<RepeatedField<Bytes>>(offset);
         let b = Bytes::from_slice(bytes, arena)?;
-        field.push(b, arena)?;
-        Ok(field.last_mut().unwrap())
+        field.push(b, arena)
     }
 }
