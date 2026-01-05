@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "b98cbfab09bfb1e3f3b901b2b394950780a5ed462025ad75e4334b187c15352c",
+  "moduleFileHash": "00c6c35f14bb7155d7d0bf01a0a425eb034685b345539373cc95043e29ae2b20",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -18,7 +18,7 @@
   "moduleDepGraph": {
     "<root>": {
       "name": "protocrap",
-      "version": "0.1.0",
+      "version": "0.3.0",
       "key": "<root>",
       "repoName": "protocrap",
       "executionPlatformsToRegister": [],
@@ -3521,7 +3521,7 @@
       "general": {
         "bzlTransitiveDigest": "GH4S5mOMYo7rTiH9NJbOSEODDfcyHkWLdSbONqT8IjM=",
         "recordedFileInputs": {
-          "@@//MODULE.bazel": "b98cbfab09bfb1e3f3b901b2b394950780a5ed462025ad75e4334b187c15352c",
+          "@@//MODULE.bazel": "00c6c35f14bb7155d7d0bf01a0a425eb034685b345539373cc95043e29ae2b20",
           "@@rules_rust~~rust_host_tools~rust_host_tools//rust_host_tools": "ENOENT"
         },
         "recordedDirentsInputs": {},
