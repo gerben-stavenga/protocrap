@@ -50,7 +50,7 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
     }
     for i in 0..5 {
         msg.rep_bytes_mut().push(
-            Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena),
+            Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena).unwrap(),
             arena,
         );
     }
@@ -233,7 +233,7 @@ mod chunked_tests {
             for _ in 0..count {
                 let bytes_data: Vec<u8> = (0..rng.gen_range(0..50)).map(|_| rng.r#gen()).collect();
                 msg.rep_bytes_mut().push(
-                    protocrap::containers::Bytes::from_slice(&bytes_data, arena),
+                    protocrap::containers::Bytes::from_slice(&bytes_data, arena).unwrap(),
                     arena,
                 );
             }

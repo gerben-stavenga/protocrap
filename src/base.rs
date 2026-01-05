@@ -295,9 +295,9 @@ impl Object {
         field
     }
 
-    pub(crate) fn add<T>(&mut self, offset: u32, val: T, arena: &mut Arena) {
+    pub(crate) fn add<T>(&mut self, offset: u32, val: T, arena: &mut Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         let field = self.ref_mut::<RepeatedField<T>>(offset);
-        field.push(val, arena);
+        field.push(val, arena)
     }
 
     pub(crate) fn bytes(&self, offset: usize) -> &[u8] {
@@ -334,10 +334,10 @@ impl Object {
         field
     }
 
-    pub(crate) fn add_bytes(&mut self, offset: u32, bytes: &[u8], arena: &mut Arena) -> &mut Bytes {
+    pub(crate) fn add_bytes(&mut self, offset: u32, bytes: &[u8], arena: &mut Arena) -> Result<&mut Bytes, crate::Error<core::alloc::LayoutError>> {
         let field = self.ref_mut::<RepeatedField<Bytes>>(offset);
-        let b = Bytes::from_slice(bytes, arena);
-        field.push(b, arena);
-        field.last_mut().unwrap()
+        let b = Bytes::from_slice(bytes, arena)?;
+        field.push(b, arena)?;
+        Ok(field.last_mut().unwrap())
     }
 }

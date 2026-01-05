@@ -600,7 +600,7 @@ mod tests {
         let mut pool = crate::descriptor_pool::DescriptorPool::new(&Global);
         let file_descriptor =
             crate::google::protobuf::FileDescriptorProto::ProtoType::file_descriptor();
-        pool.add_file(&file_descriptor);
+        pool.add_file(&file_descriptor).unwrap();
 
         let bytes = file_descriptor.encode_vec::<32>().expect("should encode");
         let mut arena = crate::arena::Arena::new(&Global);

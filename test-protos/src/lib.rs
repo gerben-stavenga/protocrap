@@ -38,7 +38,7 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> Test::ProtoType {
     }
     for i in 0..5 {
         msg.rep_bytes_mut().push(
-            Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena),
+            Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena).unwrap(),
             arena,
         );
     }

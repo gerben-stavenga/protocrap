@@ -973,7 +973,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de>
 
             match seq.next_element_seed(seed)? {
                 Some(()) => {
-                    rf.push(crate::base::Message(msg_obj as *mut Object), arena);
+                    rf.push(crate::base::Message(msg_obj as *mut Object), arena).map_err(|e| A::Error::custom(e))?;
                 }
                 None => {
                     return Ok(());
@@ -1052,7 +1052,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                     entry_obj.set::<u64>(key_entry.offset(), key_entry.has_bit_idx(), key_val);
                 }
                 Type::TYPE_STRING => {
-                    let s = crate::containers::String::from_str(&key_str, arena);
+                    let s = crate::containers::String::from_str(&key_str, arena).map_err(|e| A::Error::custom(e))?;
                     entry_obj.set::<crate::containers::String>(
                         key_entry.offset(),
                         key_entry.has_bit_idx(),
@@ -1106,7 +1106,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                 }
                 Type::TYPE_STRING => {
                     let v: std::string::String = map.next_value()?;
-                    let s = crate::containers::String::from_str(&v, arena);
+                    let s = crate::containers::String::from_str(&v, arena).map_err(|e| A::Error::custom(e))?;
                     entry_obj.set::<crate::containers::String>(
                         value_entry.offset(),
                         value_entry.has_bit_idx(),
@@ -1115,7 +1115,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                 }
                 Type::TYPE_BYTES => {
                     let v: BytesBuf = map.next_value()?;
-                    let b = crate::containers::Bytes::from_slice(&v.0, arena);
+                    let b = crate::containers::Bytes::from_slice(&v.0, arena).map_err(|e| A::Error::custom(e))?;
                     entry_obj.set::<crate::containers::Bytes>(
                         value_entry.offset(),
                         value_entry.has_bit_idx(),
@@ -1138,7 +1138,7 @@ impl<'de, 'arena, 'alloc, 'b> serde::de::Visitor<'de> for ProtobufMapVisitor<'ar
                 }
             }
 
-            rf.push(crate::base::Message(entry_obj as *mut Object), arena);
+            rf.push(crate::base::Message(entry_obj as *mut Object), arena).map_err(|e| A::Error::custom(e))?;
         }
         Ok(())
     }
@@ -1184,7 +1184,7 @@ where
     while let Some(key) = map.next_key::<std::string::String>()? {
         if key == "value" {
             let val: std::string::String = map.next_value()?;
-            let s = crate::containers::String::from_str(&val, arena);
+            let s = crate::containers::String::from_str(&val, arena).map_err(|e| A::Error::custom(e))?;
             msg.object
                 .set::<crate::containers::String>(entry.offset(), entry.has_bit_idx(), s);
             return Ok(());
@@ -1211,7 +1211,7 @@ where
     while let Some(key) = map.next_key::<std::string::String>()? {
         if key == "value" {
             let val: BytesBuf = map.next_value()?;
-            let b = crate::containers::Bytes::from_slice(&val.0, arena);
+            let b = crate::containers::Bytes::from_slice(&val.0, arena).map_err(|e| A::Error::custom(e))?;
             msg.object
                 .set::<crate::containers::Bytes>(entry.offset(), entry.has_bit_idx(), b);
             return Ok(());
@@ -1526,7 +1526,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .table
                     .entry(1)
                     .ok_or_else(|| E::custom("BytesValue missing field 1"))?;
-                let b = crate::containers::Bytes::from_slice(v, self.arena);
+                let b = crate::containers::Bytes::from_slice(v, self.arena).map_err(|e| E::custom(e))?;
                 self.msg.object.set::<crate::containers::Bytes>(
                     entry.offset(),
                     entry.has_bit_idx(),
@@ -1549,7 +1549,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .table
                     .entry(1)
                     .ok_or_else(|| E::custom("StringValue missing field 1"))?;
-                let s = crate::containers::String::from_str(v, self.arena);
+                let s = crate::containers::String::from_str(v, self.arena).map_err(|e| E::custom(e))?;
                 self.msg.object.set::<crate::containers::String>(
                     entry.offset(),
                     entry.has_bit_idx(),
@@ -1616,7 +1616,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     .table
                     .entry(3)
                     .ok_or_else(|| E::custom("Value missing field 3"))?;
-                let s = crate::containers::String::from_str(v, self.arena);
+                let s = crate::containers::String::from_str(v, self.arena).map_err(E::custom)?;
                 self.msg
                     .object
                     .set_oneof(entry.offset(), entry.has_bit_idx() & 0x7F, 3, s);
@@ -1664,7 +1664,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     let key_entry = child_table.entry(1).ok_or_else(|| {
                         serde::de::Error::custom("Struct entry missing key field")
                     })?;
-                    let s = crate::containers::String::from_str(&key, arena);
+                    let s = crate::containers::String::from_str(&key, arena).map_err(|e| A::Error::custom(e))?;
                     entry_obj.set::<crate::containers::String>(
                         key_entry.offset(),
                         key_entry.has_bit_idx(),
@@ -1686,7 +1686,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                     map.next_value_seed(seed)?;
                     *entry_obj.ref_mut::<crate::base::Message>(offset) =
                         crate::base::Message(child_obj);
-                    rf.push(crate::base::Message(entry_obj as *mut Object), arena);
+                    rf.push(crate::base::Message(entry_obj as *mut Object), arena).map_err(|e| A::Error::custom(e))?;
                 }
                 return Ok(());
             }
@@ -1746,7 +1746,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<bool>(entry.offset(), v, arena);
+                            msg.object.add::<bool>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_FIXED64 | Type::TYPE_UINT64 => {
@@ -1754,7 +1754,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<u64>(entry.offset(), v, arena);
+                            msg.object.add::<u64>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_FIXED32 | Type::TYPE_UINT32 => {
@@ -1762,7 +1762,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<u32>(entry.offset(), v, arena);
+                            msg.object.add::<u32>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_SFIXED64 | Type::TYPE_INT64 | Type::TYPE_SINT64 => {
@@ -1770,7 +1770,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<i64>(entry.offset(), v, arena);
+                            msg.object.add::<i64>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_SFIXED32 | Type::TYPE_INT32 | Type::TYPE_SINT32 => {
@@ -1778,7 +1778,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<i32>(entry.offset(), v, arena);
+                            msg.object.add::<i32>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_ENUM => {
@@ -1790,7 +1790,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<i32>(entry.offset(), v, arena);
+                            msg.object.add::<i32>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_FLOAT => {
@@ -1798,7 +1798,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<f32>(entry.offset(), v, arena);
+                            msg.object.add::<f32>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_DOUBLE => {
@@ -1806,7 +1806,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            msg.object.add::<f64>(entry.offset(), v, arena);
+                            msg.object.add::<f64>(entry.offset(), v, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_STRING => {
@@ -1814,9 +1814,9 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            let s = crate::containers::String::from_str(&v, arena);
+                            let s = crate::containers::String::from_str(&v, arena).map_err(|e| A::Error::custom(e))?;
                             msg.object
-                                .add::<crate::containers::String>(entry.offset(), s, arena);
+                                .add::<crate::containers::String>(entry.offset(), s, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_BYTES => {
@@ -1824,9 +1824,9 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                             continue;
                         };
                         for v in slice {
-                            let b = crate::containers::Bytes::from_slice(&v.0, arena);
+                            let b = crate::containers::Bytes::from_slice(&v.0, arena).map_err(|e| A::Error::custom(e))?;
                             msg.object
-                                .add::<crate::containers::Bytes>(entry.offset(), b, arena);
+                                .add::<crate::containers::Bytes>(entry.offset(), b, arena).map_err(|e| A::Error::custom(e))?;
                         }
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
@@ -1916,14 +1916,14 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         let Some(v) = map.next_value::<Option<String>>()? else {
                             continue;
                         };
-                        let s = crate::containers::String::from_str(&v, arena);
+                        let s = crate::containers::String::from_str(&v, arena).map_err(|e| A::Error::custom(e))?;
                         set_field(msg.object, entry, field.number(), s);
                     }
                     Type::TYPE_BYTES => {
                         let Some(v) = map.next_value::<Option<BytesBuf>>()? else {
                             continue;
                         };
-                        let b = crate::containers::Bytes::from_slice(&v.0, arena);
+                        let b = crate::containers::Bytes::from_slice(&v.0, arena).map_err(|e| A::Error::custom(e))?;
                         set_field(msg.object, entry, field.number(), b);
                     }
                     Type::TYPE_MESSAGE | Type::TYPE_GROUP => {
@@ -1994,7 +1994,7 @@ impl<'de, 'arena, 'alloc, 'b, 'pool> serde::de::Visitor<'de>
                         arena,
                     };
                     if seq.next_element_seed(seed)?.is_some() {
-                        rf.push(crate::base::Message(value_obj as *mut Object), arena);
+                        rf.push(crate::base::Message(value_obj as *mut Object), arena).map_err(|e| A::Error::custom(e))?;
                         true
                     } else {
                         false
