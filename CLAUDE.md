@@ -52,27 +52,29 @@ msg.set_id(value)
 msg.set_optional_id(Option<i32>)
 msg.clear_id()
 
-// Optional string/bytes fields
+// Optional string/bytes fields (allocation can fail)
 msg.has_name() -> bool
 msg.name() -> &str                           // Returns "" if unset
 msg.get_name() -> Option<&str>
-msg.set_name(value, &mut arena)
-msg.set_optional_name(Option<&str>, &mut arena)
+msg.set_name(value, &mut arena)?             // Returns Result
+msg.set_optional_name(Option<&str>, &mut arena)?
 msg.clear_name()
 
-// Repeated fields
+// Repeated fields (allocation can fail)
 msg.items() -> &[T]
 msg.items_mut() -> &mut RepeatedField<T>
-msg.add_items(&mut arena) -> &mut T          // For message types
+msg.add_items(&mut arena)? -> &mut T         // Returns Result for message types
 
-// Submessages (no default - avoids memory for default instances)
+// Submessages (allocation can fail)
 msg.has_options() -> bool
 msg.options() -> Option<&OptionsType>
-msg.options_mut(&mut arena) -> &mut OptionsType  // Creates if unset
+msg.options_mut(&mut arena)? -> &mut OptionsType  // Returns Result, creates if unset
 msg.clear_options()
 ```
 
 All fields have explicit presence (unified optionality). The wire format's intrinsic optionality is exposed directly—no proto2/proto3 semantic differences.
+
+**Fallible Allocation**: All operations that allocate from the arena return `Result`. This allows graceful handling of out-of-memory conditions instead of panicking.
 
 ## Architecture
 
@@ -82,7 +84,7 @@ All fields have explicit presence (unified optionality). The wire format's intri
 
 2. **Type Erasure**: Uses `dyn` traits instead of generics to avoid monomorphization bloat.
 
-3. **Arena Allocation**: Bump-pointer allocator with bulk deallocation. Supports custom allocators via `&dyn Allocator`.
+3. **Arena Allocation**: Bump-pointer allocator with bulk deallocation. Supports custom allocators via `&dyn Allocator`. All allocations are fallible and return `Result`.
 
 4. **Push-Based Streaming**: Parser takes `(state, buffer) -> updated_state`, enabling single implementation for sync/async.
 

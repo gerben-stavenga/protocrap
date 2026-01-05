@@ -45,8 +45,9 @@
 //!
 //! let mut arena = Arena::new(&Global);
 //! let mut msg = FileDescriptorProto::ProtoType::default();
-//! msg.set_name("example.proto", &mut arena);
-//! msg.set_package("my.package", &mut arena);
+//! // Arena allocations return Result - handle errors appropriately
+//! msg.set_name("example.proto", &mut arena).unwrap();
+//! msg.set_package("my.package", &mut arena).unwrap();
 //!
 //! // Encode to a Vec<u8>
 //! let bytes = msg.encode_vec::<32>().unwrap();
@@ -68,7 +69,7 @@
 //! // First encode a message to get some bytes
 //! let mut arena = Arena::new(&Global);
 //! let mut original = FileDescriptorProto::ProtoType::default();
-//! original.set_name("example.proto", &mut arena);
+//! original.set_name("example.proto", &mut arena).unwrap();
 //! let bytes = original.encode_vec::<32>().unwrap();
 //!
 //! // Decode from a byte slice
@@ -122,6 +123,7 @@
 //! - **Speed**: Allocation is a pointer bump in the common case
 //! - **Bulk deallocation**: Drop the arena to free all messages at once
 //! - **Custom allocators**: Pass any `&dyn Allocator` to control memory placement
+//! - **Fallible allocation**: All allocations return `Result`, enabling graceful OOM handling
 //!
 //! ```
 //! use protocrap::arena::Arena;
@@ -129,6 +131,7 @@
 //!
 //! let mut arena = Arena::new(&Global);
 //! // All allocations during decode/set operations use this arena
+//! // Operations return Result to handle allocation failures
 //! // When arena drops, all memory is freed
 //! ```
 //!
@@ -153,9 +156,11 @@
 //! | Proto Type | Getter | Setter | Other |
 //! |------------|--------|--------|-------|
 //! | Scalar | `field() -> T` | `set_field(T)` | `has_field()`, `clear_field()` |
-//! | String/Bytes | `field() -> &str`/`&[u8]` | `set_field(&str, &mut Arena)` | `has_field()`, `clear_field()` |
-//! | Message | `field() -> Option<&M>` | `field_mut() -> &mut M` | `has_field()`, `clear_field()` |
-//! | Repeated | `field() -> &[T]` | `field_mut() -> &mut RepeatedField<T>` | `add_field(...)` |
+//! | String/Bytes | `field() -> &str`/`&[u8]` | `set_field(&str, &mut Arena) -> Result` | `has_field()`, `clear_field()` |
+//! | Message | `field() -> Option<&M>` | `field_mut(&mut Arena) -> Result<&mut M>` | `has_field()`, `clear_field()` |
+//! | Repeated | `field() -> &[T]` | `field_mut() -> &mut RepeatedField<T>` | `add_field(...) -> Result` |
+//!
+//! **Note**: Operations that allocate from the arena return `Result` to handle allocation failures.
 //!
 //! ## Modules
 //!
