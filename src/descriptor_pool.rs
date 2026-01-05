@@ -197,7 +197,7 @@ impl<'alloc> DescriptorPool<'alloc> {
             .ok_or(crate::Error::MessageNotFound)?;
 
         // Allocate object with proper alignment (8 bytes for all protobuf types)
-        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8).unwrap();
+        let layout = core::alloc::Layout::from_size_align(table.size as usize, 8)?;
         let ptr = arena.alloc_raw(layout)?.as_ptr() as *mut Object;
         assert!((ptr as usize) & 7 == 0);
         let object = unsafe {
@@ -264,7 +264,7 @@ impl<'alloc> DescriptorPool<'alloc> {
 
         // Calculate field offsets and total size using Layout::extend for proper padding
         // Start with metadata layout (always u32 array, so alignment is 4)
-        let mut layout = core::alloc::Layout::from_size_align(metadata_size as usize, 4).unwrap();
+        let mut layout = core::alloc::Layout::from_size_align(metadata_size as usize, 4)?;
 
         // First pass: calculate offsets for regular fields (not in oneof)
         // Store in a map by field number
@@ -279,7 +279,7 @@ impl<'alloc> DescriptorPool<'alloc> {
                 core::alloc::Layout::from_size_align(field_size as usize, field_align as usize)
                     .unwrap();
 
-            let (new_layout, offset) = layout.extend(field_layout).unwrap();
+            let (new_layout, offset) = layout.extend(field_layout)?;
             regular_field_offsets.insert(field.number(), offset as u32);
             layout = new_layout;
         }
@@ -288,8 +288,8 @@ impl<'alloc> DescriptorPool<'alloc> {
         let mut oneof_offsets = std::vec::Vec::new();
         for (oneof_idx, &(size, align)) in oneof_sizes.iter().enumerate() {
             if size > 0 {
-                let union_layout = core::alloc::Layout::from_size_align(size, align).unwrap();
-                let (new_layout, offset) = layout.extend(union_layout).unwrap();
+                let union_layout = core::alloc::Layout::from_size_align(size, align)?;
+                let (new_layout, offset) = layout.extend(union_layout)?;
                 oneof_offsets.push((oneof_idx, offset as u32));
                 layout = new_layout;
             }
@@ -323,16 +323,13 @@ impl<'alloc> DescriptorPool<'alloc> {
             .count();
 
         // Allocate table with entries - use Layout::extend to handle padding correctly
-        let encode_layout = core::alloc::Layout::array::<encoding::TableEntry>(num_fields).unwrap();
+        let encode_layout = core::alloc::Layout::array::<encoding::TableEntry>(num_fields)?;
         let (layout, table_offset) = encode_layout
-            .extend(core::alloc::Layout::new::<Table>())
-            .unwrap();
+            .extend(core::alloc::Layout::new::<Table>())?;
         let (layout, decode_offset) = layout
-            .extend(core::alloc::Layout::array::<decoding::TableEntry>(num_decode_entries).unwrap())
-            .unwrap();
+            .extend(core::alloc::Layout::array::<decoding::TableEntry>(num_decode_entries)?)?;
         let (layout, aux_offset) = layout
-            .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries).unwrap())
-            .unwrap();
+            .extend(core::alloc::Layout::array::<AuxTableEntry>(num_aux_entries)?)?;
 
         let base_ptr = self.arena.alloc_raw(layout)?.as_ptr();
 

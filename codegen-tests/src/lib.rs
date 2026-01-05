@@ -32,7 +32,7 @@ pub fn make_medium(arena: &mut protocrap::arena::Arena) -> TestProto {
     msg.set_z(
         "Hello World! This is a test string with some content.",
         arena,
-    );
+    ).unwrap();
     let child1 = msg.child1_mut(arena);
     child1.set_x(123);
     child1.set_y(456);
@@ -43,16 +43,16 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> TestProto {
     let mut msg = TestProto::default();
     msg.set_x(42);
     msg.set_y(0xDEADBEEF);
-    msg.set_z("Hello World!", arena);
+    msg.set_z("Hello World!", arena).unwrap();
     for i in 0..100 {
-        let nested_msg = msg.add_nested_message(arena);
+        let nested_msg = msg.add_nested_message(arena).unwrap();
         nested_msg.set_x(i);
     }
     for i in 0..5 {
         msg.rep_bytes_mut().push(
             Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena).unwrap(),
             arena,
-        );
+        ).unwrap();
     }
     msg
 }
@@ -213,7 +213,7 @@ mod chunked_tests {
         }
         if rng.r#gen() {
             let s = random_string(rng, 100);
-            msg.set_z(&s, arena);
+            msg.set_z(&s, arena).unwrap();
         }
         if depth > 0 && rng.gen_bool(0.3) {
             let child = msg.child1_mut(arena);
@@ -222,7 +222,7 @@ mod chunked_tests {
         if depth > 0 && rng.gen_bool(0.3) {
             let count = rng.gen_range(0..5);
             for _ in 0..count {
-                let nested = msg.add_nested_message(arena);
+                let nested = msg.add_nested_message(arena).unwrap();
                 if rng.r#gen() {
                     nested.set_x(rng.r#gen());
                 }
@@ -235,7 +235,7 @@ mod chunked_tests {
                 msg.rep_bytes_mut().push(
                     protocrap::containers::Bytes::from_slice(&bytes_data, arena).unwrap(),
                     arena,
-                );
+                ).unwrap();
             }
         }
 
@@ -398,7 +398,7 @@ mod table_tests {
         let fds = pool.arena.place(fds).unwrap();
 
         for file in fds.file() {
-            pool.add_file(file.as_ref());
+            pool.add_file(file.as_ref()).unwrap();
         }
 
         // Test all message types

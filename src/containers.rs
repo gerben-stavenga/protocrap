@@ -87,7 +87,7 @@ impl RawVec {
                 (1, layout)
             } else {
                 let new_layout =
-                    Layout::from_size_align(layout.size() * new_cap, layout.align()).unwrap();
+                    Layout::from_size_align(layout.size() * new_cap, layout.align())?;
                 (new_cap, new_layout)
             }
         } else {
@@ -100,7 +100,7 @@ impl RawVec {
             };
 
             let new_layout =
-                Layout::from_size_align(layout.size() * new_cap, layout.align()).unwrap();
+                Layout::from_size_align(layout.size() * new_cap, layout.align())?;
 
             (new_cap, new_layout)
         };
@@ -236,16 +236,20 @@ impl<T> RepeatedField<T> {
     }
 
     #[inline(always)]
-    pub fn push(&mut self, elem: T, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+    pub fn push(&mut self, elem: T, arena: &mut crate::arena::Arena) -> Result<&mut T, crate::Error<core::alloc::LayoutError>> {
         let l = self.len;
         if l == self.cap() {
             self.buf.grow(0, Layout::new::<T>(), arena)?;
         }
-        unsafe { self.ptr().add(l).write(elem) };
+        let res = unsafe {
+            let p = self.ptr().add(l); 
+            p.write(elem);
+            &mut *p
+        };
 
         // Can't overflow, we'll OOM first.
         self.len = l + 1;
-        Ok(())
+        Ok(res)
     }
 
     pub fn pop(&mut self) -> Option<T> {

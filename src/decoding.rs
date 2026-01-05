@@ -181,7 +181,7 @@ impl<'a> DecodeObjectState<'a> {
     }
 
     #[inline(always)]
-    fn add<T>(&mut self, entry: TableEntry, val: T, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+    fn add<T>(&mut self, entry: TableEntry, val: T, arena: &mut crate::arena::Arena) -> Result<&mut T, crate::Error<core::alloc::LayoutError>> {
         self.msg.object.add(entry.aux_offset(), val, arena)
     }
 
@@ -192,7 +192,7 @@ impl<'a> DecodeObjectState<'a> {
         field_number: u32,
         slice: &[u8],
         arena: &mut crate::arena::Arena,
-    ) -> &'b mut Bytes {
+    ) -> Result<&'b mut Bytes, crate::Error<core::alloc::LayoutError>> {
         let has_bit_idx = entry.has_bit_idx();
         if has_bit_idx & 0x80 != 0 {
             // Oneof field
@@ -590,7 +590,7 @@ fn decode_loop<'a>(
                                 if validate_utf8 && core::str::from_utf8(slice).is_err() {
                                     return None;
                                 }
-                                ctx.set_bytes(entry, field_number, slice, arena);
+                                ctx.set_bytes(entry, field_number, slice, arena).ok()?;
                             } else {
                                 ctx.push_limit(len, cursor, end, stack)?;
 
@@ -611,7 +611,7 @@ fn decode_loop<'a>(
                                 } else {
                                     msg.object
                                         .set_bytes(entry.offset(), has_bit_idx, slice, arena)
-                                };
+                                }.ok()?;
 
                                 return Some((
                                     cursor,
@@ -636,6 +636,7 @@ fn decode_loop<'a>(
 
                             ctx.update(|ctx| {
                                 let limit = ctx.limit;
+                                // TODO: remove unwrap
                                 let msg = ctx.get_or_create_child_object(entry, arena).unwrap();
                                 DecodeObjectState { limit, msg }
                             });
@@ -647,6 +648,7 @@ fn decode_loop<'a>(
                             ctx.push_group(field_number, stack)?;
                             ctx.update(|ctx| {
                                 let limit = ctx.limit;
+                                // TODO: remove unwrap
                                 let msg = ctx.get_or_create_child_object(entry, arena).unwrap();
                                 DecodeObjectState { limit, msg }
                             });

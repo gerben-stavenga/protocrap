@@ -19,7 +19,7 @@ pub fn make_medium(arena: &mut protocrap::arena::Arena) -> Test::ProtoType {
     msg.set_z(
         "Hello World! This is a test string with some content.",
         arena,
-    );
+    ).unwrap();
     let child1 = msg.child1_mut(arena);
     child1.set_x(123);
     child1.set_y(456);
@@ -31,16 +31,16 @@ pub fn make_large(arena: &mut protocrap::arena::Arena) -> Test::ProtoType {
     let mut msg = Test::ProtoType::default();
     msg.set_x(42);
     msg.set_y(0xDEADBEEF);
-    msg.set_z("Hello World!", arena);
+    msg.set_z("Hello World!", arena).unwrap();
     for i in 0..100 {
-        let nested_msg = msg.add_nested_message(arena);
+        let nested_msg = msg.add_nested_message(arena).unwrap();
         nested_msg.set_x(i);
     }
     for i in 0..5 {
         msg.rep_bytes_mut().push(
             Bytes::from_slice(format!("byte array number {}", i).as_bytes(), arena).unwrap(),
             arena,
-        );
+        ).unwrap();
     }
     msg
 }

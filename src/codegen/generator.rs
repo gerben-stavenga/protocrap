@@ -731,12 +731,12 @@ fn generate_accessors(
                         }
 
                         #field_doc
-                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
+                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
                                 self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::containers::String::new());
                             }
-                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
+                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) }
                         }
 
                         #clear_doc
@@ -767,12 +767,12 @@ fn generate_accessors(
                         }
 
                         #field_doc
-                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
+                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             if !self.#has_name() {
                                 self.metadata[#discriminant_word_idx] = #field_number;
                                 self.#oneof_field_name.#field_name = core::mem::ManuallyDrop::new(protocrap::containers::Bytes::new());
                             }
-                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) };
+                            unsafe { (*self.#oneof_field_name.#field_name).assign(value, arena) }
                         }
 
                         #clear_doc
@@ -887,10 +887,10 @@ fn generate_accessors(
                     }
 
                     #field_doc
-                    pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> &mut #msg_type::ProtoType {
-                        let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena).unwrap();
-                        self.#field_name.push(msg, arena);
-                        self.#field_name.last_mut().unwrap()
+                    pub fn #add_field_name(&mut self, arena: &mut protocrap::arena::Arena) -> Result<&mut #msg_type::ProtoType, protocrap::Error<core::alloc::LayoutError>> {
+                        let msg = protocrap::TypedMessage::<#msg_type::ProtoType>::new_in(arena)?;
+                        let tp = self.#field_name.push(msg, arena)?;
+                        Ok(tp.as_mut())
                     }
                 });
                 continue;
@@ -960,16 +960,17 @@ fn generate_accessors(
                         }
 
                         #field_doc
-                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) {
+                        pub fn #setter_name(&mut self, value: &str, arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
-                            self.#field_name.assign(value, arena);
+                            self.#field_name.assign(value, arena)
                         }
 
-                        pub fn #optional_setter_name(&mut self, value: Option<&str>, arena: &mut protocrap::arena::Arena) {
+                        pub fn #optional_setter_name(&mut self, value: Option<&str>, arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             match value {
-                                Some(v) => self.#setter_name(v, arena),
+                                Some(v) => self.#setter_name(v, arena)?,
                                 None => self.#clear_name(),
                             }
+                            Ok(())
                         }
 
                         #clear_doc
@@ -1008,16 +1009,17 @@ fn generate_accessors(
                         }
 
                         #field_doc
-                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) {
+                        pub fn #setter_name(&mut self, value: &[u8], arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             protocrap::generated_code_only::as_object_mut(self).set_has_bit(#has_bit);
-                            self.#field_name.assign(value, arena);
+                            self.#field_name.assign(value, arena)
                         }
 
-                        pub fn #optional_setter_name(&mut self, value: Option<&[u8]>, arena: &mut protocrap::arena::Arena) {
+                        pub fn #optional_setter_name(&mut self, value: Option<&[u8]>, arena: &mut protocrap::arena::Arena) -> Result<(), protocrap::Error<core::alloc::LayoutError>> {
                             match value {
-                                Some(v) => self.#setter_name(v, arena),
+                                Some(v) => self.#setter_name(v, arena)?,
                                 None => self.#clear_name(),
-                            }
+                            };
+                            Ok(())
                         }
 
                         #clear_doc

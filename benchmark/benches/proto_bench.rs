@@ -115,9 +115,9 @@ fn bench_encode(c: &mut Criterion) {
 #[inline(never)]
 pub fn push_loop_protocrap_inner(arena: &mut arena::Arena) {
     let mut repeated_field = protocrap::containers::RepeatedField::<i32>::new();
-    repeated_field.reserve(100000, arena);
+    repeated_field.reserve(100000, arena).unwrap();
     for i in 0..100000 {
-        repeated_field.push(i, arena);
+        repeated_field.push(i, arena).unwrap();
     }
     black_box(repeated_field.slice());
 }
