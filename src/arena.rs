@@ -22,7 +22,6 @@
 //!
 //! // All memory freed when arena drops
 //! ```
-//!
 //! # Custom Allocators
 //!
 //! The arena accepts any `&dyn Allocator`, allowing custom memory placement:
@@ -77,11 +76,16 @@ impl<'a> Arena<'a> {
     /// Create an arena from a pre-allocated memory slice
     pub fn from_slice(data: &'a mut [u8]) -> Self {
         debug_assert!(data.len() >= core::mem::size_of::<MemBlock>());
-        Self {
-            current: data.as_mut_ptr() as *mut MemBlock,
-            cursor: unsafe { data.as_mut_ptr().add(core::mem::size_of::<MemBlock>()) },
-            end: unsafe { data.as_mut_ptr().add(data.len()) },
-            allocator: None,
+        let current = data.as_mut_ptr() as *mut MemBlock;
+        unsafe {
+            (*current).prev = ptr::null_mut();
+            (*current).layout = Layout::from_size_align_unchecked(data.len(), core::mem::align_of::<MemBlock>());
+            Self {
+                current,
+                cursor: data.as_mut_ptr().add(core::mem::size_of::<MemBlock>()),
+                end: data.as_mut_ptr().add(data.len()),
+                allocator: None,
+            }
         }
     }
 
