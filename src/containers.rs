@@ -51,14 +51,7 @@ struct RawVecGrown {
 }
 
 // assert Result<RawVecGrown, crate::Error<LayoutError>> is same size as RawVec
-// ju
-const _: () = {
-    // check the size at compile time, no transmute
-    let _ = core::mem::transmute::<
-        Result<RawVecGrown, crate::Error<core::alloc::LayoutError>>,
-        RawVec,
-    >;
-};
+const _: () = assert!(std::mem::size_of::<Result<RawVecGrown, crate::Error<core::alloc::LayoutError>>>() == std::mem::size_of::<RawVec>());
 
 impl RawVec {
     const fn new() -> Self {
@@ -69,7 +62,7 @@ impl RawVec {
     }
 
     #[inline(always)]
-    pub fn grow(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
+    fn grow(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         let RawVecGrown { ptr, cap } = self.grow_outline(new_cap, layout, arena)?;
         self.ptr = ptr.as_ptr();
         self.cap = cap;
@@ -122,6 +115,7 @@ impl RawVec {
         Ok(RawVecGrown { ptr: new_ptr, cap: new_cap })
     }
 
+    #[inline(always)]
     pub unsafe fn pop(&mut self, len: &mut usize, layout: Layout) -> Option<*mut u8> {
         let l = *len;
         if l == 0 {
@@ -134,6 +128,7 @@ impl RawVec {
         }
     }
 
+    #[inline(always)]
     pub fn reserve(&mut self, new_cap: usize, layout: Layout, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         if new_cap > self.cap {
             self.grow(new_cap, layout, arena)?;
@@ -154,12 +149,14 @@ pub struct RepeatedField<T> {
 }
 
 impl<T: PartialEq> PartialEq for RepeatedField<T> {
+    #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
         self.as_ref() == other.as_ref()
     }
 }
 
 impl<T: PartialEq> PartialEq<&[T]> for RepeatedField<T> {
+    #[inline(always)]
     fn eq(&self, other: &&[T]) -> bool {
         self.as_ref() == *other
     }
@@ -183,10 +180,12 @@ where
 }
 
 impl<T> RepeatedField<T> {
+    #[inline(always)]
     const fn ptr(&self) -> *mut T {
         self.buf.ptr as *mut T
     }
 
+    #[inline(always)]
     const fn cap(&self) -> usize {
         self.buf.cap
     }
@@ -219,6 +218,7 @@ impl<T> RepeatedField<T> {
         }
     }
 
+    #[inline(always)]
     pub const fn slice(&self) -> &[T] {
         if self.cap() == 0 {
             &[]
@@ -227,6 +227,7 @@ impl<T> RepeatedField<T> {
         }
     }
 
+    #[inline(always)]
     pub fn slice_mut(&mut self) -> &mut [T] {
         if self.cap() == 0 {
             &mut []
@@ -252,6 +253,7 @@ impl<T> RepeatedField<T> {
         Ok(res)
     }
 
+    #[inline(always)]
     pub fn pop(&mut self) -> Option<T> {
         unsafe {
             self.buf
@@ -260,6 +262,7 @@ impl<T> RepeatedField<T> {
         }
     }
 
+    #[inline(always)]
     pub fn insert(&mut self, index: usize, elem: T, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         assert!(index <= self.len, "index out of bounds");
         let len = self.len;
@@ -280,6 +283,7 @@ impl<T> RepeatedField<T> {
         Ok(())
     }
 
+    #[inline(always)]
     pub fn remove(&mut self, index: usize) -> T {
         let len = self.len;
         assert!(index < len, "index out of bounds");
@@ -298,15 +302,17 @@ impl<T> RepeatedField<T> {
         }
     }
 
+    #[inline(always)]
     pub fn clear(&mut self) {
-        unsafe { core::ptr::drop_in_place(self.as_mut()) }
         self.len = 0
     }
 
+    #[inline(always)]
     pub fn reserve(&mut self, new_cap: usize, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         self.buf.reserve(new_cap, Layout::new::<T>(), arena)
     }
 
+    #[inline(always)]
     pub fn assign(&mut self, slice: &[T], arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>>
     where
         T: Copy,
@@ -315,6 +321,7 @@ impl<T> RepeatedField<T> {
         self.append(slice, arena)
     }
 
+    #[inline(always)]
     pub fn append(&mut self, slice: &[T], arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>>
     where
         T: Copy,
@@ -333,12 +340,14 @@ impl<T> RepeatedField<T> {
 
 impl<T> Deref for RepeatedField<T> {
     type Target = [T];
+    #[inline(always)]
     fn deref(&self) -> &[T] {
         self.slice()
     }
 }
 
 impl<T> DerefMut for RepeatedField<T> {
+    #[inline(always)]
     fn deref_mut(&mut self) -> &mut [T] {
         self.slice_mut()
     }
@@ -353,8 +362,9 @@ pub type Bytes = RepeatedField<u8>;
 pub struct String(Bytes);
 
 impl core::fmt::Debug for String {
+    #[inline(always)]
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{:?}", self.as_str())
+        self.as_str().fmt(f)
     }
 }
 impl String {
@@ -370,15 +380,19 @@ impl String {
         String(RepeatedField::from_static(s.as_bytes()))
     }
 
+    #[inline(always)]
     pub const fn as_str(&self) -> &str {
         debug_assert!(core::str::from_utf8(self.0.slice()).is_ok());
         unsafe { core::str::from_utf8_unchecked(self.0.slice()) }
     }
 
+
+    #[inline(always)]
     pub fn assign(&mut self, s: &str, arena: &mut crate::arena::Arena) -> Result<(), crate::Error<core::alloc::LayoutError>> {
         self.0.assign(s.as_bytes(), arena)
     }
 
+    #[inline(always)]
     pub fn clear(&mut self) {
         self.0.clear();
     }
@@ -386,6 +400,7 @@ impl String {
 
 impl Deref for String {
     type Target = str;
+    #[inline(always)]
     fn deref(&self) -> &str {
         self.as_str()
     }
