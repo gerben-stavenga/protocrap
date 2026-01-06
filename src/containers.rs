@@ -51,7 +51,7 @@ struct RawVecGrown {
 }
 
 // assert Result<RawVecGrown, crate::Error<LayoutError>> is same size as RawVec
-const _: () = assert!(std::mem::size_of::<Result<RawVecGrown, crate::Error<core::alloc::LayoutError>>>() == std::mem::size_of::<RawVec>());
+const _: () = assert!(core::mem::size_of::<Result<RawVecGrown, crate::Error<core::alloc::LayoutError>>>() == core::mem::size_of::<RawVec>());
 
 impl RawVec {
     const fn new() -> Self {
